@@ -648,7 +648,7 @@
     <div class="left-panel">
         <!-- Header -->
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.2</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.4</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1150,32 +1150,89 @@
             
             const svgText = await svgResponse.text();
             
-            // Fetch JSON baseline for default scaling values
+            // Fetch JSON baseline for positioning & styling (NOT text content!)
             const jsonUrl = `templates/Style_${style}_${shape}.json`;
             const jsonResponse = await fetch(jsonUrl);
             
             let baseline = null;
             if (jsonResponse.ok) {
                 baseline = await jsonResponse.json();
-                console.log(`✓ Loaded baseline:`, baseline);
+                console.log(`✓ Loaded baseline (ignoring sample text):`, baseline);
             }
             
-            // Replace the preview SVG with the loaded template
-            const previewContainer = document.getElementById('previewSVG');
+            // Parse and insert the template SVG
             const parser = new DOMParser();
             const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
             const loadedSVG = svgDoc.documentElement;
             
-            // Preserve viewBox or set default
-            if (!loadedSVG.hasAttribute('viewBox')) {
-                loadedSVG.setAttribute('viewBox', '0 0 500 400');
+            // Get original viewBox or set from dimensions
+            let viewBox = loadedSVG.getAttribute('viewBox');
+            if (!viewBox) {
+                const w = loadedSVG.getAttribute('width') || '2048';
+                const h = loadedSVG.getAttribute('height') || '1536';
+                viewBox = `0 0 ${w} ${h}`;
             }
-            
-            // Replace the SVG content
-            previewContainer.parentNode.replaceChild(loadedSVG, previewContainer);
+            loadedSVG.setAttribute('viewBox', viewBox);
             loadedSVG.id = 'previewSVG';
             
-            // Apply baseline values to sliders if available
+            // Extract positioning from JSON baseline (or use defaults)
+            const [x, y, width, height] = viewBox.split(' ').map(Number);
+            const centerX = x + width / 2;
+            
+            // Get positioning from JSON baseline sliders
+            let cityYPos = y + height * 0.3;  // Default: 30% down
+            let groupYPos = y + height * 0.7; // Default: 70% down
+            let citySizeVal = 40;  // Default size
+            let groupSizeVal = 30; // Default size
+            
+            if (baseline && baseline.sliders) {
+                const sliders = baseline.sliders;
+                // Convert JSON Y values (which are based on 500px viewBox) to actual template size
+                const scale = height / 500;  // Scale factor from preview to template
+                
+                if (sliders.cityY) cityYPos = parseInt(sliders.cityY) * scale;
+                if (sliders.groupY) groupYPos = parseInt(sliders.groupY) * scale;
+                if (sliders.citySize) citySizeVal = parseInt(sliders.citySize) * (width / 500);
+                if (sliders.gSize) groupSizeVal = parseInt(sliders.gSize) * (width / 500);
+                
+                console.log(`Positioning: cityY=${cityYPos}, groupY=${groupYPos}, citySize=${citySizeVal}, groupSize=${groupSizeVal}`);
+            }
+            
+            // Create city text element (USER INPUT, not JSON sample text!)
+            const cityTextEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            cityTextEl.id = 'cityText';
+            cityTextEl.setAttribute('x', centerX);
+            cityTextEl.setAttribute('y', cityYPos);
+            cityTextEl.setAttribute('text-anchor', 'middle');
+            cityTextEl.setAttribute('font-family', STYLES[style].font);
+            cityTextEl.setAttribute('fill', STYLES[style].color);
+            cityTextEl.setAttribute('font-size', citySizeVal);
+            cityTextEl.setAttribute('font-weight', '700');
+            // Use user input, NOT JSON sample text
+            cityTextEl.textContent = cityText || 'YOUR CITY, STATE';
+            
+            // Create group text element (USER INPUT, not JSON sample text!)
+            const groupTextEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            groupTextEl.id = 'groupText';
+            groupTextEl.setAttribute('x', centerX);
+            groupTextEl.setAttribute('y', groupYPos);
+            groupTextEl.setAttribute('text-anchor', 'middle');
+            groupTextEl.setAttribute('font-family', STYLES[style].font);
+            groupTextEl.setAttribute('fill', STYLES[style].color);
+            groupTextEl.setAttribute('font-size', groupSizeVal);
+            groupTextEl.setAttribute('font-weight', '700');
+            // Use user input, NOT JSON sample text
+            groupTextEl.textContent = groupText || 'YOUR GROUP NAME';
+            
+            // Append text elements to SVG
+            loadedSVG.appendChild(cityTextEl);
+            loadedSVG.appendChild(groupTextEl);
+            
+            // Replace the preview SVG
+            const previewContainer = document.getElementById('previewSVG');
+            previewContainer.parentNode.replaceChild(loadedSVG, previewContainer);
+            
+            // Apply baseline values to sliders (for user fine-tuning)
             if (baseline && baseline.sliders) {
                 const sliders = baseline.sliders;
                 if (sliders.citySize) document.getElementById('citySizeSlider').value = sliders.citySize;
@@ -1184,10 +1241,10 @@
                 if (sliders.groupY) document.getElementById('groupYSlider').value = sliders.groupY;
             }
             
-            // Update preview with current text
+            // Update preview with current user text
             updatePreview();
             
-            console.log(`✓ Template loaded: ${style}_${shape}`);
+            console.log(`✓ Template loaded: ${style}_${shape} with user text overlays`);
             
         } catch (error) {
             console.error('Template load failed:', error);
@@ -1315,60 +1372,54 @@
     }
     
     function updatePreview() {
-        const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
-        const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
-        const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
-        const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
-        
         const previewSVG = document.getElementById('previewSVG');
         if (!previewSVG) return;
         
-        // Check if this is the placeholder SVG or a loaded template
-        const isPlaceholder = previewSVG.querySelector('#pathTop') !== null;
+        // Get slider values (if they exist)
+        const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 40);
+        const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
+        const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 30);
+        const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
         
-        if (isPlaceholder) {
-            // Original placeholder SVG update
-            document.getElementById('pathTop').setAttribute('d', `M 20,${cityY} A 230,45 0 0,1 480,${cityY}`);
-            document.getElementById('pathMid').setAttribute('d', `M 20,${groupY} A 230,65 0 0,1 480,${groupY}`);
+        // Update city text element (if exists)
+        const cityTextEl = document.getElementById('cityText');
+        if (cityTextEl) {
+            cityTextEl.textContent = cityText || 'YOUR CITY, STATE';
+            cityTextEl.setAttribute('font-size', citySize);
+            cityTextEl.setAttribute('y', cityY);
+            console.log(`✓ Updated city: "${cityText}" (size: ${citySize}, y: ${cityY})`);
+        }
+        
+        // Update group text element (if exists)
+        const groupTextEl = document.getElementById('groupText');
+        if (groupTextEl) {
+            groupTextEl.textContent = groupText || 'YOUR GROUP NAME';
+            groupTextEl.setAttribute('font-size', groupSize);
+            groupTextEl.setAttribute('y', groupY);
+            console.log(`✓ Updated group: "${groupText}" (size: ${groupSize}, y: ${groupY})`);
+        }
+        
+        // If no text elements exist, we're using the placeholder SVG
+        if (!cityTextEl && !groupTextEl) {
+            // Placeholder SVG update (original logic)
+            const pathTop = document.getElementById('pathTop');
+            const pathMid = document.getElementById('pathMid');
             
-            const cityTextPath = document.querySelector('#cityText textPath');
-            const groupTextPath = document.querySelector('#groupText textPath');
-            
-            if (cityTextPath) cityTextPath.innerHTML = formatText(cityText, citySize);
-            if (groupTextPath) groupTextPath.innerHTML = formatText(groupText, groupSize);
-            
-            document.getElementById('cityText')?.setAttribute('font-size', citySize);
-            document.getElementById('groupText')?.setAttribute('font-size', groupSize);
-        } else {
-            // Loaded template - find and update text elements
-            // Templates use <text> elements, we need to find them and update their content
-            
-            // Strategy: Look for text elements that likely contain city/group text
-            // Most templates have text elements we can identify by position or content
-            const textElements = previewSVG.querySelectorAll('text');
-            
-            console.log(`Updating ${textElements.length} text elements in template`);
-            
-            // For now, just log - we'll need to identify which text elements to update
-            // This would require template-specific mapping
-            textElements.forEach((textEl, idx) => {
-                const currentText = textEl.textContent.trim();
-                console.log(`Text ${idx}: "${currentText}"`);
+            if (pathTop && pathMid) {
+                pathTop.setAttribute('d', `M 20,${cityY} A 230,45 0 0,1 480,${cityY}`);
+                pathMid.setAttribute('d', `M 20,${groupY} A 230,65 0 0,1 480,${groupY}`);
                 
-                // Simple heuristic: if text looks like a city (has commas, USA, state names)
-                // or group name (has "FAMILY", "GROUP", etc.), update it
-                if (currentText.includes('FLORIDA') || currentText.includes('BEACH') || currentText.length > 15) {
-                    if (cityText) {
-                        textEl.textContent = cityText;
-                        console.log(`✓ Updated city text: ${cityText}`);
-                    }
-                } else if (currentText.includes('FAMILY') || currentText.includes('JOHNSON') || currentText.includes('250')) {
-                    if (groupText) {
-                        textEl.textContent = groupText;
-                        console.log(`✓ Updated group text: ${groupText}`);
-                    }
-                }
-            });
+                const cityTextPath = document.querySelector('#cityText textPath');
+                const groupTextPath = document.querySelector('#groupText textPath');
+                
+                if (cityTextPath) cityTextPath.innerHTML = formatText(cityText, citySize);
+                if (groupTextPath) groupTextPath.innerHTML = formatText(groupText, groupSize);
+                
+                const cityTextPlaceholder = document.querySelector('#cityText');
+                const groupTextPlaceholder = document.querySelector('#groupText');
+                if (cityTextPlaceholder) cityTextPlaceholder.setAttribute('font-size', citySize);
+                if (groupTextPlaceholder) groupTextPlaceholder.setAttribute('font-size', groupSize);
+            }
         }
     }
     
