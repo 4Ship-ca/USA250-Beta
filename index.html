@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>America 250 - Design Your Style</title>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Cinzel:wght@700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        :root {
+            --gold: #d4af37;
+            --bg: #0a0a0a;
+            --panel: #161616;
+            --border: #333;
+        }
+        
+        body {
+            background: var(--bg);
+            color: white;
+            font-family: 'Montserrat', sans-serif;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* ===========================================
+           MOBILE-FIRST DESIGN (Default)
+           =========================================== */
+        
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 100px; /* Space for sticky button */
+        }
+        
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: #222;
+            z-index: 1000;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), #ffd700);
+            transition: width 0.3s ease;
+            width: 25%;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 40px 20px 20px;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--gold);
+            letter-spacing: 2px;
+        }
+        
+        .step-indicator {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #888;
+        }
+        
+        /* Style Cards (Tinder-style swipeable) */
+        .style-section {
+            margin: 30px 0;
+        }
+        
+        .section-title {
+            font-size: 18px;
+            color: var(--gold);
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        
+        .style-cards {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            height: 400px;
+        }
+        
+        .style-card {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--panel);
+            border-radius: 20px;
+            border: 2px solid var(--border);
+            overflow: hidden;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .style-card.active {
+            transform: scale(1);
+            opacity: 1;
+            z-index: 10;
+        }
+        
+        .style-card.prev {
+            transform: translateX(-20px) scale(0.95);
+            opacity: 0.5;
+            z-index: 5;
+        }
+        
+        .style-card.next {
+            transform: translateX(20px) scale(0.95);
+            opacity: 0.5;
+            z-index: 5;
+        }
+        
+        .card-mockup {
+            width: 100%;
+            height: 250px;
+            background: #222;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .card-content {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .card-title {
+            font-size: 22px;
+            font-weight: 900;
+            color: var(--gold);
+            margin-bottom: 8px;
+        }
+        
+        .card-description {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+        
+        .card-select-btn {
+            background: var(--gold);
+            color: black;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-weight: 900;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .card-select-btn:active {
+            transform: scale(0.95);
+        }
+        
+        /* Swipe Navigation */
+        .swipe-nav {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .swipe-nav button {
+            background: #333;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .swipe-nav button:active {
+            background: var(--gold);
+            color: black;
+        }
+        
+        /* Location Input */
+        .location-section {
+            margin: 30px 0;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .locate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 18px;
+            border-radius: 15px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .locate-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .or-divider {
+            text-align: center;
+            color: #666;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .or-divider::before,
+        .or-divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 40%;
+            height: 1px;
+            background: #333;
+        }
+        
+        .or-divider::before { left: 0; }
+        .or-divider::after { right: 0; }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-label {
+            font-size: 12px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .text-input {
+            width: 100%;
+            background: #1a1a1a;
+            border: 2px solid #333;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+        }
+        
+        .text-input:focus {
+            border-color: var(--gold);
+        }
+        
+        .char-counter {
+            font-size: 11px;
+            color: #666;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        /* Suggested Options */
+        .suggestions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .suggestion-chip {
+            background: #222;
+            border: 1px solid #444;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .suggestion-chip:active {
+            background: var(--gold);
+            color: black;
+            border-color: var(--gold);
+        }
+        
+        /* Preview Section */
+        .preview-section {
+            margin: 30px 0;
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px solid #333;
+        }
+        
+        .preview-title {
+            font-size: 16px;
+            color: var(--gold);
+            text-align: center;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+        
+        .preview-canvas {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            aspect-ratio: 5/4;
+            background: #000;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #previewSVG {
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+        }
+        
+        /* Tweak Controls */
+        .tweak-section {
+            margin: 20px 0;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .tweak-toggle {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .toggle-btn {
+            background: transparent;
+            border: 2px solid #444;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: #aaa;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .toggle-btn.active {
+            background: var(--gold);
+            color: black;
+            border-color: var(--gold);
+        }
+        
+        .tweak-controls {
+            display: none;
+        }
+        
+        .tweak-controls.active {
+            display: block;
+        }
+        
+        .control-group {
+            margin-bottom: 25px;
+        }
+        
+        .control-label {
+            font-size: 13px;
+            color: #aaa;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        
+        .tweak-btn {
+            aspect-ratio: 1;
+            background: #222;
+            border: 2px solid #444;
+            border-radius: 15px;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .tweak-btn:active {
+            background: var(--gold);
+            color: black;
+            border-color: var(--gold);
+            transform: scale(0.95);
+        }
+        
+        .tweak-btn.size-minus::before { content: 'A-'; font-size: 16px; }
+        .tweak-btn.size-plus::before { content: 'A+'; font-size: 20px; }
+        .tweak-btn.pos-up::before { content: '↑'; }
+        .tweak-btn.pos-down::before { content: '↓'; }
+        
+        /* Sticky Bottom CTA */
+        .sticky-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 80%, transparent);
+            padding: 20px;
+            z-index: 100;
+        }
+        
+        .mega-btn {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--gold) 0%, #ffd700 100%);
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            color: black;
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
+            transition: transform 0.2s;
+            display: block;
+        }
+        
+        .mega-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .mega-btn:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+        
+        /* ===========================================
+           DESKTOP DESIGN (min-width: 768px)
+           =========================================== */
+        
+        @media (min-width: 768px) {
+            .container {
+                display: grid;
+                grid-template-columns: 450px 1fr;
+                gap: 30px;
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 40px;
+            }
+            
+            .left-panel {
+                height: 90vh;
+                overflow-y: auto;
+                padding-right: 15px;
+            }
+            
+            .left-panel::-webkit-scrollbar {
+                width: 6px;
+            }
+            
+            .left-panel::-webkit-scrollbar-thumb {
+                background: var(--gold);
+                border-radius: 10px;
+            }
+            
+            .right-panel {
+                position: sticky;
+                top: 40px;
+                height: fit-content;
+            }
+            
+            .header {
+                padding: 0 0 30px 0;
+                text-align: left;
+            }
+            
+            .logo {
+                font-size: 32px;
+            }
+            
+            /* Desktop: Show all styles in grid instead of cards */
+            .style-cards-desktop {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+            }
+            
+            .style-cards {
+                display: none; /* Hide mobile swipe cards */
+            }
+            
+            .swipe-nav {
+                display: none;
+            }
+            
+            .style-card-desktop {
+                background: var(--panel);
+                border: 2px solid var(--border);
+                border-radius: 15px;
+                overflow: hidden;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            
+            .style-card-desktop:hover {
+                border-color: var(--gold);
+                transform: translateY(-5px);
+            }
+            
+            .style-card-desktop.selected {
+                border-color: var(--gold);
+                box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            }
+            
+            .card-mockup {
+                height: 180px;
+            }
+            
+            .card-content {
+                padding: 15px;
+            }
+            
+            .card-title {
+                font-size: 18px;
+            }
+            
+            .card-description {
+                font-size: 13px;
+            }
+            
+            .card-select-btn {
+                padding: 10px 25px;
+                font-size: 14px;
+            }
+            
+            .preview-section {
+                padding: 30px;
+            }
+            
+            .preview-canvas {
+                max-width: 600px;
+            }
+            
+            /* Desktop: Show advanced slider controls */
+            .advanced-controls {
+                display: block;
+                margin-top: 20px;
+                padding: 20px;
+                background: #1a1a1a;
+                border-radius: 15px;
+            }
+            
+            .slider-group {
+                margin-bottom: 15px;
+            }
+            
+            .slider-label {
+                display: flex;
+                justify-content: space-between;
+                font-size: 11px;
+                color: #aaa;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+            
+            .slider-value {
+                color: var(--gold);
+                font-family: monospace;
+            }
+            
+            input[type="range"] {
+                width: 100%;
+                height: 6px;
+                background: #333;
+                border-radius: 5px;
+                outline: none;
+                -webkit-appearance: none;
+            }
+            
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                width: 20px;
+                height: 20px;
+                background: var(--gold);
+                border-radius: 50%;
+                cursor: pointer;
+            }
+            
+            input[type="range"]::-moz-range-thumb {
+                width: 20px;
+                height: 20px;
+                background: var(--gold);
+                border-radius: 50%;
+                cursor: pointer;
+                border: none;
+            }
+            
+            .sticky-cta {
+                position: static;
+                background: transparent;
+                padding: 20px 0;
+            }
+        }
+        
+        /* Hidden utility */
+        .hidden { display: none !important; }
+        
+        /* Loading states */
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+</div>
+
+<div class="container">
+    <div class="left-panel">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">AMERICA 250</div>
+            <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
+        </div>
+        
+        <!-- STEP 1: Style Selection -->
+        <div class="style-section" id="step1">
+            <h2 class="section-title">Choose Your Style</h2>
+            
+            <!-- Product Selector (shows available products) -->
+            <div class="product-selector" style="margin-bottom: 20px;">
+                <label class="input-label">Product Type</label>
+                <select id="productSelect" onchange="changeProduct(this.value)" style="width: 100%; background: #1a1a1a; border: 2px solid #333; padding: 12px; border-radius: 10px; color: white; font-size: 14px;">
+                    <option value="tee">👕 T-Shirt - $24.99</option>
+                    <option value="hoodie">🧥 Hoodie - $44.99</option>
+                    <option value="sweatshirt">👔 Sweatshirt - $39.99</option>
+                    <option value="longsleeve">👕 Long Sleeve - $29.99</option>
+                    <option value="tank">🎽 Tank Top - $22.99</option>
+                    <option value="mug">☕ Mug - $14.99</option>
+                    <option value="sticker">⭐ Sticker - $3.99</option>
+                    <option value="poster">🖼️ Poster - $19.99</option>
+                    <option value="phone">📱 Phone Case - $16.99</option>
+                    <option value="tote">👜 Tote Bag - $18.99</option>
+                    <option value="pillow">🛋️ Pillow - $24.99</option>
+                    <option value="hat">🧢 Baseball Cap - $24.99</option>
+                </select>
+                <p style="font-size: 11px; color: #666; margin-top: 5px;">
+                    Shape: <span id="shapeIndicator">Square (DTG)</span>
+                </p>
+            </div>
+            
+            <!-- Mobile: Swipeable Cards -->
+            <div class="style-cards">
+                <div class="style-card active" data-style="A">
+                    <div class="card-mockup"></div>
+                    <div class="card-content">
+                        <div class="card-title">Heritage Style</div>
+                        <div class="card-description">Classic Americana</div>
+                        <button class="card-select-btn" onclick="selectStyle('A')">Select This Style</button>
+                    </div>
+                </div>
+                <div class="style-card next" data-style="B">
+                    <div class="card-mockup"></div>
+                    <div class="card-content">
+                        <div class="card-title">Midnight Style</div>
+                        <div class="card-description">Bold & Modern</div>
+                        <button class="card-select-btn" onclick="selectStyle('B')">Select This Style</button>
+                    </div>
+                </div>
+                <div class="style-card" data-style="C">
+                    <div class="card-mockup"></div>
+                    <div class="card-content">
+                        <div class="card-title">Retro Style</div>
+                        <div class="card-description">Vintage Vibes</div>
+                        <button class="card-select-btn" onclick="selectStyle('C')">Select This Style</button>
+                    </div>
+                </div>
+                <div class="style-card" data-style="D">
+                    <div class="card-mockup"></div>
+                    <div class="card-content">
+                        <div class="card-title">Outdoors Style</div>
+                        <div class="card-description">Nature Inspired</div>
+                        <button class="card-select-btn" onclick="selectStyle('D')">Select This Style</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="swipe-nav">
+                <button onclick="previousCard()">←</button>
+                <button onclick="nextCard()">→</button>
+            </div>
+            
+            <!-- Desktop: Grid of All Styles -->
+            <div class="style-cards-desktop hidden">
+                <div class="style-card-desktop" data-style="A" onclick="selectStyle('A')">
+                    <div class="card-mockup"></div>
+                    <div class="card-content">
+                        <div class="card-title">Heritage</div>
+                        <div class="card-description">Classic Americana</div>
+                    </div>
+                </div>
+                <div class="style-card-desktop" data-style="B" onclick="selectStyle('B')">
+                    <div class="card-mockup"></div>
+                    <div class="card-content">
+                        <div class="card-title">Midnight</div>
+                        <div class="card-description">Bold & Modern</div>
+                    </div>
+                </div>
+                <div class="style-card-desktop" data-style="C" onclick="selectStyle('C')">
+                    <div class="card-mockup"></div>
+                    <div class="card-content">
+                        <div class="card-title">Retro</div>
+                        <div class="card-description">Vintage Vibes</div>
+                    </div>
+                </div>
+                <div class="style-card-desktop" data-style="D" onclick="selectStyle('D')">
+                    <div class="card-mockup"></div>
+                    <div class="card-content">
+                        <div class="card-title">Outdoors</div>
+                        <div class="card-description">Nature Inspired</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- STEP 2: Location -->
+        <div class="location-section hidden" id="step2">
+            <h2 class="section-title">Your Location</h2>
+            
+            <button class="locate-btn" onclick="useGeolocation()">
+                <span>📍</span>
+                <span>Use My Location</span>
+            </button>
+            
+            <div class="or-divider">OR</div>
+            
+            <div class="input-group">
+                <label class="input-label">City & State</label>
+                <input type="text" class="text-input" id="cityInput" maxlength="50" 
+                       placeholder="MIAMI, FLORIDA" oninput="updateCity()">
+                <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
+            </div>
+            
+            <div class="suggestions">
+                <div class="suggestion-chip" onclick="useCity('MIAMI, FL')">Miami, FL</div>
+                <div class="suggestion-chip" onclick="useCity('NEW YORK, NY')">New York, NY</div>
+                <div class="suggestion-chip" onclick="useCity('LOS ANGELES, CA')">Los Angeles, CA</div>
+                <div class="suggestion-chip" onclick="useCity('CHICAGO, IL')">Chicago, IL</div>
+            </div>
+        </div>
+        
+        <!-- STEP 3: Group Name -->
+        <div class="location-section hidden" id="step3">
+            <h2 class="section-title">Your Group</h2>
+            
+            <div class="input-group">
+                <label class="input-label">Group or Family Name</label>
+                <input type="text" class="text-input" id="groupInput" maxlength="35" 
+                       placeholder="THE SMITH FAMILY" oninput="updateGroup()">
+                <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
+            </div>
+            
+            <div class="suggestions">
+                <div class="suggestion-chip" onclick="useGroup('THE SMITH FAMILY')">The Smith Family</div>
+                <div class="suggestion-chip" onclick="useGroup('CLASS OF 2026')">Class of 2026</div>
+                <div class="suggestion-chip" onclick="useGroup('TEAM USA')">Team USA</div>
+                <div class="suggestion-chip" onclick="useGroup('AMERICA 250')">America 250</div>
+            </div>
+        </div>
+        
+        <!-- STEP 4: Tweak (Optional) -->
+        <div class="tweak-section hidden" id="step4">
+            <div class="tweak-toggle">
+                <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">
+                    ⚙️ Fine-Tune Your Design
+                </button>
+            </div>
+            
+            <div class="tweak-controls" id="tweakControls">
+                <!-- City Controls -->
+                <div class="control-group">
+                    <div class="control-label">City Text Size</div>
+                    <div class="button-grid">
+                        <button class="tweak-btn size-minus" onclick="adjustCity('size', -1)"></button>
+                        <button class="tweak-btn size-plus" onclick="adjustCity('size', 1)"></button>
+                        <button class="tweak-btn pos-up" onclick="adjustCity('y', -1)"></button>
+                        <button class="tweak-btn pos-down" onclick="adjustCity('y', 1)"></button>
+                    </div>
+                </div>
+                
+                <!-- Group Controls -->
+                <div class="control-group">
+                    <div class="control-label">Group Text Size</div>
+                    <div class="button-grid">
+                        <button class="tweak-btn size-minus" onclick="adjustGroup('size', -1)"></button>
+                        <button class="tweak-btn size-plus" onclick="adjustGroup('size', 1)"></button>
+                        <button class="tweak-btn pos-up" onclick="adjustGroup('y', -1)"></button>
+                        <button class="tweak-btn pos-down" onclick="adjustGroup('y', 1)"></button>
+                    </div>
+                </div>
+                
+                <button class="toggle-btn" onclick="resetDesign()" style="width: 100%; margin-top: 15px;">
+                    🔄 Reset to Auto
+                </button>
+            </div>
+            
+            <!-- Desktop: Advanced Sliders (hidden on mobile) -->
+            <div class="advanced-controls hidden">
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>City Size</span>
+                        <span class="slider-value" id="citySizeVal">10</span>
+                    </div>
+                    <input type="range" id="citySizeSlider" min="10" max="80" value="10" oninput="updateSlider('citySize', this.value)">
+                </div>
+                
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>City Y-Position</span>
+                        <span class="slider-value" id="cityYVal">223</span>
+                    </div>
+                    <input type="range" id="cityYSlider" min="0" max="300" value="223" oninput="updateSlider('cityY', this.value)">
+                </div>
+                
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Group Size</span>
+                        <span class="slider-value" id="groupSizeVal">8</span>
+                    </div>
+                    <input type="range" id="groupSizeSlider" min="8" max="50" value="8" oninput="updateSlider('groupSize', this.value)">
+                </div>
+                
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>Group Y-Position</span>
+                        <span class="slider-value" id="groupYVal">282</span>
+                    </div>
+                    <input type="range" id="groupYSlider" min="50" max="400" value="282" oninput="updateSlider('groupY', this.value)">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Panel: Preview -->
+    <div class="right-panel">
+        <div class="preview-section">
+            <div class="preview-title">Live Preview</div>
+            <div class="preview-canvas">
+                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
+                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
+                    </defs>
+                    <rect width="500" height="400" fill="#1a1a1a"/>
+                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
+                        <textPath href="#pathTop" startOffset="50%"></textPath>
+                    </text>
+                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
+                        <textPath href="#pathMid" startOffset="50%"></textPath>
+                    </text>
+                </svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sticky CTA -->
+<div class="sticky-cta">
+    <button class="mega-btn" id="ctaButton" onclick="handleCTA()" disabled>
+        Select a Style to Continue
+    </button>
+</div>
+
+<script>
+    // State management
+    let currentStep = 1;
+    let currentCardIndex = 0;
+    let selectedStyle = null;
+    let selectedProduct = 'tee'; // Default product
+    let cityText = '';
+    let groupText = '';
+    let availableMockups = {}; // Auto-detected mockups
+    
+    // POD Product Catalog
+    const PRODUCTS = {
+        // DTG/Apparel (Square shape - transparent backgrounds)
+        'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' },
+        'hoodie': { shape: 'Sq', name: 'Hoodie', price: 44.99, category: 'Apparel' },
+        'zip_hoodie': { shape: 'Sq', name: 'Zip Hoodie', price: 49.99, category: 'Apparel' },
+        'sweatshirt': { shape: 'Sq', name: 'Sweatshirt', price: 39.99, category: 'Apparel' },
+        'longsleeve': { shape: 'Sq', name: 'Long Sleeve', price: 29.99, category: 'Apparel' },
+        'tank': { shape: 'Sq', name: 'Tank Top', price: 22.99, category: 'Apparel' },
+        'youth_tee': { shape: 'Sq', name: 'Youth Tee', price: 19.99, category: 'Apparel' },
+        'polo': { shape: 'Sq', name: 'Polo Shirt', price: 34.99, category: 'Apparel' },
+        
+        // Drinkware (Oval shape - styled backgrounds)
+        'mug': { shape: 'Ov', name: 'Mug (11oz)', price: 14.99, category: 'Drinkware' },
+        'mug_travel': { shape: 'Ov', name: 'Travel Mug', price: 19.99, category: 'Drinkware' },
+        
+        // Stickers & Prints (Oval shape)
+        'sticker': { shape: 'Ov', name: 'Sticker', price: 3.99, category: 'Stickers' },
+        'sticker_sheet': { shape: 'Ov', name: 'Sticker Sheet', price: 8.99, category: 'Stickers' },
+        'poster': { shape: 'Ov', name: 'Poster', price: 19.99, category: 'Prints' },
+        'canvas': { shape: 'Ov', name: 'Canvas Print', price: 39.99, category: 'Prints' },
+        
+        // Accessories (Oval shape)
+        'phone': { shape: 'Ov', name: 'Phone Case', price: 16.99, category: 'Accessories' },
+        'tote': { shape: 'Ov', name: 'Tote Bag', price: 18.99, category: 'Accessories' },
+        'pillow': { shape: 'Ov', name: 'Throw Pillow', price: 24.99, category: 'Home' },
+        'coaster': { shape: 'Ov', name: 'Coaster Set', price: 12.99, category: 'Home' },
+        'magnet': { shape: 'Ov', name: 'Magnet', price: 4.99, category: 'Accessories' },
+        'ornament': { shape: 'Ov', name: 'Ornament', price: 14.99, category: 'Seasonal' },
+        'hat': { shape: 'Ov', name: 'Baseball Cap', price: 24.99, category: 'Accessories' },
+        'patch': { shape: 'Ov', name: 'Patch', price: 7.99, category: 'Accessories' },
+        'flag': { shape: 'Ov', name: 'Garden Flag', price: 22.99, category: 'Home' },
+        'doormat': { shape: 'Ov', name: 'Doormat', price: 34.99, category: 'Home' },
+        'blanket': { shape: 'Ov', name: 'Fleece Blanket', price: 44.99, category: 'Home' },
+        'towel': { shape: 'Ov', name: 'Beach Towel', price: 29.99, category: 'Home' },
+        'notebook': { shape: 'Ov', name: 'Notebook', price: 11.99, category: 'Stationery' },
+        'mousepad': { shape: 'Ov', name: 'Mouse Pad', price: 12.99, category: 'Accessories' }
+    };
+    
+    const STYLES = {
+        A: { font: "Libre Baskerville", color: "#F2E8C9", weight: "700", name: "Heritage" },
+        B: { font: "Anton", color: "#E6DCC8", weight: "400", name: "Midnight" },
+        C: { font: "Oswald", color: "#A61A26", weight: "700", name: "Retro" },
+        D: { font: "Cinzel", color: "#0F2A1B", weight: "700", name: "Outdoors" }
+    };
+    
+    // Generate mockup URL based on naming convention
+    function getMockupUrl(style, product) {
+        const shape = PRODUCTS[product].shape;
+        return `/mockups/Style_${style}_${shape}_${product}.png`;
+    }
+    
+    // Check if mockup exists
+    async function checkMockupExists(url) {
+        try {
+            const response = await fetch(url, { method: 'HEAD' });
+            return response.ok;
+        } catch {
+            return false;
+        }
+    }
+    
+    // Auto-detect available mockups on page load
+    async function detectAvailableMockups() {
+        const styles = ['A', 'B', 'C', 'D'];
+        const products = Object.keys(PRODUCTS);
+        
+        console.log('Detecting available mockups...');
+        
+        for (const style of styles) {
+            availableMockups[style] = [];
+            
+            for (const product of products) {
+                const url = getMockupUrl(style, product);
+                const exists = await checkMockupExists(url);
+                
+                if (exists) {
+                    availableMockups[style].push(product);
+                    console.log(`✓ Found: ${url}`);
+                }
+            }
+        }
+        
+        console.log('Available mockups:', availableMockups);
+        
+        // Auto-select first available product
+        if (availableMockups['A'] && availableMockups['A'].length > 0) {
+            selectedProduct = availableMockups['A'][0];
+        }
+    }
+    
+    // Initialize
+    async function init() {
+        updateProgress();
+        updateStepIndicator();
+        
+        // Auto-detect available mockups
+        await detectAvailableMockups();
+        
+        // Populate product selector
+        populateProductSelector();
+        
+        // Initialize mockups for all styles
+        initializeMockups();
+        
+        // Show desktop grid on larger screens
+        if (window.innerWidth >= 768) {
+            document.querySelector('.style-cards').classList.add('hidden');
+            document.querySelector('.style-cards-desktop').classList.remove('hidden');
+            document.querySelector('.advanced-controls').classList.remove('hidden');
+        }
+    }
+    
+    // Populate product selector with available products
+    function populateProductSelector() {
+        // Group products by category
+        const categories = {};
+        
+        Object.entries(PRODUCTS).forEach(([key, product]) => {
+            if (!categories[product.category]) {
+                categories[product.category] = [];
+            }
+            categories[product.category].push({ key, ...product });
+        });
+        
+        // Create product selector HTML (will add this to UI later)
+        console.log('Product categories:', categories);
+    }
+    
+    // Load mockup with automatic fallback
+    function loadMockup(imgElement, style, product) {
+        const primaryUrl = getMockupUrl(style, product);
+        
+        imgElement.src = primaryUrl;
+        imgElement.alt = `${STYLES[style].name} - ${PRODUCTS[product].name}`;
+        
+        imgElement.onerror = () => {
+            // Try placeholder
+            imgElement.src = '/mockups/placeholder.png';
+            
+            imgElement.onerror = () => {
+                // Ultimate fallback - solid color based on style
+                const colors = { A: '#1a3a5c', B: '#0a0a0a', C: '#5c1a1a', D: '#1a3a1a' };
+                imgElement.style.background = colors[style] || '#333';
+                imgElement.alt = `${STYLES[style].name} Style Preview`;
+            };
+        };
+    }
+    
+    // Initialize mockups for all style cards
+    function initializeMockups() {
+        const styles = ['A', 'B', 'C', 'D'];
+        
+        styles.forEach(style => {
+            const mockupUrl = getMockupUrl(style, selectedProduct);
+            
+            // Update mobile cards
+            const mobileCard = document.querySelector(`.style-card[data-style="${style}"] .card-mockup`);
+            if (mobileCard) {
+                const img = document.createElement('img');
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                loadMockup(img, style, selectedProduct);
+                mobileCard.innerHTML = '';
+                mobileCard.appendChild(img);
+            }
+            
+            // Update desktop cards
+            const desktopCard = document.querySelector(`.style-card-desktop[data-style="${style}"] .card-mockup`);
+            if (desktopCard) {
+                const img = document.createElement('img');
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                loadMockup(img, style, selectedProduct);
+                desktopCard.innerHTML = '';
+                desktopCard.appendChild(img);
+            }
+        });
+    }
+    
+    // Card navigation (mobile)
+    function nextCard() {
+        const cards = document.querySelectorAll('.style-card');
+        cards[currentCardIndex].classList.remove('active');
+        cards[currentCardIndex].classList.add('prev');
+        
+        currentCardIndex = (currentCardIndex + 1) % cards.length;
+        
+        cards[currentCardIndex].classList.remove('prev', 'next');
+        cards[currentCardIndex].classList.add('active');
+        
+        if (currentCardIndex < cards.length - 1) {
+            cards[currentCardIndex + 1].classList.remove('prev');
+            cards[currentCardIndex + 1].classList.add('next');
+        }
+    }
+    
+    function previousCard() {
+        const cards = document.querySelectorAll('.style-card');
+        cards[currentCardIndex].classList.remove('active');
+        cards[currentCardIndex].classList.add('next');
+        
+        currentCardIndex = (currentCardIndex - 1 + cards.length) % cards.length;
+        
+        cards[currentCardIndex].classList.remove('prev', 'next');
+        cards[currentCardIndex].classList.add('active');
+    }
+    
+    // Change product (updates mockups and template)
+    function changeProduct(productKey) {
+        selectedProduct = productKey;
+        const product = PRODUCTS[productKey];
+        
+        // Update shape indicator
+        const shapeText = product.shape === 'Sq' ? 'Square (DTG)' : 'Oval (Merch)';
+        document.getElementById('shapeIndicator').textContent = shapeText;
+        
+        // Reload mockups for all styles
+        initializeMockups();
+        
+        // If style already selected, reload template for new shape
+        if (selectedStyle) {
+            loadTemplate(selectedStyle, product.shape);
+        }
+    }
+    
+    // Step 1: Select Style
+    function selectStyle(style) {
+        selectedStyle = style;
+        
+        // Visual feedback
+        document.querySelectorAll('.style-card-desktop').forEach(card => {
+            card.classList.remove('selected');
+        });
+        document.querySelector(`[data-style="${style}"]`)?.classList.add('selected');
+        
+        // Update SVG style
+        const styleConfig = STYLES[style];
+        document.getElementById('cityText').setAttribute('fill', styleConfig.color);
+        document.getElementById('cityText').setAttribute('font-family', styleConfig.font);
+        document.getElementById('groupText').setAttribute('fill', styleConfig.color);
+        document.getElementById('groupText').setAttribute('font-family', styleConfig.font);
+        
+        // Load template for current product's shape
+        const shape = PRODUCTS[selectedProduct].shape;
+        loadTemplate(style, shape);
+        
+        // Move to step 2
+        currentStep = 2;
+        showStep(2);
+    }
+    
+    // Load template (SVG + JSON) for style/shape combo
+    async function loadTemplate(style, shape) {
+        try {
+            console.log(`Loading template: Style_${style}_${shape}`);
+            
+            // For now, just update the preview
+            // In production, you'd load SVG background + JSON baseline here
+            updatePreview();
+            
+            console.log(`✓ Template loaded: ${style}_${shape}`);
+            
+        } catch (error) {
+            console.error('Template load failed:', error);
+        }
+    }
+    
+    // Step 2: Location
+    function useGeolocation() {
+        // Simulate geolocation (would use real API in production)
+        useCity('BRANTFORD, ONTARIO');
+    }
+    
+    function useCity(city) {
+        document.getElementById('cityInput').value = city;
+        updateCity();
+        
+        // Auto-advance after short delay
+        setTimeout(() => {
+            currentStep = 3;
+            showStep(3);
+        }, 300);
+    }
+    
+    function updateCity() {
+        cityText = document.getElementById('cityInput').value.toUpperCase();
+        const remaining = 50 - cityText.length;
+        document.getElementById('cityCounter').textContent = remaining;
+        
+        updatePreview();
+        
+        if (cityText.length > 0 && currentStep === 2) {
+            updateCTA('Continue →');
+        }
+    }
+    
+    // Step 3: Group
+    function useGroup(group) {
+        document.getElementById('groupInput').value = group;
+        updateGroup();
+        
+        // Auto-advance to tweak/checkout
+        setTimeout(() => {
+            currentStep = 4;
+            showStep(4);
+        }, 300);
+    }
+    
+    function updateGroup() {
+        groupText = document.getElementById('groupInput').value.toUpperCase();
+        const remaining = 35 - groupText.length;
+        document.getElementById('groupCounter').textContent = remaining;
+        
+        updatePreview();
+        
+        if (groupText.length > 0 && currentStep === 3) {
+            updateCTA('Continue →');
+        }
+    }
+    
+    // Step 4: Tweak
+    function toggleTweak() {
+        const controls = document.getElementById('tweakControls');
+        const btn = document.getElementById('tweakToggle');
+        controls.classList.toggle('active');
+        btn.classList.toggle('active');
+    }
+    
+    function adjustCity(property, delta) {
+        // Simple nudge adjustments
+        if (property === 'size') {
+            let current = parseInt(document.getElementById('citySizeSlider')?.value || 10);
+            current = Math.max(10, Math.min(80, current + delta));
+            updateSlider('citySize', current);
+        } else if (property === 'y') {
+            let current = parseInt(document.getElementById('cityYSlider')?.value || 223);
+            current = Math.max(0, Math.min(300, current + (delta * 5)));
+            updateSlider('cityY', current);
+        }
+    }
+    
+    function adjustGroup(property, delta) {
+        if (property === 'size') {
+            let current = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
+            current = Math.max(8, Math.min(50, current + delta));
+            updateSlider('groupSize', current);
+        } else if (property === 'y') {
+            let current = parseInt(document.getElementById('groupYSlider')?.value || 282);
+            current = Math.max(50, Math.min(400, current + (delta * 5)));
+            updateSlider('groupY', current);
+        }
+    }
+    
+    function updateSlider(property, value) {
+        // Update slider and value display
+        const slider = document.getElementById(property + 'Slider');
+        const valueDisplay = document.getElementById(property + 'Val');
+        
+        if (slider) slider.value = value;
+        if (valueDisplay) valueDisplay.textContent = value;
+        
+        updatePreview();
+    }
+    
+    function resetDesign() {
+        // Reset to defaults
+        updateSlider('citySize', 10);
+        updateSlider('cityY', 223);
+        updateSlider('groupSize', 8);
+        updateSlider('groupY', 282);
+    }
+    
+    // Preview update
+    function formatText(text, baseSize) {
+        if (!text) return '';
+        const words = text.split(/\s+/).filter(w => w.length > 0);
+        return words.map((word, i) => {
+            const dx = i > 0 ? `dx="${baseSize * 0.45}"` : '';
+            if (/^\d+$/.test(word)) {
+                return `<tspan ${dx} font-size="${baseSize * 1.35}">${word}</tspan>`;
+            } else {
+                return `<tspan ${dx} font-size="${baseSize * 1.35}">${word[0]}</tspan><tspan font-size="${baseSize}">${word.slice(1)}</tspan>`;
+            }
+        }).join('');
+    }
+    
+    function updatePreview() {
+        const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
+        const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
+        const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
+        const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
+        
+        // Update paths
+        document.getElementById('pathTop').setAttribute('d', `M 20,${cityY} A 230,45 0 0,1 480,${cityY}`);
+        document.getElementById('pathMid').setAttribute('d', `M 20,${groupY} A 230,65 0 0,1 480,${groupY}`);
+        
+        // Update text
+        const cityTextPath = document.querySelector('#cityText textPath');
+        const groupTextPath = document.querySelector('#groupText textPath');
+        
+        cityTextPath.innerHTML = formatText(cityText, citySize);
+        groupTextPath.innerHTML = formatText(groupText, groupSize);
+        
+        document.getElementById('cityText').setAttribute('font-size', citySize);
+        document.getElementById('groupText').setAttribute('font-size', groupSize);
+    }
+    
+    // Navigation
+    function showStep(step) {
+        // Hide all steps
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById(`step${i}`)?.classList.add('hidden');
+        }
+        
+        // Show current step
+        document.getElementById(`step${step}`)?.classList.remove('hidden');
+        
+        updateProgress();
+        updateStepIndicator();
+        updateCTA();
+    }
+    
+    function updateProgress() {
+        const progress = (currentStep / 4) * 100;
+        document.getElementById('progressFill').style.width = progress + '%';
+    }
+    
+    function updateStepIndicator() {
+        const steps = [
+            'Pick Your Style',
+            'Your Location',
+            'Your Group',
+            'Review & Checkout'
+        ];
+        document.getElementById('stepIndicator').textContent = `Step ${currentStep} of 4: ${steps[currentStep - 1]}`;
+    }
+    
+    function updateCTA(text) {
+        const btn = document.getElementById('ctaButton');
+        
+        if (text) {
+            btn.textContent = text;
+            btn.disabled = false;
+        } else if (currentStep === 1) {
+            btn.textContent = selectedStyle ? 'Continue →' : 'Select a Style to Continue';
+            btn.disabled = !selectedStyle;
+        } else if (currentStep === 2) {
+            btn.textContent = cityText ? 'Continue →' : 'Enter Your Location';
+            btn.disabled = !cityText;
+        } else if (currentStep === 3) {
+            btn.textContent = groupText ? 'Continue →' : 'Enter Your Group Name';
+            btn.disabled = !groupText;
+        } else if (currentStep === 4) {
+            btn.textContent = 'Add to Cart - $29.99 ✨';
+            btn.disabled = false;
+        }
+    }
+    
+    function handleCTA() {
+        if (currentStep < 4) {
+            currentStep++;
+            showStep(currentStep);
+        } else {
+            // Checkout
+            alert('Proceeding to checkout! (Would integrate with Shopify here)');
+        }
+    }
+    
+    // Initialize on load
+    window.addEventListener('load', init);
+</script>
+
+</body>
+</html>
