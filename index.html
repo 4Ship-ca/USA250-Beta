@@ -959,7 +959,7 @@
     // Generate mockup URL based on naming convention
     function getMockupUrl(style, product) {
         const shape = PRODUCTS[product].shape;
-        return `/mockups/Style_${style}_${shape}_${product}.png`;
+        return `mockups/Style_${style}_${shape}_${product}.png`;
     }
     
     // Mockups load on-demand with automatic fallback - no pre-checking needed
@@ -1017,7 +1017,7 @@
         
         imgElement.onerror = () => {
             // Try placeholder
-            imgElement.src = '/mockups/placeholder.png';
+            imgElement.src = 'mockups/placeholder.png';
             
             imgElement.onerror = () => {
                 // Ultimate fallback - solid color based on style
