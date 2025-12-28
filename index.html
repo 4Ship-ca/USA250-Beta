@@ -962,52 +962,21 @@
         return `/mockups/Style_${style}_${shape}_${product}.png`;
     }
     
-    // Check if mockup exists
-    async function checkMockupExists(url) {
-        try {
-            const response = await fetch(url, { method: 'HEAD' });
-            return response.ok;
-        } catch {
-            return false;
-        }
-    }
+    // Mockups load on-demand with automatic fallback - no pre-checking needed
     
-    // Auto-detect available mockups on page load
+    // Skip detection - just load mockups and handle errors gracefully
     async function detectAvailableMockups() {
-        const styles = ['A', 'B', 'C', 'D'];
-        const products = Object.keys(PRODUCTS);
-        
-        console.log('Detecting available mockups...');
-        
-        for (const style of styles) {
-            availableMockups[style] = [];
-            
-            for (const product of products) {
-                const url = getMockupUrl(style, product);
-                const exists = await checkMockupExists(url);
-                
-                if (exists) {
-                    availableMockups[style].push(product);
-                    console.log(`✓ Found: ${url}`);
-                }
-            }
-        }
-        
-        console.log('Available mockups:', availableMockups);
-        
-        // Auto-select first available product
-        if (availableMockups['A'] && availableMockups['A'].length > 0) {
-            selectedProduct = availableMockups['A'][0];
-        }
+        console.log('Mockups will load on-demand with fallback to placeholder');
+        // No detection needed - just try to load and fallback if missing
     }
     
     // Initialize
-    async function init() {
+    function init() {
         updateProgress();
         updateStepIndicator();
         
-        // Auto-detect available mockups
-        await detectAvailableMockups();
+        // Skip mockup detection - they'll load on-demand
+        detectAvailableMockups();
         
         // Populate product selector
         populateProductSelector();
