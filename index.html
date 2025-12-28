@@ -648,7 +648,7 @@
     <div class="left-panel">
         <!-- Header -->
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.4</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.6</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -880,7 +880,7 @@
                         <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
                         <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
                     </defs>
-                    <rect width="500" height="400" fill="#1a1a1a"/>
+                    <image id="bgImage" x="0" y="0" width="500" height="400" preserveAspectRatio="xMidYMid meet" />
                     <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
                         <textPath href="#pathTop" startOffset="50%"></textPath>
                     </text>
@@ -1134,121 +1134,55 @@
     }
     
     // Load template (SVG + JSON) for style/shape combo
+    // Store baseline values globally
+    let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
+    
     async function loadTemplate(style, shape) {
         try {
             console.log(`Loading template: Style_${style}_${shape}`);
             
-            // Fetch SVG template
-            const svgUrl = `templates/Style_${style}_${shape}.svg`;
-            const svgResponse = await fetch(svgUrl);
+            const templatePath = `templates/Style_${style}_${shape}.svg`;
+            const jsonPath = `templates/Style_${style}_${shape}.json`;
             
-            if (!svgResponse.ok) {
-                console.error(`SVG not found: ${svgUrl}`);
-                updatePreview(); // Use placeholder
-                return;
+            // Load template as background image
+            const bgImage = document.getElementById('bgImage');
+            if (bgImage) {
+                bgImage.setAttribute('href', templatePath);
             }
             
-            const svgText = await svgResponse.text();
-            
-            // Fetch JSON baseline for positioning & styling (NOT text content!)
-            const jsonUrl = `templates/Style_${style}_${shape}.json`;
-            const jsonResponse = await fetch(jsonUrl);
-            
+            // Load JSON baseline
+            const jsonResponse = await fetch(jsonPath);
             let baseline = null;
             if (jsonResponse.ok) {
                 baseline = await jsonResponse.json();
-                console.log(`✓ Loaded baseline (ignoring sample text):`, baseline);
+                console.log(`✓ Loaded baseline:`, baseline);
             }
             
-            // Parse and insert the template SVG
-            const parser = new DOMParser();
-            const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-            const loadedSVG = svgDoc.documentElement;
-            
-            // Get original viewBox or set from dimensions
-            let viewBox = loadedSVG.getAttribute('viewBox');
-            if (!viewBox) {
-                const w = loadedSVG.getAttribute('width') || '2048';
-                const h = loadedSVG.getAttribute('height') || '1536';
-                viewBox = `0 0 ${w} ${h}`;
-            }
-            loadedSVG.setAttribute('viewBox', viewBox);
-            loadedSVG.id = 'previewSVG';
-            
-            // Extract positioning from JSON baseline (or use defaults)
-            const [x, y, width, height] = viewBox.split(' ').map(Number);
-            const centerX = x + width / 2;
-            
-            // Get positioning from JSON baseline sliders
-            let cityYPos = y + height * 0.3;  // Default: 30% down
-            let groupYPos = y + height * 0.7; // Default: 70% down
-            let citySizeVal = 40;  // Default size
-            let groupSizeVal = 30; // Default size
-            
+            // Apply baseline slider values DIRECTLY (no scaling!)
             if (baseline && baseline.sliders) {
-                const sliders = baseline.sliders;
-                // Convert JSON Y values (which are based on 500px viewBox) to actual template size
-                const scale = height / 500;  // Scale factor from preview to template
+                const s = baseline.sliders;
+                if (s.cityY) document.getElementById('cityYSlider').value = s.cityY;
+                if (s.citySize) document.getElementById('citySizeSlider').value = s.citySize;
+                if (s.groupY) document.getElementById('groupYSlider').value = s.groupY;
+                if (s.gSize) document.getElementById('groupSizeSlider').value = s.gSize;
                 
-                if (sliders.cityY) cityYPos = parseInt(sliders.cityY) * scale;
-                if (sliders.groupY) groupYPos = parseInt(sliders.groupY) * scale;
-                if (sliders.citySize) citySizeVal = parseInt(sliders.citySize) * (width / 500);
-                if (sliders.gSize) groupSizeVal = parseInt(sliders.gSize) * (width / 500);
+                // Store arch and tracking values
+                baselineArch.cityArch = parseInt(s.archIntensity) || 64;
+                baselineArch.groupArch = parseInt(s.gArch) || 64;
+                baselineArch.cityTrack = parseInt(s.cityTrack) || 0;
+                baselineArch.groupTrack = parseInt(s.gTrack) || 2;
                 
-                console.log(`Positioning: cityY=${cityYPos}, groupY=${groupYPos}, citySize=${citySizeVal}, groupSize=${groupSizeVal}`);
+                console.log(`✓ Applied baseline values directly (no scaling)`);
             }
             
-            // Create city text element (USER INPUT, not JSON sample text!)
-            const cityTextEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            cityTextEl.id = 'cityText';
-            cityTextEl.setAttribute('x', centerX);
-            cityTextEl.setAttribute('y', cityYPos);
-            cityTextEl.setAttribute('text-anchor', 'middle');
-            cityTextEl.setAttribute('font-family', STYLES[style].font);
-            cityTextEl.setAttribute('fill', STYLES[style].color);
-            cityTextEl.setAttribute('font-size', citySizeVal);
-            cityTextEl.setAttribute('font-weight', '700');
-            // Use user input, NOT JSON sample text
-            cityTextEl.textContent = cityText || 'YOUR CITY, STATE';
-            
-            // Create group text element (USER INPUT, not JSON sample text!)
-            const groupTextEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            groupTextEl.id = 'groupText';
-            groupTextEl.setAttribute('x', centerX);
-            groupTextEl.setAttribute('y', groupYPos);
-            groupTextEl.setAttribute('text-anchor', 'middle');
-            groupTextEl.setAttribute('font-family', STYLES[style].font);
-            groupTextEl.setAttribute('fill', STYLES[style].color);
-            groupTextEl.setAttribute('font-size', groupSizeVal);
-            groupTextEl.setAttribute('font-weight', '700');
-            // Use user input, NOT JSON sample text
-            groupTextEl.textContent = groupText || 'YOUR GROUP NAME';
-            
-            // Append text elements to SVG
-            loadedSVG.appendChild(cityTextEl);
-            loadedSVG.appendChild(groupTextEl);
-            
-            // Replace the preview SVG
-            const previewContainer = document.getElementById('previewSVG');
-            previewContainer.parentNode.replaceChild(loadedSVG, previewContainer);
-            
-            // Apply baseline values to sliders (for user fine-tuning)
-            if (baseline && baseline.sliders) {
-                const sliders = baseline.sliders;
-                if (sliders.citySize) document.getElementById('citySizeSlider').value = sliders.citySize;
-                if (sliders.cityY) document.getElementById('cityYSlider').value = sliders.cityY;
-                if (sliders.gSize) document.getElementById('groupSizeSlider').value = sliders.gSize;
-                if (sliders.groupY) document.getElementById('groupYSlider').value = sliders.groupY;
-            }
-            
-            // Update preview with current user text
+            // Update preview
             updatePreview();
             
-            console.log(`✓ Template loaded: ${style}_${shape} with user text overlays`);
+            console.log(`✓ Template loaded: ${style}_${shape}`);
             
         } catch (error) {
             console.error('Template load failed:', error);
-            updatePreview(); // Fallback to placeholder
+            updatePreview();
         }
     }
     
@@ -1372,55 +1306,54 @@
     }
     
     function updatePreview() {
-        const previewSVG = document.getElementById('previewSVG');
-        if (!previewSVG) return;
-        
-        // Get slider values (if they exist)
-        const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 40);
+        const style = STYLES[selectedStyle];
+        const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
         const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
-        const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 30);
+        const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
         const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
         
-        // Update city text element (if exists)
-        const cityTextEl = document.getElementById('cityText');
-        if (cityTextEl) {
-            cityTextEl.textContent = cityText || 'YOUR CITY, STATE';
-            cityTextEl.setAttribute('font-size', citySize);
-            cityTextEl.setAttribute('y', cityY);
-            console.log(`✓ Updated city: "${cityText}" (size: ${citySize}, y: ${cityY})`);
+        // Update paths with admin's EXACT formula
+        const pathTop = document.getElementById('pathTop');
+        const pathMid = document.getElementById('pathMid');
+        
+        if (pathTop && pathMid) {
+            pathTop.setAttribute('d', `M 20,${cityY} A 230,${baselineArch.cityArch} 0 0,1 480,${cityY}`);
+            pathMid.setAttribute('d', `M 20,${groupY} A 230,${baselineArch.groupArch} 0 0,1 480,${groupY}`);
         }
         
-        // Update group text element (if exists)
-        const groupTextEl = document.getElementById('groupText');
-        if (groupTextEl) {
-            groupTextEl.textContent = groupText || 'YOUR GROUP NAME';
-            groupTextEl.setAttribute('font-size', groupSize);
-            groupTextEl.setAttribute('y', groupY);
-            console.log(`✓ Updated group: "${groupText}" (size: ${groupSize}, y: ${groupY})`);
-        }
+        // Update text content and styling
+        const cityContainer = document.querySelector('#cityText');
+        const groupContainer = document.querySelector('#groupText');
         
-        // If no text elements exist, we're using the placeholder SVG
-        if (!cityTextEl && !groupTextEl) {
-            // Placeholder SVG update (original logic)
-            const pathTop = document.getElementById('pathTop');
-            const pathMid = document.getElementById('pathMid');
+        if (cityContainer && style) {
+            cityContainer.setAttribute('fill', style.color);
+            cityContainer.setAttribute('font-family', `"${style.font}"`);
+            cityContainer.setAttribute('font-weight', style.weight);
+            cityContainer.style.fontFamily = `"${style.font}", sans-serif`;
+            cityContainer.style.letterSpacing = baselineArch.cityTrack + "px";
+            cityContainer.setAttribute('font-size', citySize);
             
-            if (pathTop && pathMid) {
-                pathTop.setAttribute('d', `M 20,${cityY} A 230,45 0 0,1 480,${cityY}`);
-                pathMid.setAttribute('d', `M 20,${groupY} A 230,65 0 0,1 480,${groupY}`);
-                
-                const cityTextPath = document.querySelector('#cityText textPath');
-                const groupTextPath = document.querySelector('#groupText textPath');
-                
-                if (cityTextPath) cityTextPath.innerHTML = formatText(cityText, citySize);
-                if (groupTextPath) groupTextPath.innerHTML = formatText(groupText, groupSize);
-                
-                const cityTextPlaceholder = document.querySelector('#cityText');
-                const groupTextPlaceholder = document.querySelector('#groupText');
-                if (cityTextPlaceholder) cityTextPlaceholder.setAttribute('font-size', citySize);
-                if (groupTextPlaceholder) groupTextPlaceholder.setAttribute('font-size', groupSize);
+            const cityTextPath = cityContainer.querySelector('textPath');
+            if (cityTextPath) {
+                cityTextPath.innerHTML = formatText(cityText, citySize);
             }
         }
+        
+        if (groupContainer && style) {
+            groupContainer.setAttribute('fill', style.color);
+            groupContainer.setAttribute('font-family', `"${style.font}"`);
+            groupContainer.setAttribute('font-weight', style.weight);
+            groupContainer.style.fontFamily = `"${style.font}", sans-serif`;
+            groupContainer.style.letterSpacing = baselineArch.groupTrack + "px";
+            groupContainer.setAttribute('font-size', groupSize);
+            
+            const groupTextPath = groupContainer.querySelector('textPath');
+            if (groupTextPath) {
+                groupTextPath.innerHTML = formatText(groupText, groupSize);
+            }
+        }
+        
+        console.log(`✓ Preview updated: cityY=${cityY}, groupY=${groupY}`);
     }
     
     // Navigation
