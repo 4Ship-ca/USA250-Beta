@@ -648,7 +648,7 @@
     <div class="left-panel">
         <!-- Header -->
         <div class="header">
-            <div class="logo">AMERICA 250</div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.2</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1138,14 +1138,60 @@
         try {
             console.log(`Loading template: Style_${style}_${shape}`);
             
-            // For now, just update the preview
-            // In production, you'd load SVG background + JSON baseline here
+            // Fetch SVG template
+            const svgUrl = `templates/Style_${style}_${shape}.svg`;
+            const svgResponse = await fetch(svgUrl);
+            
+            if (!svgResponse.ok) {
+                console.error(`SVG not found: ${svgUrl}`);
+                updatePreview(); // Use placeholder
+                return;
+            }
+            
+            const svgText = await svgResponse.text();
+            
+            // Fetch JSON baseline for default scaling values
+            const jsonUrl = `templates/Style_${style}_${shape}.json`;
+            const jsonResponse = await fetch(jsonUrl);
+            
+            let baseline = null;
+            if (jsonResponse.ok) {
+                baseline = await jsonResponse.json();
+                console.log(`✓ Loaded baseline:`, baseline);
+            }
+            
+            // Replace the preview SVG with the loaded template
+            const previewContainer = document.getElementById('previewSVG');
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+            const loadedSVG = svgDoc.documentElement;
+            
+            // Preserve viewBox or set default
+            if (!loadedSVG.hasAttribute('viewBox')) {
+                loadedSVG.setAttribute('viewBox', '0 0 500 400');
+            }
+            
+            // Replace the SVG content
+            previewContainer.parentNode.replaceChild(loadedSVG, previewContainer);
+            loadedSVG.id = 'previewSVG';
+            
+            // Apply baseline values to sliders if available
+            if (baseline && baseline.sliders) {
+                const sliders = baseline.sliders;
+                if (sliders.citySize) document.getElementById('citySizeSlider').value = sliders.citySize;
+                if (sliders.cityY) document.getElementById('cityYSlider').value = sliders.cityY;
+                if (sliders.gSize) document.getElementById('groupSizeSlider').value = sliders.gSize;
+                if (sliders.groupY) document.getElementById('groupYSlider').value = sliders.groupY;
+            }
+            
+            // Update preview with current text
             updatePreview();
             
             console.log(`✓ Template loaded: ${style}_${shape}`);
             
         } catch (error) {
             console.error('Template load failed:', error);
+            updatePreview(); // Fallback to placeholder
         }
     }
     
@@ -1274,19 +1320,56 @@
         const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
         const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
         
-        // Update paths
-        document.getElementById('pathTop').setAttribute('d', `M 20,${cityY} A 230,45 0 0,1 480,${cityY}`);
-        document.getElementById('pathMid').setAttribute('d', `M 20,${groupY} A 230,65 0 0,1 480,${groupY}`);
+        const previewSVG = document.getElementById('previewSVG');
+        if (!previewSVG) return;
         
-        // Update text
-        const cityTextPath = document.querySelector('#cityText textPath');
-        const groupTextPath = document.querySelector('#groupText textPath');
+        // Check if this is the placeholder SVG or a loaded template
+        const isPlaceholder = previewSVG.querySelector('#pathTop') !== null;
         
-        cityTextPath.innerHTML = formatText(cityText, citySize);
-        groupTextPath.innerHTML = formatText(groupText, groupSize);
-        
-        document.getElementById('cityText').setAttribute('font-size', citySize);
-        document.getElementById('groupText').setAttribute('font-size', groupSize);
+        if (isPlaceholder) {
+            // Original placeholder SVG update
+            document.getElementById('pathTop').setAttribute('d', `M 20,${cityY} A 230,45 0 0,1 480,${cityY}`);
+            document.getElementById('pathMid').setAttribute('d', `M 20,${groupY} A 230,65 0 0,1 480,${groupY}`);
+            
+            const cityTextPath = document.querySelector('#cityText textPath');
+            const groupTextPath = document.querySelector('#groupText textPath');
+            
+            if (cityTextPath) cityTextPath.innerHTML = formatText(cityText, citySize);
+            if (groupTextPath) groupTextPath.innerHTML = formatText(groupText, groupSize);
+            
+            document.getElementById('cityText')?.setAttribute('font-size', citySize);
+            document.getElementById('groupText')?.setAttribute('font-size', groupSize);
+        } else {
+            // Loaded template - find and update text elements
+            // Templates use <text> elements, we need to find them and update their content
+            
+            // Strategy: Look for text elements that likely contain city/group text
+            // Most templates have text elements we can identify by position or content
+            const textElements = previewSVG.querySelectorAll('text');
+            
+            console.log(`Updating ${textElements.length} text elements in template`);
+            
+            // For now, just log - we'll need to identify which text elements to update
+            // This would require template-specific mapping
+            textElements.forEach((textEl, idx) => {
+                const currentText = textEl.textContent.trim();
+                console.log(`Text ${idx}: "${currentText}"`);
+                
+                // Simple heuristic: if text looks like a city (has commas, USA, state names)
+                // or group name (has "FAMILY", "GROUP", etc.), update it
+                if (currentText.includes('FLORIDA') || currentText.includes('BEACH') || currentText.length > 15) {
+                    if (cityText) {
+                        textEl.textContent = cityText;
+                        console.log(`✓ Updated city text: ${cityText}`);
+                    }
+                } else if (currentText.includes('FAMILY') || currentText.includes('JOHNSON') || currentText.includes('250')) {
+                    if (groupText) {
+                        textEl.textContent = groupText;
+                        console.log(`✓ Updated group text: ${groupText}`);
+                    }
+                }
+            });
+        }
     }
     
     // Navigation
