@@ -386,10 +386,28 @@
             margin-bottom: 10px;
         }
         
+        .button-labels {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 11px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            text-align: center;
+        }
+        
         .button-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
+        }
+        
+        .button-grid-extended {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
         }
         
         .tweak-btn {
@@ -398,12 +416,13 @@
             border: 2px solid #444;
             border-radius: 15px;
             color: white;
-            font-size: 24px;
+            font-size: 20px;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 700;
         }
         
         .tweak-btn:active {
@@ -412,11 +431,6 @@
             border-color: var(--gold);
             transform: scale(0.95);
         }
-        
-        .tweak-btn.size-minus::before { content: 'A-'; font-size: 16px; }
-        .tweak-btn.size-plus::before { content: 'A+'; font-size: 20px; }
-        .tweak-btn.pos-up::before { content: '↑'; }
-        .tweak-btn.pos-down::before { content: '↓'; }
         
         /* Sticky Bottom CTA */
         .sticky-cta {
@@ -648,7 +662,7 @@
     <div class="left-panel">
         <!-- Header -->
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.4</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.7</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -808,23 +822,37 @@
             <div class="tweak-controls" id="tweakControls">
                 <!-- City Controls -->
                 <div class="control-group">
-                    <div class="control-label">City Text Size</div>
-                    <div class="button-grid">
-                        <button class="tweak-btn size-minus" onclick="adjustCity('size', -1)"></button>
-                        <button class="tweak-btn size-plus" onclick="adjustCity('size', 1)"></button>
-                        <button class="tweak-btn pos-up" onclick="adjustCity('y', -1)"></button>
-                        <button class="tweak-btn pos-down" onclick="adjustCity('y', 1)"></button>
+                    <div class="control-label">City Text</div>
+                    <div class="button-labels">
+                        <span>Size</span>
+                        <span>Position</span>
+                        <span>Arc</span>
+                    </div>
+                    <div class="button-grid-extended">
+                        <button class="tweak-btn size-minus" onclick="adjustCity('size', -1)">A-</button>
+                        <button class="tweak-btn size-plus" onclick="adjustCity('size', 1)">A+</button>
+                        <button class="tweak-btn pos-up" onclick="adjustCity('y', -1)">↑</button>
+                        <button class="tweak-btn pos-down" onclick="adjustCity('y', 1)">↓</button>
+                        <button class="tweak-btn arc-less" onclick="adjustCity('arc', -5)">⌒-</button>
+                        <button class="tweak-btn arc-more" onclick="adjustCity('arc', 5)">⌒+</button>
                     </div>
                 </div>
                 
                 <!-- Group Controls -->
                 <div class="control-group">
-                    <div class="control-label">Group Text Size</div>
-                    <div class="button-grid">
-                        <button class="tweak-btn size-minus" onclick="adjustGroup('size', -1)"></button>
-                        <button class="tweak-btn size-plus" onclick="adjustGroup('size', 1)"></button>
-                        <button class="tweak-btn pos-up" onclick="adjustGroup('y', -1)"></button>
-                        <button class="tweak-btn pos-down" onclick="adjustGroup('y', 1)"></button>
+                    <div class="control-label">Group Text</div>
+                    <div class="button-labels">
+                        <span>Size</span>
+                        <span>Position</span>
+                        <span>Arc</span>
+                    </div>
+                    <div class="button-grid-extended">
+                        <button class="tweak-btn size-minus" onclick="adjustGroup('size', -1)">A-</button>
+                        <button class="tweak-btn size-plus" onclick="adjustGroup('size', 1)">A+</button>
+                        <button class="tweak-btn pos-up" onclick="adjustGroup('y', -1)">↑</button>
+                        <button class="tweak-btn pos-down" onclick="adjustGroup('y', 1)">↓</button>
+                        <button class="tweak-btn arc-less" onclick="adjustGroup('arc', -5)">⌒-</button>
+                        <button class="tweak-btn arc-more" onclick="adjustGroup('arc', 5)">⌒+</button>
                     </div>
                 </div>
                 
@@ -880,7 +908,7 @@
                         <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
                         <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
                     </defs>
-                    <rect width="500" height="400" fill="#1a1a1a"/>
+                    <image id="bgImage" x="0" y="0" width="500" height="400" preserveAspectRatio="xMidYMid meet" />
                     <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
                         <textPath href="#pathTop" startOffset="50%"></textPath>
                     </text>
@@ -1134,121 +1162,55 @@
     }
     
     // Load template (SVG + JSON) for style/shape combo
+    // Store baseline values globally
+    let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
+    
     async function loadTemplate(style, shape) {
         try {
             console.log(`Loading template: Style_${style}_${shape}`);
             
-            // Fetch SVG template
-            const svgUrl = `templates/Style_${style}_${shape}.svg`;
-            const svgResponse = await fetch(svgUrl);
+            const templatePath = `templates/Style_${style}_${shape}.svg`;
+            const jsonPath = `templates/Style_${style}_${shape}.json`;
             
-            if (!svgResponse.ok) {
-                console.error(`SVG not found: ${svgUrl}`);
-                updatePreview(); // Use placeholder
-                return;
+            // Load template as background image
+            const bgImage = document.getElementById('bgImage');
+            if (bgImage) {
+                bgImage.setAttribute('href', templatePath);
             }
             
-            const svgText = await svgResponse.text();
-            
-            // Fetch JSON baseline for positioning & styling (NOT text content!)
-            const jsonUrl = `templates/Style_${style}_${shape}.json`;
-            const jsonResponse = await fetch(jsonUrl);
-            
+            // Load JSON baseline
+            const jsonResponse = await fetch(jsonPath);
             let baseline = null;
             if (jsonResponse.ok) {
                 baseline = await jsonResponse.json();
-                console.log(`✓ Loaded baseline (ignoring sample text):`, baseline);
+                console.log(`✓ Loaded baseline:`, baseline);
             }
             
-            // Parse and insert the template SVG
-            const parser = new DOMParser();
-            const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-            const loadedSVG = svgDoc.documentElement;
-            
-            // Get original viewBox or set from dimensions
-            let viewBox = loadedSVG.getAttribute('viewBox');
-            if (!viewBox) {
-                const w = loadedSVG.getAttribute('width') || '2048';
-                const h = loadedSVG.getAttribute('height') || '1536';
-                viewBox = `0 0 ${w} ${h}`;
-            }
-            loadedSVG.setAttribute('viewBox', viewBox);
-            loadedSVG.id = 'previewSVG';
-            
-            // Extract positioning from JSON baseline (or use defaults)
-            const [x, y, width, height] = viewBox.split(' ').map(Number);
-            const centerX = x + width / 2;
-            
-            // Get positioning from JSON baseline sliders
-            let cityYPos = y + height * 0.3;  // Default: 30% down
-            let groupYPos = y + height * 0.7; // Default: 70% down
-            let citySizeVal = 40;  // Default size
-            let groupSizeVal = 30; // Default size
-            
+            // Apply baseline slider values DIRECTLY (no scaling!)
             if (baseline && baseline.sliders) {
-                const sliders = baseline.sliders;
-                // Convert JSON Y values (which are based on 500px viewBox) to actual template size
-                const scale = height / 500;  // Scale factor from preview to template
+                const s = baseline.sliders;
+                if (s.cityY) document.getElementById('cityYSlider').value = s.cityY;
+                if (s.citySize) document.getElementById('citySizeSlider').value = s.citySize;
+                if (s.groupY) document.getElementById('groupYSlider').value = s.groupY;
+                if (s.gSize) document.getElementById('groupSizeSlider').value = s.gSize;
                 
-                if (sliders.cityY) cityYPos = parseInt(sliders.cityY) * scale;
-                if (sliders.groupY) groupYPos = parseInt(sliders.groupY) * scale;
-                if (sliders.citySize) citySizeVal = parseInt(sliders.citySize) * (width / 500);
-                if (sliders.gSize) groupSizeVal = parseInt(sliders.gSize) * (width / 500);
+                // Store arch and tracking values
+                baselineArch.cityArch = parseInt(s.archIntensity) || 64;
+                baselineArch.groupArch = parseInt(s.gArch) || 64;
+                baselineArch.cityTrack = parseInt(s.cityTrack) || 0;
+                baselineArch.groupTrack = parseInt(s.gTrack) || 2;
                 
-                console.log(`Positioning: cityY=${cityYPos}, groupY=${groupYPos}, citySize=${citySizeVal}, groupSize=${groupSizeVal}`);
+                console.log(`✓ Applied baseline values directly (no scaling)`);
             }
             
-            // Create city text element (USER INPUT, not JSON sample text!)
-            const cityTextEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            cityTextEl.id = 'cityText';
-            cityTextEl.setAttribute('x', centerX);
-            cityTextEl.setAttribute('y', cityYPos);
-            cityTextEl.setAttribute('text-anchor', 'middle');
-            cityTextEl.setAttribute('font-family', STYLES[style].font);
-            cityTextEl.setAttribute('fill', STYLES[style].color);
-            cityTextEl.setAttribute('font-size', citySizeVal);
-            cityTextEl.setAttribute('font-weight', '700');
-            // Use user input, NOT JSON sample text
-            cityTextEl.textContent = cityText || 'YOUR CITY, STATE';
-            
-            // Create group text element (USER INPUT, not JSON sample text!)
-            const groupTextEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            groupTextEl.id = 'groupText';
-            groupTextEl.setAttribute('x', centerX);
-            groupTextEl.setAttribute('y', groupYPos);
-            groupTextEl.setAttribute('text-anchor', 'middle');
-            groupTextEl.setAttribute('font-family', STYLES[style].font);
-            groupTextEl.setAttribute('fill', STYLES[style].color);
-            groupTextEl.setAttribute('font-size', groupSizeVal);
-            groupTextEl.setAttribute('font-weight', '700');
-            // Use user input, NOT JSON sample text
-            groupTextEl.textContent = groupText || 'YOUR GROUP NAME';
-            
-            // Append text elements to SVG
-            loadedSVG.appendChild(cityTextEl);
-            loadedSVG.appendChild(groupTextEl);
-            
-            // Replace the preview SVG
-            const previewContainer = document.getElementById('previewSVG');
-            previewContainer.parentNode.replaceChild(loadedSVG, previewContainer);
-            
-            // Apply baseline values to sliders (for user fine-tuning)
-            if (baseline && baseline.sliders) {
-                const sliders = baseline.sliders;
-                if (sliders.citySize) document.getElementById('citySizeSlider').value = sliders.citySize;
-                if (sliders.cityY) document.getElementById('cityYSlider').value = sliders.cityY;
-                if (sliders.gSize) document.getElementById('groupSizeSlider').value = sliders.gSize;
-                if (sliders.groupY) document.getElementById('groupYSlider').value = sliders.groupY;
-            }
-            
-            // Update preview with current user text
+            // Update preview
             updatePreview();
             
-            console.log(`✓ Template loaded: ${style}_${shape} with user text overlays`);
+            console.log(`✓ Template loaded: ${style}_${shape}`);
             
         } catch (error) {
             console.error('Template load failed:', error);
-            updatePreview(); // Fallback to placeholder
+            updatePreview();
         }
     }
     
@@ -1323,6 +1285,9 @@
             let current = parseInt(document.getElementById('cityYSlider')?.value || 223);
             current = Math.max(0, Math.min(300, current + (delta * 5)));
             updateSlider('cityY', current);
+        } else if (property === 'arc') {
+            baselineArch.cityArch = Math.max(10, Math.min(450, baselineArch.cityArch + delta));
+            updatePreview();
         }
     }
     
@@ -1335,6 +1300,9 @@
             let current = parseInt(document.getElementById('groupYSlider')?.value || 282);
             current = Math.max(50, Math.min(400, current + (delta * 5)));
             updateSlider('groupY', current);
+        } else if (property === 'arc') {
+            baselineArch.groupArch = Math.max(10, Math.min(450, baselineArch.groupArch + delta));
+            updatePreview();
         }
     }
     
@@ -1372,55 +1340,54 @@
     }
     
     function updatePreview() {
-        const previewSVG = document.getElementById('previewSVG');
-        if (!previewSVG) return;
-        
-        // Get slider values (if they exist)
-        const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 40);
+        const style = STYLES[selectedStyle];
+        const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
         const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
-        const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 30);
+        const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
         const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
         
-        // Update city text element (if exists)
-        const cityTextEl = document.getElementById('cityText');
-        if (cityTextEl) {
-            cityTextEl.textContent = cityText || 'YOUR CITY, STATE';
-            cityTextEl.setAttribute('font-size', citySize);
-            cityTextEl.setAttribute('y', cityY);
-            console.log(`✓ Updated city: "${cityText}" (size: ${citySize}, y: ${cityY})`);
+        // Update paths with admin's EXACT formula
+        const pathTop = document.getElementById('pathTop');
+        const pathMid = document.getElementById('pathMid');
+        
+        if (pathTop && pathMid) {
+            pathTop.setAttribute('d', `M 20,${cityY} A 230,${baselineArch.cityArch} 0 0,1 480,${cityY}`);
+            pathMid.setAttribute('d', `M 20,${groupY} A 230,${baselineArch.groupArch} 0 0,1 480,${groupY}`);
         }
         
-        // Update group text element (if exists)
-        const groupTextEl = document.getElementById('groupText');
-        if (groupTextEl) {
-            groupTextEl.textContent = groupText || 'YOUR GROUP NAME';
-            groupTextEl.setAttribute('font-size', groupSize);
-            groupTextEl.setAttribute('y', groupY);
-            console.log(`✓ Updated group: "${groupText}" (size: ${groupSize}, y: ${groupY})`);
-        }
+        // Update text content and styling
+        const cityContainer = document.querySelector('#cityText');
+        const groupContainer = document.querySelector('#groupText');
         
-        // If no text elements exist, we're using the placeholder SVG
-        if (!cityTextEl && !groupTextEl) {
-            // Placeholder SVG update (original logic)
-            const pathTop = document.getElementById('pathTop');
-            const pathMid = document.getElementById('pathMid');
+        if (cityContainer && style) {
+            cityContainer.setAttribute('fill', style.color);
+            cityContainer.setAttribute('font-family', `"${style.font}"`);
+            cityContainer.setAttribute('font-weight', style.weight);
+            cityContainer.style.fontFamily = `"${style.font}", sans-serif`;
+            cityContainer.style.letterSpacing = baselineArch.cityTrack + "px";
+            cityContainer.setAttribute('font-size', citySize);
             
-            if (pathTop && pathMid) {
-                pathTop.setAttribute('d', `M 20,${cityY} A 230,45 0 0,1 480,${cityY}`);
-                pathMid.setAttribute('d', `M 20,${groupY} A 230,65 0 0,1 480,${groupY}`);
-                
-                const cityTextPath = document.querySelector('#cityText textPath');
-                const groupTextPath = document.querySelector('#groupText textPath');
-                
-                if (cityTextPath) cityTextPath.innerHTML = formatText(cityText, citySize);
-                if (groupTextPath) groupTextPath.innerHTML = formatText(groupText, groupSize);
-                
-                const cityTextPlaceholder = document.querySelector('#cityText');
-                const groupTextPlaceholder = document.querySelector('#groupText');
-                if (cityTextPlaceholder) cityTextPlaceholder.setAttribute('font-size', citySize);
-                if (groupTextPlaceholder) groupTextPlaceholder.setAttribute('font-size', groupSize);
+            const cityTextPath = cityContainer.querySelector('textPath');
+            if (cityTextPath) {
+                cityTextPath.innerHTML = formatText(cityText, citySize);
             }
         }
+        
+        if (groupContainer && style) {
+            groupContainer.setAttribute('fill', style.color);
+            groupContainer.setAttribute('font-family', `"${style.font}"`);
+            groupContainer.setAttribute('font-weight', style.weight);
+            groupContainer.style.fontFamily = `"${style.font}", sans-serif`;
+            groupContainer.style.letterSpacing = baselineArch.groupTrack + "px";
+            groupContainer.setAttribute('font-size', groupSize);
+            
+            const groupTextPath = groupContainer.querySelector('textPath');
+            if (groupTextPath) {
+                groupTextPath.innerHTML = formatText(groupText, groupSize);
+            }
+        }
+        
+        console.log(`✓ Preview updated: cityY=${cityY}, groupY=${groupY}`);
     }
     
     // Navigation
@@ -1474,13 +1441,142 @@
         }
     }
     
-    function handleCTA() {
+    async function generate9000pxPNG() {
+        try {
+            // Show loading
+            const ctaBtn = document.getElementById('ctaButton');
+            ctaBtn.disabled = true;
+            ctaBtn.textContent = 'Generating High-Res PNG...';
+            
+            // Create high-res canvas
+            const canvas = document.createElement('canvas');
+            const scale = 18;  // 500×400 → 9000×7200
+            canvas.width = 500 * scale;   // 9000px
+            canvas.height = 400 * scale;  // 7200px
+            const ctx = canvas.getContext('2d');
+            
+            // Get current design values
+            const style = STYLES[selectedStyle];
+            const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
+            const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
+            const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
+            const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
+            
+            // Load template as background
+            const templatePath = `templates/Style_${selectedStyle}_${selectedProduct === 'tee' ? 'Sq' : 'Ov'}.svg`;
+            const bgImage = await loadImage(templatePath);
+            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+            
+            // Create high-res SVG for text overlay
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(svgNS, 'svg');
+            svg.setAttribute('width', canvas.width);
+            svg.setAttribute('height', canvas.height);
+            svg.setAttribute('viewBox', `0 0 ${canvas.width} ${canvas.height}`);
+            
+            // Add defs with paths
+            const defs = document.createElementNS(svgNS, 'defs');
+            const cityPath = document.createElementNS(svgNS, 'path');
+            cityPath.setAttribute('id', 'exportCityPath');
+            cityPath.setAttribute('d', `M ${20*scale},${cityY*scale} A ${230*scale},${baselineArch.cityArch*scale} 0 0,1 ${480*scale},${cityY*scale}`);
+            const groupPath = document.createElementNS(svgNS, 'path');
+            groupPath.setAttribute('id', 'exportGroupPath');
+            groupPath.setAttribute('d', `M ${20*scale},${groupY*scale} A ${230*scale},${baselineArch.groupArch*scale} 0 0,1 ${480*scale},${groupY*scale}`);
+            defs.appendChild(cityPath);
+            defs.appendChild(groupPath);
+            svg.appendChild(defs);
+            
+            // Add city text
+            const cityTextEl = document.createElementNS(svgNS, 'text');
+            cityTextEl.setAttribute('text-anchor', 'middle');
+            cityTextEl.setAttribute('fill', style.color);
+            cityTextEl.setAttribute('font-family', style.font);
+            cityTextEl.setAttribute('font-weight', style.weight);
+            cityTextEl.setAttribute('font-size', citySize * scale);
+            cityTextEl.style.letterSpacing = (baselineArch.cityTrack * scale) + 'px';
+            const cityTextPath = document.createElementNS(svgNS, 'textPath');
+            cityTextPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#exportCityPath');
+            cityTextPath.setAttribute('startOffset', '50%');
+            cityTextPath.innerHTML = formatText(cityText, citySize * scale);
+            cityTextEl.appendChild(cityTextPath);
+            svg.appendChild(cityTextEl);
+            
+            // Add group text
+            const groupTextEl = document.createElementNS(svgNS, 'text');
+            groupTextEl.setAttribute('text-anchor', 'middle');
+            groupTextEl.setAttribute('fill', style.color);
+            groupTextEl.setAttribute('font-family', style.font);
+            groupTextEl.setAttribute('font-weight', style.weight);
+            groupTextEl.setAttribute('font-size', groupSize * scale);
+            groupTextEl.style.letterSpacing = (baselineArch.groupTrack * scale) + 'px';
+            const groupTextPath = document.createElementNS(svgNS, 'textPath');
+            groupTextPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#exportGroupPath');
+            groupTextPath.setAttribute('startOffset', '50%');
+            groupTextPath.innerHTML = formatText(groupText, groupSize * scale);
+            groupTextEl.appendChild(groupTextPath);
+            svg.appendChild(groupTextEl);
+            
+            // Convert SVG to image and overlay on canvas
+            const svgData = new XMLSerializer().serializeToString(svg);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const svgUrl = URL.createObjectURL(svgBlob);
+            const textImage = await loadImage(svgUrl);
+            ctx.drawImage(textImage, 0, 0);
+            URL.revokeObjectURL(svgUrl);
+            
+            // Convert to PNG blob
+            return new Promise((resolve) => {
+                canvas.toBlob((blob) => {
+                    ctaBtn.textContent = 'Preparing Checkout...';
+                    resolve(blob);
+                }, 'image/png', 0.95);
+            });
+            
+        } catch (error) {
+            console.error('PNG generation failed:', error);
+            alert('Failed to generate design. Please try again.');
+            const ctaBtn = document.getElementById('ctaButton');
+            ctaBtn.disabled = false;
+            ctaBtn.textContent = 'Continue to Checkout →';
+            return null;
+        }
+    }
+    
+    function loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+    
+    async function handleCTA() {
         if (currentStep < 4) {
             currentStep++;
             showStep(currentStep);
         } else {
-            // Checkout
-            alert('Proceeding to checkout! (Would integrate with Shopify here)');
+            // Generate 9000px PNG
+            const pngBlob = await generate9000pxPNG();
+            
+            if (pngBlob) {
+                // TODO: Upload to server/Gelato
+                // For now, trigger download for testing
+                const url = URL.createObjectURL(pngBlob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `America250_${selectedStyle}_${cityText.replace(/[^a-zA-Z0-9]/g, '_')}_9000px.png`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                // Reset button
+                const ctaBtn = document.getElementById('ctaButton');
+                ctaBtn.textContent = 'Design Downloaded! Order Now →';
+                
+                setTimeout(() => {
+                    alert('Next: Upload to Gelato/Shopify and proceed to checkout');
+                }, 1000);
+            }
         }
     }
     
