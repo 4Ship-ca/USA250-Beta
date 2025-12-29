@@ -1582,6 +1582,124 @@
     
     // Initialize on load
     window.addEventListener('load', init);
+    // ============================================
+// SHOPIFY INTEGRATION
+// ============================================
+
+const SHOPIFY_CONFIG = {
+    backendUrl: 'https://usa250-backend.vercel.app/api/create-draft-order',
+    productId: '8581802721430'
+};
+
+// Variant ID mapping (Color + Size → Shopify Variant ID)
+const VARIANT_MAP = {
+    'Navy-M': '46056445444246',
+    'Navy-L': '46056445477014',
+    'Navy-XL': '46056445509782',
+    'Navy-2XL': '46056445542550',
+    'Navy-S': '46056445575318',
+    'Black-M': '46056445608086',
+    'Black-L': '46056445640854',
+    'Black-XL': '46056445673622',
+    'Black-2XL': '46056445706390',
+    'Black-S': '46056445739158',
+    'Gray-M': '46056445771926',
+    'Gray-L': '46056445804694',
+    'Gray-XL': '46056445837462',
+    'Gray-2XL': '46056445870230',
+    'Gray-S': '46056445902998',
+    'White-M': '46056445935766',
+    'White-L': '46056445968534',
+    'White-XL': '46056446001302',
+    'White-2XL': '46056446034070',
+    'White-S': '46056446066838'
+};
+
+// Update handleCheckout function
+async function handleCheckout() {
+    if (currentStep < 4) {
+        currentStep++;
+        showStep(currentStep);
+    } else {
+        try {
+            const ctaBtn = document.getElementById('ctaButton');
+            ctaBtn.disabled = true;
+            ctaBtn.textContent = 'Generating design...';
+            
+            // 1. Generate PNG
+            const pngBlob = await generate9000pxPNG();
+            
+            // 2. Upload to Cloudinary
+            ctaBtn.textContent = 'Uploading design...';
+            const timestamp = Date.now();
+            const filename = `USA250_TEMP_${selectedStyle}_${timestamp}`;
+            
+            const formData = new FormData();
+            formData.append('file', pngBlob);
+            formData.append('upload_preset', 'america250');
+            formData.append('folder', 'america250');
+            formData.append('public_id', filename);
+            
+            const cloudinaryResponse = await fetch(
+                `https://api.cloudinary.com/v1_1/dqab444bd/image/upload`,
+                {
+                    method: 'POST',
+                    body: formData
+                }
+            );
+            
+            if (!cloudinaryResponse.ok) {
+                throw new Error('Cloudinary upload failed');
+            }
+            
+            const cloudinaryData = await cloudinaryResponse.json();
+            const designUrl = cloudinaryData.secure_url;
+            
+            // 3. Create Shopify draft order
+            ctaBtn.textContent = 'Creating order...';
+            
+            const variantKey = `${selectedColor}-${selectedSize}`;
+            const variantId = VARIANT_MAP[variantKey];
+            
+            if (!variantId) {
+                throw new Error(`No variant found for ${variantKey}`);
+            }
+            
+            const orderResponse = await fetch(SHOPIFY_CONFIG.backendUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    designUrl: designUrl,
+                    style: selectedStyle,
+                    cityText: cityText,
+                    groupText: groupText,
+                    color: selectedColor,
+                    size: selectedSize,
+                    variantId: variantId
+                })
+            });
+            
+            const orderData = await orderResponse.json();
+            
+            if (orderData.success) {
+                // Redirect to Shopify checkout
+                window.location.href = orderData.checkoutUrl;
+            } else {
+                throw new Error(orderData.error || 'Failed to create order');
+            }
+            
+        } catch (error) {
+            console.error('Checkout error:', error);
+            alert('Something went wrong. Please try again.');
+            
+            const ctaBtn = document.getElementById('ctaButton');
+            ctaBtn.disabled = false;
+            ctaBtn.textContent = 'Continue to Checkout →';
+        }
+    }
+}
 </script>
 
 </body>
