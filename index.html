@@ -23,18 +23,14 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* ===========================================
-           MOBILE-FIRST DESIGN (Default)
-           =========================================== */
-        
+        /* Mobile-first design */
         .container {
             width: 100%;
             min-height: 100vh;
             padding: 20px;
-            padding-bottom: 100px; /* Space for sticky button */
+            padding-bottom: 100px;
         }
         
-        /* Progress Bar */
         .progress-bar {
             position: fixed;
             top: 0;
@@ -52,7 +48,6 @@
             width: 25%;
         }
         
-        /* Header */
         .header {
             text-align: center;
             padding: 40px 20px 20px;
@@ -71,7 +66,6 @@
             color: #888;
         }
         
-        /* Style Cards (Tinder-style swipeable) */
         .style-section {
             margin: 30px 0;
         }
@@ -168,7 +162,6 @@
             transform: scale(0.95);
         }
         
-        /* Swipe Navigation */
         .swipe-nav {
             display: flex;
             justify-content: center;
@@ -193,7 +186,6 @@
             color: black;
         }
         
-        /* Location Input */
         .location-section {
             margin: 30px 0;
             max-width: 400px;
@@ -277,7 +269,6 @@
             margin-top: 5px;
         }
         
-        /* Suggested Options */
         .suggestions {
             display: flex;
             flex-wrap: wrap;
@@ -301,7 +292,6 @@
             border-color: var(--gold);
         }
         
-        /* Preview Section */
         .preview-section {
             margin: 30px 0;
             background: #1a1a1a;
@@ -337,7 +327,6 @@
             max-width: 100%;
         }
         
-        /* Tweak Controls */
         .tweak-section {
             margin: 20px 0;
             max-width: 400px;
@@ -398,12 +387,6 @@
             text-align: center;
         }
         
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-        
         .button-grid-extended {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
@@ -432,7 +415,6 @@
             transform: scale(0.95);
         }
         
-        /* Sticky Bottom CTA */
         .sticky-cta {
             position: fixed;
             bottom: 0;
@@ -472,10 +454,7 @@
             cursor: not-allowed;
         }
         
-        /* ===========================================
-           DESKTOP DESIGN (min-width: 768px)
-           =========================================== */
-        
+        /* Desktop styles */
         @media (min-width: 768px) {
             .container {
                 display: grid;
@@ -516,7 +495,6 @@
                 font-size: 32px;
             }
             
-            /* Desktop: Show all styles in grid instead of cards */
             .style-cards-desktop {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
@@ -524,7 +502,7 @@
             }
             
             .style-cards {
-                display: none; /* Hide mobile swipe cards */
+                display: none;
             }
             
             .swipe-nav {
@@ -579,7 +557,6 @@
                 max-width: 600px;
             }
             
-            /* Desktop: Show advanced slider controls */
             .advanced-controls {
                 display: block;
                 margin-top: 20px;
@@ -641,28 +618,24 @@
             }
         }
         
-        /* Hidden utility */
         .hidden { display: none !important; }
+        .loading { opacity: 0.5; pointer-events: none; }
         
-        /* Loading states */
-        .loading {
-            opacity: 0.5;
-            pointer-events: none;
+        .product-selector {
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
 
-<!-- Progress Bar -->
 <div class="progress-bar">
     <div class="progress-fill" id="progressFill"></div>
 </div>
 
 <div class="container">
     <div class="left-panel">
-        <!-- Header -->
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.9</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.10</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -670,22 +643,10 @@
         <div class="style-section" id="step1">
             <h2 class="section-title">Choose Your Style</h2>
             
-            <!-- Product Selector (shows available products) -->
-            <div class="product-selector" style="margin-bottom: 20px;">
+            <div class="product-selector">
                 <label class="input-label">Product Type</label>
                 <select id="productSelect" onchange="changeProduct(this.value)" style="width: 100%; background: #1a1a1a; border: 2px solid #333; padding: 12px; border-radius: 10px; color: white; font-size: 14px;">
                     <option value="tee">👕 T-Shirt - $24.99</option>
-                    <option value="hoodie">🧥 Hoodie - $44.99</option>
-                    <option value="sweatshirt">👔 Sweatshirt - $39.99</option>
-                    <option value="longsleeve">👕 Long Sleeve - $29.99</option>
-                    <option value="tank">🎽 Tank Top - $22.99</option>
-                    <option value="mug">☕ Mug - $14.99</option>
-                    <option value="sticker">⭐ Sticker - $3.99</option>
-                    <option value="poster">🖼️ Poster - $19.99</option>
-                    <option value="phone">📱 Phone Case - $16.99</option>
-                    <option value="tote">👜 Tote Bag - $18.99</option>
-                    <option value="pillow">🛋️ Pillow - $24.99</option>
-                    <option value="hat">🧢 Baseball Cap - $24.99</option>
                 </select>
                 <p style="font-size: 11px; color: #666; margin-top: 5px;">
                     Shape: <span id="shapeIndicator">Square (DTG)</span>
@@ -733,7 +694,7 @@
                 <button onclick="nextCard()">→</button>
             </div>
             
-            <!-- Desktop: Grid of All Styles -->
+            <!-- Desktop: Grid -->
             <div class="style-cards-desktop hidden">
                 <div class="style-card-desktop" data-style="A" onclick="selectStyle('A')">
                     <div class="card-mockup"></div>
@@ -811,7 +772,7 @@
             </div>
         </div>
         
-        <!-- STEP 4: Tweak (Optional) -->
+        <!-- STEP 4: Tweak -->
         <div class="tweak-section hidden" id="step4">
             <div class="tweak-toggle">
                 <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">
@@ -820,7 +781,6 @@
             </div>
             
             <div class="tweak-controls" id="tweakControls">
-                <!-- City Controls -->
                 <div class="control-group">
                     <div class="control-label">City Text</div>
                     <div class="button-labels">
@@ -829,16 +789,15 @@
                         <span>Arc</span>
                     </div>
                     <div class="button-grid-extended">
-                        <button class="tweak-btn size-minus" onclick="adjustCity('size', -1)">A-</button>
-                        <button class="tweak-btn size-plus" onclick="adjustCity('size', 1)">A+</button>
-                        <button class="tweak-btn pos-up" onclick="adjustCity('y', -1)">↑</button>
-                        <button class="tweak-btn pos-down" onclick="adjustCity('y', 1)">↓</button>
-                        <button class="tweak-btn arc-less" onclick="adjustCity('arc', -5)">⌒-</button>
-                        <button class="tweak-btn arc-more" onclick="adjustCity('arc', 5)">⌒+</button>
+                        <button class="tweak-btn" onclick="adjustCity('size', -1)">A-</button>
+                        <button class="tweak-btn" onclick="adjustCity('size', 1)">A+</button>
+                        <button class="tweak-btn" onclick="adjustCity('y', -1)">↑</button>
+                        <button class="tweak-btn" onclick="adjustCity('y', 1)">↓</button>
+                        <button class="tweak-btn" onclick="adjustCity('arc', -5)">⌒-</button>
+                        <button class="tweak-btn" onclick="adjustCity('arc', 5)">⌒+</button>
                     </div>
                 </div>
                 
-                <!-- Group Controls -->
                 <div class="control-group">
                     <div class="control-label">Group Text</div>
                     <div class="button-labels">
@@ -847,12 +806,12 @@
                         <span>Arc</span>
                     </div>
                     <div class="button-grid-extended">
-                        <button class="tweak-btn size-minus" onclick="adjustGroup('size', -1)">A-</button>
-                        <button class="tweak-btn size-plus" onclick="adjustGroup('size', 1)">A+</button>
-                        <button class="tweak-btn pos-up" onclick="adjustGroup('y', -1)">↑</button>
-                        <button class="tweak-btn pos-down" onclick="adjustGroup('y', 1)">↓</button>
-                        <button class="tweak-btn arc-less" onclick="adjustGroup('arc', -5)">⌒-</button>
-                        <button class="tweak-btn arc-more" onclick="adjustGroup('arc', 5)">⌒+</button>
+                        <button class="tweak-btn" onclick="adjustGroup('size', -1)">A-</button>
+                        <button class="tweak-btn" onclick="adjustGroup('size', 1)">A+</button>
+                        <button class="tweak-btn" onclick="adjustGroup('y', -1)">↑</button>
+                        <button class="tweak-btn" onclick="adjustGroup('y', 1)">↓</button>
+                        <button class="tweak-btn" onclick="adjustGroup('arc', -5)">⌒-</button>
+                        <button class="tweak-btn" onclick="adjustGroup('arc', 5)">⌒+</button>
                     </div>
                 </div>
                 
@@ -861,7 +820,6 @@
                 </button>
             </div>
             
-            <!-- Desktop: Advanced Sliders (hidden on mobile) -->
             <div class="advanced-controls hidden">
                 <div class="slider-group">
                     <div class="slider-label">
@@ -921,9 +879,8 @@
     </div>
 </div>
 
-<!-- Sticky CTA -->
 <div class="sticky-cta">
-    <button class="mega-btn" id="ctaButton" onclick="handleCTA()" disabled>
+    <button class="mega-btn" id="ctaButton" onclick="handleCheckout()" disabled>
         Select a Style to Continue
     </button>
 </div>
@@ -933,50 +890,15 @@
     let currentStep = 1;
     let currentCardIndex = 0;
     let selectedStyle = null;
-    let selectedProduct = 'tee'; // Default product
-    let selectedColor = 'White'; // Default color
-    let selectedSize = 'L'; // Default size
+    let selectedProduct = 'tee';
+    let selectedColor = 'White';
+    let selectedSize = 'L';
     let cityText = '';
     let groupText = '';
-    let availableMockups = {}; // Auto-detected mockups
+    let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     
-    // POD Product Catalog
     const PRODUCTS = {
-        // DTG/Apparel (Square shape - transparent backgrounds)
-        'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' },
-        'hoodie': { shape: 'Sq', name: 'Hoodie', price: 44.99, category: 'Apparel' },
-        'zip_hoodie': { shape: 'Sq', name: 'Zip Hoodie', price: 49.99, category: 'Apparel' },
-        'sweatshirt': { shape: 'Sq', name: 'Sweatshirt', price: 39.99, category: 'Apparel' },
-        'longsleeve': { shape: 'Sq', name: 'Long Sleeve', price: 29.99, category: 'Apparel' },
-        'tank': { shape: 'Sq', name: 'Tank Top', price: 22.99, category: 'Apparel' },
-        'youth_tee': { shape: 'Sq', name: 'Youth Tee', price: 19.99, category: 'Apparel' },
-        'polo': { shape: 'Sq', name: 'Polo Shirt', price: 34.99, category: 'Apparel' },
-        
-        // Drinkware (Oval shape - styled backgrounds)
-        'mug': { shape: 'Ov', name: 'Mug (11oz)', price: 14.99, category: 'Drinkware' },
-        'mug_travel': { shape: 'Ov', name: 'Travel Mug', price: 19.99, category: 'Drinkware' },
-        
-        // Stickers & Prints (Oval shape)
-        'sticker': { shape: 'Ov', name: 'Sticker', price: 3.99, category: 'Stickers' },
-        'sticker_sheet': { shape: 'Ov', name: 'Sticker Sheet', price: 8.99, category: 'Stickers' },
-        'poster': { shape: 'Ov', name: 'Poster', price: 19.99, category: 'Prints' },
-        'canvas': { shape: 'Ov', name: 'Canvas Print', price: 39.99, category: 'Prints' },
-        
-        // Accessories (Oval shape)
-        'phone': { shape: 'Ov', name: 'Phone Case', price: 16.99, category: 'Accessories' },
-        'tote': { shape: 'Ov', name: 'Tote Bag', price: 18.99, category: 'Accessories' },
-        'pillow': { shape: 'Ov', name: 'Throw Pillow', price: 24.99, category: 'Home' },
-        'coaster': { shape: 'Ov', name: 'Coaster Set', price: 12.99, category: 'Home' },
-        'magnet': { shape: 'Ov', name: 'Magnet', price: 4.99, category: 'Accessories' },
-        'ornament': { shape: 'Ov', name: 'Ornament', price: 14.99, category: 'Seasonal' },
-        'hat': { shape: 'Ov', name: 'Baseball Cap', price: 24.99, category: 'Accessories' },
-        'patch': { shape: 'Ov', name: 'Patch', price: 7.99, category: 'Accessories' },
-        'flag': { shape: 'Ov', name: 'Garden Flag', price: 22.99, category: 'Home' },
-        'doormat': { shape: 'Ov', name: 'Doormat', price: 34.99, category: 'Home' },
-        'blanket': { shape: 'Ov', name: 'Fleece Blanket', price: 44.99, category: 'Home' },
-        'towel': { shape: 'Ov', name: 'Beach Towel', price: 29.99, category: 'Home' },
-        'notebook': { shape: 'Ov', name: 'Notebook', price: 11.99, category: 'Stationery' },
-        'mousepad': { shape: 'Ov', name: 'Mouse Pad', price: 12.99, category: 'Accessories' }
+        'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' }
     };
     
     const STYLES = {
@@ -986,71 +908,48 @@
         D: { font: "Cinzel", color: "#0F2A1B", weight: "700", name: "Outdoors" }
     };
     
-    // Generate mockup URL based on naming convention
+    // Shopify Integration
+    const SHOPIFY_CONFIG = {
+        backendUrl: 'https://usa250-backend.vercel.app/api/create-draft-order',
+        productId: '8581802721430'
+    };
+    
+    const VARIANT_MAP = {
+        'Navy-M': '46056445444246',
+        'Navy-L': '46056445477014',
+        'Navy-XL': '46056445509782',
+        'Navy-2XL': '46056445542550',
+        'Navy-S': '46056445575318',
+        'Black-M': '46056445608086',
+        'Black-L': '46056445640854',
+        'Black-XL': '46056445673622',
+        'Black-2XL': '46056445706390',
+        'Black-S': '46056445739158',
+        'Gray-M': '46056445771926',
+        'Gray-L': '46056445804694',
+        'Gray-XL': '46056445837462',
+        'Gray-2XL': '46056445870230',
+        'Gray-S': '46056445902998',
+        'White-M': '46056445935766',
+        'White-L': '46056445968534',
+        'White-XL': '46056446001302',
+        'White-2XL': '46056446034070',
+        'White-S': '46056446066838'
+    };
+    
     function getMockupUrl(style, product) {
         const shape = PRODUCTS[product].shape;
         return `mockups/Style_${style}_${shape}_${product}.png`;
     }
     
-    // Mockups load on-demand with automatic fallback - no pre-checking needed
-    
-    // Skip detection - just load mockups and handle errors gracefully
-    async function detectAvailableMockups() {
-        console.log('Mockups will load on-demand with fallback to placeholder');
-        // No detection needed - just try to load and fallback if missing
-    }
-    
-    // Initialize
-    function init() {
-        updateProgress();
-        updateStepIndicator();
-        
-        // Skip mockup detection - they'll load on-demand
-        detectAvailableMockups();
-        
-        // Populate product selector
-        populateProductSelector();
-        
-        // Initialize mockups for all styles
-        initializeMockups();
-        
-        // Show desktop grid on larger screens
-        if (window.innerWidth >= 768) {
-            document.querySelector('.style-cards').classList.add('hidden');
-            document.querySelector('.style-cards-desktop').classList.remove('hidden');
-            document.querySelector('.advanced-controls').classList.remove('hidden');
-        }
-    }
-    
-    // Populate product selector with available products
-    function populateProductSelector() {
-        // Group products by category
-        const categories = {};
-        
-        Object.entries(PRODUCTS).forEach(([key, product]) => {
-            if (!categories[product.category]) {
-                categories[product.category] = [];
-            }
-            categories[product.category].push({ key, ...product });
-        });
-        
-        // Create product selector HTML (will add this to UI later)
-        console.log('Product categories:', categories);
-    }
-    
-    // Load mockup with automatic fallback
     function loadMockup(imgElement, style, product) {
         const primaryUrl = getMockupUrl(style, product);
-        
         imgElement.src = primaryUrl;
         imgElement.alt = `${STYLES[style].name} - ${PRODUCTS[product].name}`;
         
         imgElement.onerror = () => {
-            // Try placeholder
             imgElement.src = 'mockups/placeholder.png';
-            
             imgElement.onerror = () => {
-                // Ultimate fallback - solid color based on style
                 const colors = { A: '#1a3a5c', B: '#0a0a0a', C: '#5c1a1a', D: '#1a3a1a' };
                 imgElement.style.background = colors[style] || '#333';
                 imgElement.alt = `${STYLES[style].name} Style Preview`;
@@ -1058,14 +957,10 @@
         };
     }
     
-    // Initialize mockups for all style cards
     function initializeMockups() {
         const styles = ['A', 'B', 'C', 'D'];
         
         styles.forEach(style => {
-            const mockupUrl = getMockupUrl(style, selectedProduct);
-            
-            // Update mobile cards
             const mobileCard = document.querySelector(`.style-card[data-style="${style}"] .card-mockup`);
             if (mobileCard) {
                 const img = document.createElement('img');
@@ -1077,7 +972,6 @@
                 mobileCard.appendChild(img);
             }
             
-            // Update desktop cards
             const desktopCard = document.querySelector(`.style-card-desktop[data-style="${style}"] .card-mockup`);
             if (desktopCard) {
                 const img = document.createElement('img');
@@ -1091,7 +985,6 @@
         });
     }
     
-    // Card navigation (mobile)
     function nextCard() {
         const cards = document.querySelectorAll('.style-card');
         cards[currentCardIndex].classList.remove('active');
@@ -1119,76 +1012,54 @@
         cards[currentCardIndex].classList.add('active');
     }
     
-    // Change product (updates mockups and template)
     function changeProduct(productKey) {
         selectedProduct = productKey;
         const product = PRODUCTS[productKey];
-        
-        // Update shape indicator
         const shapeText = product.shape === 'Sq' ? 'Square (DTG)' : 'Oval (Merch)';
         document.getElementById('shapeIndicator').textContent = shapeText;
-        
-        // Reload mockups for all styles
         initializeMockups();
-        
-        // If style already selected, reload template for new shape
         if (selectedStyle) {
             loadTemplate(selectedStyle, product.shape);
         }
     }
     
-    // Step 1: Select Style
     function selectStyle(style) {
         selectedStyle = style;
         
-        // Visual feedback
         document.querySelectorAll('.style-card-desktop').forEach(card => {
             card.classList.remove('selected');
         });
         document.querySelector(`[data-style="${style}"]`)?.classList.add('selected');
         
-        // Update SVG style
         const styleConfig = STYLES[style];
         document.getElementById('cityText').setAttribute('fill', styleConfig.color);
         document.getElementById('cityText').setAttribute('font-family', styleConfig.font);
         document.getElementById('groupText').setAttribute('fill', styleConfig.color);
         document.getElementById('groupText').setAttribute('font-family', styleConfig.font);
         
-        // Load template for current product's shape
         const shape = PRODUCTS[selectedProduct].shape;
         loadTemplate(style, shape);
         
-        // Move to step 2
         currentStep = 2;
         showStep(2);
     }
     
-    // Load template (SVG + JSON) for style/shape combo
-    // Store baseline values globally
-    let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
-    
     async function loadTemplate(style, shape) {
         try {
-            console.log(`Loading template: Style_${style}_${shape}`);
-            
             const templatePath = `templates/Style_${style}_${shape}.svg`;
             const jsonPath = `templates/Style_${style}_${shape}.json`;
             
-            // Load template as background image
             const bgImage = document.getElementById('bgImage');
             if (bgImage) {
                 bgImage.setAttribute('href', templatePath);
             }
             
-            // Load JSON baseline
             const jsonResponse = await fetch(jsonPath);
             let baseline = null;
             if (jsonResponse.ok) {
                 baseline = await jsonResponse.json();
-                console.log(`✓ Loaded baseline:`, baseline);
             }
             
-            // Apply baseline slider values DIRECTLY (no scaling!)
             if (baseline && baseline.sliders) {
                 const s = baseline.sliders;
                 if (s.cityY) document.getElementById('cityYSlider').value = s.cityY;
@@ -1196,19 +1067,13 @@
                 if (s.groupY) document.getElementById('groupYSlider').value = s.groupY;
                 if (s.gSize) document.getElementById('groupSizeSlider').value = s.gSize;
                 
-                // Store arch and tracking values
                 baselineArch.cityArch = parseInt(s.archIntensity) || 64;
                 baselineArch.groupArch = parseInt(s.gArch) || 64;
                 baselineArch.cityTrack = parseInt(s.cityTrack) || 0;
                 baselineArch.groupTrack = parseInt(s.gTrack) || 2;
-                
-                console.log(`✓ Applied baseline values directly (no scaling)`);
             }
             
-            // Update preview
             updatePreview();
-            
-            console.log(`✓ Template loaded: ${style}_${shape}`);
             
         } catch (error) {
             console.error('Template load failed:', error);
@@ -1216,17 +1081,13 @@
         }
     }
     
-    // Step 2: Location
     function useGeolocation() {
-        // Simulate geolocation (would use real API in production)
         useCity('BRANTFORD, ONTARIO');
     }
     
     function useCity(city) {
         document.getElementById('cityInput').value = city;
         updateCity();
-        
-        // Auto-advance after short delay
         setTimeout(() => {
             currentStep = 3;
             showStep(3);
@@ -1237,20 +1098,15 @@
         cityText = document.getElementById('cityInput').value.toUpperCase();
         const remaining = 50 - cityText.length;
         document.getElementById('cityCounter').textContent = remaining;
-        
         updatePreview();
-        
         if (cityText.length > 0 && currentStep === 2) {
             updateCTA('Continue →');
         }
     }
     
-    // Step 3: Group
     function useGroup(group) {
         document.getElementById('groupInput').value = group;
         updateGroup();
-        
-        // Auto-advance to tweak/checkout
         setTimeout(() => {
             currentStep = 4;
             showStep(4);
@@ -1261,15 +1117,12 @@
         groupText = document.getElementById('groupInput').value.toUpperCase();
         const remaining = 35 - groupText.length;
         document.getElementById('groupCounter').textContent = remaining;
-        
         updatePreview();
-        
         if (groupText.length > 0 && currentStep === 3) {
             updateCTA('Continue →');
         }
     }
     
-    // Step 4: Tweak
     function toggleTweak() {
         const controls = document.getElementById('tweakControls');
         const btn = document.getElementById('tweakToggle');
@@ -1278,7 +1131,6 @@
     }
     
     function adjustCity(property, delta) {
-        // Simple nudge adjustments
         if (property === 'size') {
             let current = parseInt(document.getElementById('citySizeSlider')?.value || 10);
             current = Math.max(10, Math.min(80, current + delta));
@@ -1309,25 +1161,20 @@
     }
     
     function updateSlider(property, value) {
-        // Update slider and value display
         const slider = document.getElementById(property + 'Slider');
         const valueDisplay = document.getElementById(property + 'Val');
-        
         if (slider) slider.value = value;
         if (valueDisplay) valueDisplay.textContent = value;
-        
         updatePreview();
     }
     
     function resetDesign() {
-        // Reset to defaults
         updateSlider('citySize', 10);
         updateSlider('cityY', 223);
         updateSlider('groupSize', 8);
         updateSlider('groupY', 282);
     }
     
-    // Preview update
     function formatText(text, baseSize) {
         if (!text) return '';
         const words = text.split(/\s+/).filter(w => w.length > 0);
@@ -1348,7 +1195,6 @@
         const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
         const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
         
-        // Update paths with admin's EXACT formula
         const pathTop = document.getElementById('pathTop');
         const pathMid = document.getElementById('pathMid');
         
@@ -1357,7 +1203,6 @@
             pathMid.setAttribute('d', `M 20,${groupY} A 230,${baselineArch.groupArch} 0 0,1 480,${groupY}`);
         }
         
-        // Update text content and styling
         const cityContainer = document.querySelector('#cityText');
         const groupContainer = document.querySelector('#groupText');
         
@@ -1388,20 +1233,13 @@
                 groupTextPath.innerHTML = formatText(groupText, groupSize);
             }
         }
-        
-        console.log(`✓ Preview updated: cityY=${cityY}, groupY=${groupY}`);
     }
     
-    // Navigation
     function showStep(step) {
-        // Hide all steps
         for (let i = 1; i <= 4; i++) {
             document.getElementById(`step${i}`)?.classList.add('hidden');
         }
-        
-        // Show current step
         document.getElementById(`step${step}`)?.classList.remove('hidden');
-        
         updateProgress();
         updateStepIndicator();
         updateCTA();
@@ -1413,12 +1251,7 @@
     }
     
     function updateStepIndicator() {
-        const steps = [
-            'Pick Your Style',
-            'Your Location',
-            'Your Group',
-            'Review & Checkout'
-        ];
+        const steps = ['Pick Your Style', 'Your Location', 'Your Group', 'Review & Checkout'];
         document.getElementById('stepIndicator').textContent = `Step ${currentStep} of 4: ${steps[currentStep - 1]}`;
     }
     
@@ -1438,45 +1271,35 @@
             btn.textContent = groupText ? 'Continue →' : 'Enter Your Group Name';
             btn.disabled = !groupText;
         } else if (currentStep === 4) {
-            btn.textContent = 'Add to Cart - $29.99 ✨';
+            btn.textContent = 'Continue to Checkout →';
             btn.disabled = false;
         }
     }
     
     async function generate9000pxPNG() {
         try {
-            // Show loading
-            const ctaBtn = document.getElementById('ctaButton');
-            ctaBtn.disabled = true;
-            ctaBtn.textContent = 'Generating High-Res PNG...';
-            
-            // Create high-res canvas
             const canvas = document.createElement('canvas');
-            const scale = 18;  // 500×400 → 9000×7200
-            canvas.width = 500 * scale;   // 9000px
-            canvas.height = 400 * scale;  // 7200px
+            const scale = 18;
+            canvas.width = 500 * scale;
+            canvas.height = 400 * scale;
             const ctx = canvas.getContext('2d');
             
-            // Get current design values
             const style = STYLES[selectedStyle];
             const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
             const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
             const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
             const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
             
-            // Load template as background
-            const templatePath = `templates/Style_${selectedStyle}_${selectedProduct === 'tee' ? 'Sq' : 'Ov'}.svg`;
+            const templatePath = `templates/Style_${selectedStyle}_${PRODUCTS[selectedProduct].shape}.svg`;
             const bgImage = await loadImage(templatePath);
             ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
             
-            // Create high-res SVG for text overlay
             const svgNS = 'http://www.w3.org/2000/svg';
             const svg = document.createElementNS(svgNS, 'svg');
             svg.setAttribute('width', canvas.width);
             svg.setAttribute('height', canvas.height);
             svg.setAttribute('viewBox', `0 0 ${canvas.width} ${canvas.height}`);
             
-            // Add defs with paths
             const defs = document.createElementNS(svgNS, 'defs');
             const cityPath = document.createElementNS(svgNS, 'path');
             cityPath.setAttribute('id', 'exportCityPath');
@@ -1488,7 +1311,6 @@
             defs.appendChild(groupPath);
             svg.appendChild(defs);
             
-            // Add city text
             const cityTextEl = document.createElementNS(svgNS, 'text');
             cityTextEl.setAttribute('text-anchor', 'middle');
             cityTextEl.setAttribute('fill', style.color);
@@ -1503,7 +1325,6 @@
             cityTextEl.appendChild(cityTextPath);
             svg.appendChild(cityTextEl);
             
-            // Add group text
             const groupTextEl = document.createElementNS(svgNS, 'text');
             groupTextEl.setAttribute('text-anchor', 'middle');
             groupTextEl.setAttribute('fill', style.color);
@@ -1518,7 +1339,6 @@
             groupTextEl.appendChild(groupTextPath);
             svg.appendChild(groupTextEl);
             
-            // Convert SVG to image and overlay on canvas
             const svgData = new XMLSerializer().serializeToString(svg);
             const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
             const svgUrl = URL.createObjectURL(svgBlob);
@@ -1526,20 +1346,14 @@
             ctx.drawImage(textImage, 0, 0);
             URL.revokeObjectURL(svgUrl);
             
-            // Convert to PNG blob
             return new Promise((resolve) => {
                 canvas.toBlob((blob) => {
-                    ctaBtn.textContent = 'Preparing Checkout...';
                     resolve(blob);
                 }, 'image/png', 0.95);
             });
             
         } catch (error) {
             console.error('PNG generation failed:', error);
-            alert('Failed to generate design. Please try again.');
-            const ctaBtn = document.getElementById('ctaButton');
-            ctaBtn.disabled = false;
-            ctaBtn.textContent = 'Continue to Checkout →';
             return null;
         }
     }
@@ -1553,155 +1367,107 @@
         });
     }
     
-    async function handleCTA() {
+    async function handleCheckout() {
         if (currentStep < 4) {
             currentStep++;
             showStep(currentStep);
         } else {
-            // Generate 9000px PNG
-            const pngBlob = await generate9000pxPNG();
-            
-            if (pngBlob) {
-                // TODO: Upload to server/Gelato
-                // For now, trigger download for testing
-                const url = URL.createObjectURL(pngBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `America250_${selectedStyle}_${cityText.replace(/[^a-zA-Z0-9]/g, '_')}_9000px.png`;
-                a.click();
-                URL.revokeObjectURL(url);
-                
-                // Reset button
+            try {
                 const ctaBtn = document.getElementById('ctaButton');
-                ctaBtn.textContent = 'Design Downloaded! Order Now →';
+                ctaBtn.disabled = true;
+                ctaBtn.textContent = 'Generating design...';
                 
-                setTimeout(() => {
-                    alert('Next: Upload to Gelato/Shopify and proceed to checkout');
-                }, 1000);
+                const pngBlob = await generate9000pxPNG();
+                
+                if (!pngBlob) {
+                    throw new Error('PNG generation failed');
+                }
+                
+                ctaBtn.textContent = 'Uploading design...';
+                const timestamp = Date.now();
+                const filename = `USA250_${selectedStyle}_${timestamp}`;
+                
+                const formData = new FormData();
+                formData.append('file', pngBlob);
+                formData.append('upload_preset', 'america250');
+                formData.append('folder', 'america250');
+                formData.append('public_id', filename);
+                
+                const cloudinaryResponse = await fetch(
+                    `https://api.cloudinary.com/v1_1/dqab444bd/image/upload`,
+                    {
+                        method: 'POST',
+                        body: formData
+                    }
+                );
+                
+                if (!cloudinaryResponse.ok) {
+                    throw new Error('Cloudinary upload failed');
+                }
+                
+                const cloudinaryData = await cloudinaryResponse.json();
+                const designUrl = cloudinaryData.secure_url;
+                
+                console.log('✓ Design uploaded:', designUrl);
+                
+                ctaBtn.textContent = 'Creating order...';
+                
+                const variantKey = `${selectedColor}-${selectedSize}`;
+                const variantId = VARIANT_MAP[variantKey];
+                
+                if (!variantId) {
+                    throw new Error(`No variant found for ${variantKey}`);
+                }
+                
+                const orderResponse = await fetch(SHOPIFY_CONFIG.backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        designUrl: designUrl,
+                        style: selectedStyle,
+                        cityText: cityText,
+                        groupText: groupText,
+                        color: selectedColor,
+                        size: selectedSize,
+                        variantId: variantId
+                    })
+                });
+                
+                const orderData = await orderResponse.json();
+                
+                if (orderData.success) {
+                    console.log('✓ Draft order created:', orderData.draftOrderId);
+                    window.location.href = orderData.checkoutUrl;
+                } else {
+                    throw new Error(orderData.error || 'Failed to create order');
+                }
+                
+            } catch (error) {
+                console.error('Checkout error:', error);
+                alert('Something went wrong: ' + error.message);
+                
+                const ctaBtn = document.getElementById('ctaButton');
+                ctaBtn.disabled = false;
+                ctaBtn.textContent = 'Try Again';
             }
         }
     }
     
-    // Initialize on load
-    window.addEventListener('load', init);
-    // ============================================
-// SHOPIFY INTEGRATION
-// ============================================
-
-const SHOPIFY_CONFIG = {
-    backendUrl: 'https://usa250-backend.vercel.app/api/create-draft-order',
-    productId: '8581802721430'
-};
-
-// Variant ID mapping (Color + Size → Shopify Variant ID)
-const VARIANT_MAP = {
-    'Navy-M': '46056445444246',
-    'Navy-L': '46056445477014',
-    'Navy-XL': '46056445509782',
-    'Navy-2XL': '46056445542550',
-    'Navy-S': '46056445575318',
-    'Black-M': '46056445608086',
-    'Black-L': '46056445640854',
-    'Black-XL': '46056445673622',
-    'Black-2XL': '46056445706390',
-    'Black-S': '46056445739158',
-    'Gray-M': '46056445771926',
-    'Gray-L': '46056445804694',
-    'Gray-XL': '46056445837462',
-    'Gray-2XL': '46056445870230',
-    'Gray-S': '46056445902998',
-    'White-M': '46056445935766',
-    'White-L': '46056445968534',
-    'White-XL': '46056446001302',
-    'White-2XL': '46056446034070',
-    'White-S': '46056446066838'
-};
-
-// Update handleCheckout function
-async function handleCheckout() {
-    if (currentStep < 4) {
-        currentStep++;
-        showStep(currentStep);
-    } else {
-        try {
-            const ctaBtn = document.getElementById('ctaButton');
-            ctaBtn.disabled = true;
-            ctaBtn.textContent = 'Generating design...';
-            
-            // 1. Generate PNG
-            const pngBlob = await generate9000pxPNG();
-            
-            // 2. Upload to Cloudinary
-            ctaBtn.textContent = 'Uploading design...';
-            const timestamp = Date.now();
-            const filename = `USA250_TEMP_${selectedStyle}_${timestamp}`;
-            
-            const formData = new FormData();
-            formData.append('file', pngBlob);
-            formData.append('upload_preset', 'america250');
-            formData.append('folder', 'america250');
-            formData.append('public_id', filename);
-            
-            const cloudinaryResponse = await fetch(
-                `https://api.cloudinary.com/v1_1/dqab444bd/image/upload`,
-                {
-                    method: 'POST',
-                    body: formData
-                }
-            );
-            
-            if (!cloudinaryResponse.ok) {
-                throw new Error('Cloudinary upload failed');
-            }
-            
-            const cloudinaryData = await cloudinaryResponse.json();
-            const designUrl = cloudinaryData.secure_url;
-            
-            // 3. Create Shopify draft order
-            ctaBtn.textContent = 'Creating order...';
-            
-            const variantKey = `${selectedColor}-${selectedSize}`;
-            const variantId = VARIANT_MAP[variantKey];
-            
-            if (!variantId) {
-                throw new Error(`No variant found for ${variantKey}`);
-            }
-            
-            const orderResponse = await fetch(SHOPIFY_CONFIG.backendUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    designUrl: designUrl,
-                    style: selectedStyle,
-                    cityText: cityText,
-                    groupText: groupText,
-                    color: selectedColor,
-                    size: selectedSize,
-                    variantId: variantId
-                })
-            });
-            
-            const orderData = await orderResponse.json();
-            
-            if (orderData.success) {
-                // Redirect to Shopify checkout
-                window.location.href = orderData.checkoutUrl;
-            } else {
-                throw new Error(orderData.error || 'Failed to create order');
-            }
-            
-        } catch (error) {
-            console.error('Checkout error:', error);
-            alert('Something went wrong. Please try again.');
-            
-            const ctaBtn = document.getElementById('ctaButton');
-            ctaBtn.disabled = false;
-            ctaBtn.textContent = 'Continue to Checkout →';
+    function init() {
+        updateProgress();
+        updateStepIndicator();
+        initializeMockups();
+        
+        if (window.innerWidth >= 768) {
+            document.querySelector('.style-cards').classList.add('hidden');
+            document.querySelector('.style-cards-desktop').classList.remove('hidden');
+            document.querySelector('.advanced-controls').classList.remove('hidden');
         }
     }
-}
+    
+    window.addEventListener('load', init);
 </script>
 
 </body>
