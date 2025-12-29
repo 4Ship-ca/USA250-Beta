@@ -1034,7 +1034,29 @@
             categories[product.category].push({ key, ...product });
         });
         
-     
+        // Create product selector HTML (will add this to UI later)
+        console.log('Product categories:', categories);
+    }
+    
+    // Load mockup with automatic fallback
+    function loadMockup(imgElement, style, product) {
+        const primaryUrl = getMockupUrl(style, product);
+        
+        imgElement.src = primaryUrl;
+        imgElement.alt = `${STYLES[style].name} - ${PRODUCTS[product].name}`;
+        
+        imgElement.onerror = () => {
+            // Try placeholder
+            imgElement.src = 'mockups/placeholder.png';
+            
+            imgElement.onerror = () => {
+                // Ultimate fallback - solid color based on style
+                const colors = { A: '#1a3a5c', B: '#0a0a0a', C: '#5c1a1a', D: '#1a3a1a' };
+                imgElement.style.background = colors[style] || '#333';
+                imgElement.alt = `${STYLES[style].name} Style Preview`;
+            };
+        };
+    }
     
     // Initialize mockups for all style cards
     function initializeMockups() {
