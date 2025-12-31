@@ -1468,6 +1468,105 @@
     }
     
     window.addEventListener('load', init);
+
+    // Final checkout function for v1.11 frontend
+// Add this to your index.html or main.js
+
+async function handleCheckout() {
+    // Validate selections
+    if (!selectedStyle || !selectedProduct || !selectedColor || !selectedSize) {
+        alert('Please select all options');
+        return;
+    }
+    
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    checkoutBtn.textContent = 'Generating design...';
+    checkoutBtn.disabled = true;
+    
+    try {
+        // 1. Generate PNG from canvas
+        const canvas = document.getElementById('canvas');
+        const dataUrl = canvas.toDataURL('image/png');
+        const blob = await (await fetch(dataUrl)).blob();
+        
+        console.log('Design generated, uploading to Cloudinary...');
+        
+        // 2. Upload to Cloudinary
+        const formData = new FormData();
+        formData.append('file', blob);
+        formData.append('upload_preset', 'america250');
+        
+        const cloudinaryResponse = await fetch(
+            'https://api.cloudinary.com/v1_1/dqab444bd/image/upload',
+            {
+                method: 'POST',
+                body: formData
+            }
+        );
+        
+        if (!cloudinaryResponse.ok) {
+            throw new Error('Cloudinary upload failed');
+        }
+        
+        const cloudinaryData = await cloudinaryResponse.json();
+        const designUrl = cloudinaryData.secure_url;
+        
+        console.log('Design uploaded:', designUrl);
+        
+        // 3. Map product selection to Shopify variant
+        const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
+        
+        // TEMPORARY: For now, use placeholder variant ID
+        // You'll replace this with your actual variant mapping
+        const TEMP_VARIANT_ID = '48589506592062'; // Replace with your actual variant ID
+        
+        // Get Gelato product UID
+        const GELATO_UIDS = {
+            'tee-white-s': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000',
+            'tee-white-m': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000',
+            'tee-white-l': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000',
+            'tee-white-xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000',
+            'tee-white-2xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000',
+            'tee-black-s': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000',
+            'tee-black-m': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000',
+            'tee-black-l': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000',
+            'tee-black-xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000',
+            'tee-black-2xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000',
+            'tee-navy-s': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000',
+            'tee-navy-m': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000',
+            'tee-navy-l': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000',
+            'tee-navy-xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000',
+            'tee-navy-2xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000'
+        };
+        
+        const gelatoUid = GELATO_UIDS[variantKey];
+        if (!gelatoUid) {
+            throw new Error(`No Gelato product for: ${variantKey}`);
+        }
+        
+        // 4. Build Shopify cart URL
+        const shopifyUrl = new URL(`https://shop-4ship-ca.myshopify.com/cart/${TEMP_VARIANT_ID}:1`);
+        
+        // Add custom attributes (these get passed to webhook)
+        shopifyUrl.searchParams.append('attributes[design_url]', designUrl);
+        shopifyUrl.searchParams.append('attributes[style]', selectedStyle);
+        shopifyUrl.searchParams.append('attributes[city]', document.getElementById('cityInput').value);
+        shopifyUrl.searchParams.append('attributes[group]', document.getElementById('groupInput').value || '');
+        shopifyUrl.searchParams.append('attributes[gelato_product]', gelatoUid);
+        shopifyUrl.searchParams.append('attributes[gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
+        
+        console.log('Redirecting to Shopify:', shopifyUrl.toString());
+        
+        // 5. Redirect to Shopify
+        window.location.href = shopifyUrl.toString();
+        
+    } catch (error) {
+        console.error('Checkout error:', error);
+        alert('Checkout failed: ' + error.message);
+        checkoutBtn.textContent = 'Checkout';
+        checkoutBtn.disabled = false;
+    }
+}
 </script>
 
 </body>
