@@ -1,21 +1,9 @@
 <!--
-USA250 v1.14.2 - Clean Navigation Build
+USA250 v1.16 - Complete Feature Merge
+Base: Working v1.9 layout
+Added: Color/Size selectors, Zoom toggle
+Navigation: Simple 2-step flow
 Last Updated: January 1, 2026
-DEBUGGING: Console logs enabled
--->
-<!-- 
-USA250 v1.13.1 - Complete Color/Size Selector Integration + SVG Fix
-Last Updated: January 1, 2026 (v1.13.1 - Fixed color selectors, zoom behavior, inputs)
-
-NEW FEATURES:
-- Color selector (filtered by style)
-- Size selector (S/M/L/XL/2XL)
-- Zoom toggle (150% magnification)
-- Smart color availability per style
-- Fixed SVG-to-PNG with base64 embedding
-
-Store: https://shop.4ship.ca
-Backend: https://usa250-backend-gr41.vercel.app
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -339,209 +327,6 @@ Backend: https://usa250-backend-gr41.vercel.app
             align-items: center;
             justify-content: center;
         }
-
-/* Add this CSS after the existing preview-section styles */
-
-/* FIXED CSS - Replace selector styles section */
-
-.preview-title {
-    font-size: 14px;
-    color: var(--gold);
-    margin-bottom: 15px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* Preview wrapper - Fixed size container */
-.preview-wrapper {
-    position: relative;
-    background: #f5f5f5;
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 20px;
-    overflow: hidden; /* Crop when zoomed */
-}
-
-/* Preview canvas - zooms within wrapper */
-.preview-canvas {
-    width: 100%;
-    transition: transform 0.3s ease;
-    transform-origin: center center;
-}
-
-.preview-canvas.zoomed {
-    transform: scale(1.5);
-}
-
-/* Zoom button - Bottom right corner */
-.zoom-toggle {
-    position: absolute;
-    bottom: 15px;
-    right: 15px;
-    background: rgba(10, 10, 10, 0.8);
-    border: 2px solid var(--border);
-    border-radius: 8px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--gold);
-    transition: all 0.3s ease;
-    z-index: 10;
-    backdrop-filter: blur(10px);
-}
-
-.zoom-toggle:hover {
-    background: rgba(10, 10, 10, 0.95);
-    border-color: var(--gold);
-    transform: scale(1.1);
-}
-
-.zoom-toggle.active {
-    background: var(--gold);
-    color: var(--bg);
-    border-color: var(--gold);
-}
-
-#previewSVG {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-
-/* SELECTOR SECTIONS */
-.selector-section {
-    margin-bottom: 20px;
-}
-
-.selector-label {
-    font-size: 14px;
-    color: var(--gold);
-    margin-bottom: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-/* COLOR OPTIONS */
-.color-options {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    min-height: 50px; /* Prevent layout shift when colors load */
-}
-
-.color-options:empty::after {
-    content: 'Select a style to see available colors';
-    color: #666;
-    font-size: 13px;
-    font-style: italic;
-}
-
-.color-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 3px solid var(--border);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    background: var(--panel);
-}
-
-.color-btn:hover {
-    transform: scale(1.1);
-    border-color: var(--gold);
-}
-
-.color-btn.active {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
-}
-
-.color-btn::before {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border-radius: 50%;
-}
-
-.color-btn[data-color="Black"]::before { background: #000; }
-.color-btn[data-color="White"]::before { background: #fff; border: 1px solid #ddd; }
-.color-btn[data-color="Navy"]::before { background: #001f3f; }
-.color-btn[data-color="Gray"]::before { background: #808080; }
-
-.color-btn .color-name {
-    position: absolute;
-    bottom: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 11px;
-    color: #888;
-    white-space: nowrap;
-}
-
-.color-btn.active .color-name {
-    color: var(--gold);
-    font-weight: 700;
-}
-
-/* SIZE OPTIONS */
-.size-options {
-    display: flex;
-    gap: 8px;
-}
-
-.size-btn {
-    flex: 1;
-    padding: 12px;
-    background: var(--panel);
-    border: 2px solid var(--border);
-    border-radius: 8px;
-    color: white;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.size-btn:hover {
-    background: var(--border);
-    border-color: var(--gold);
-}
-
-.size-btn.active {
-    background: var(--gold);
-    border-color: var(--gold);
-    color: var(--bg);
-}
-
-/* Mobile responsive */
-@media (max-width: 768px) {
-    .color-options {
-        justify-content: center;
-    }
-    
-    .size-options {
-        flex-wrap: wrap;
-    }
-    
-    .size-btn {
-        flex: 0 0 calc(33.333% - 6px);
-    }
-    
-    .zoom-toggle {
-        bottom: 10px;
-        right: 10px;
-        width: 36px;
-        height: 36px;
-    }
-}
-
-
         
         #previewSVG {
             width: 100%;
@@ -846,7 +631,181 @@ Backend: https://usa250-backend-gr41.vercel.app
         .product-selector {
             margin-bottom: 20px;
         }
-    </style>
+    
+/* SELECTOR SECTIONS */
+.selector-section {
+    margin-bottom: 20px;
+}
+
+.selector-label {
+    font-size: 14px;
+    color: var(--gold);
+    margin-bottom: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* COLOR OPTIONS */
+.color-options {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    min-height: 50px; /* Prevent layout shift when colors load */
+}
+
+.color-options:empty::after {
+    content: 'Select a style to see available colors';
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.color-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid var(--border);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    background: var(--panel);
+}
+
+.color-btn:hover {
+    transform: scale(1.1);
+    border-color: var(--gold);
+}
+
+.color-btn.active {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+}
+
+.color-btn::before {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border-radius: 50%;
+}
+
+.color-btn[data-color="Black"]::before { background: #000; }
+.color-btn[data-color="White"]::before { background: #fff; border: 1px solid #ddd; }
+.color-btn[data-color="Navy"]::before { background: #001f3f; }
+.color-btn[data-color="Gray"]::before { background: #808080; }
+
+.color-btn .color-name {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #888;
+    white-space: nowrap;
+}
+
+.color-btn.active .color-name {
+    color: var(--gold);
+    font-weight: 700;
+}
+
+/* SIZE OPTIONS */
+.size-options {
+    display: flex;
+    gap: 8px;
+}
+
+.size-btn {
+    flex: 1;
+    padding: 12px;
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    color: white;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.size-btn:hover {
+    background: var(--border);
+    border-color: var(--gold);
+}
+
+.size-btn.active {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: var(--bg);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .color-options {
+        justify-content: center;
+    }
+    
+    .size-options {
+        flex-wrap: wrap;
+    }
+    
+    .size-btn {
+        fle
+
+.preview-wrapper {
+    position: relative;
+    background: #f5f5f5;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    overflow: hidden; /* Crop when zoomed */
+}
+
+/* Preview canvas - zooms within wrapper */
+.preview-canvas {
+    width: 100%;
+    transition: transform 0.3s ease;
+    transform-origin: center center;
+}
+
+.preview-canvas.zoomed {
+    transform: scale(1.5);
+}
+
+/* Zoom button - Bottom right corner */
+.zoom-toggle {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background: rgba(10, 10, 10, 0.8);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--gold);
+    transition: all 0.3s ease;
+    z-index: 10;
+    backdrop-filter: blur(10px);
+}
+
+.zoom-toggle:hover {
+    background: rgba(10, 10, 10, 0.95);
+    border-color: var(--gold);
+    transform: scale(1.1);
+}
+
+.zoom-toggle.active {
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold);
+}
+
+
+</style>
 </head>
 <body>
 
@@ -857,7 +816,7 @@ Backend: https://usa250-backend-gr41.vercel.app
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.14.2</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.16</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1079,16 +1038,11 @@ Backend: https://usa250-backend-gr41.vercel.app
     </div>
     
     <!-- Right Panel: Preview -->
-    <!-- Replace the right panel section (around line 860) with this -->
-
-<!-- FIXED Right Panel - Replace entire right-panel div -->
-
-<div class="right-panel">
-    <div class="preview-section">
-        <div class="preview-title">Live Preview</div>
-        
-        <div class="preview-wrapper">
-            <div class="preview-canvas" id="previewCanvas">
+    <div class="right-panel">
+        <div class="preview-section">
+            <div class="preview-title">Live Preview</div>
+            <div class="preview-wrapper">
+            <div class="preview-canvas">
                 <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
@@ -1114,11 +1068,12 @@ Backend: https://usa250-backend-gr41.vercel.app
             </button>
         </div>
         
+        
         <!-- COLOR SELECTOR -->
         <div class="selector-section">
             <div class="selector-label">Color</div>
             <div class="color-options" id="colorOptions">
-                <!-- Populated by updateColorOptions() when style selected -->
+                <!-- Populated by updateColorOptions() -->
             </div>
         </div>
         
@@ -1133,21 +1088,8 @@ Backend: https://usa250-backend-gr41.vercel.app
                 <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
             </div>
         </div>
-        
-        <!-- TEXT INPUTS - NO PRESET VALUES -->
-        <div class="input-section">
-            <label for="cityInput">City, State</label>
-            <input type="text" id="cityInput" placeholder="NEW YORK, NY" maxlength="30" value="">
-        </div>
-        
-        <div class="input-section">
-            <label for="groupInput">Group Name (Optional)</label>
-            <input type="text" id="groupInput" placeholder="THE SMITH FAMILY" maxlength="30" value="">
-        </div>
-    </div>
 </div>
-
-
+    </div>
 </div>
 
 <div class="sticky-cta">
@@ -1162,7 +1104,7 @@ Backend: https://usa250-backend-gr41.vercel.app
     let currentCardIndex = 0;
     let selectedStyle = null;
     let selectedProduct = 'tee';
-    let selectedColor = null;  // Set when style selected
+    let selectedColor = 'White';
     let selectedSize = 'L';
     let cityText = '';
     let groupText = '';
@@ -1171,258 +1113,6 @@ Backend: https://usa250-backend-gr41.vercel.app
     const PRODUCTS = {
         'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' }
     };
-
-// Add these functions to your existing JavaScript section
-
-// Color availability per style
-// FIXED JAVASCRIPT - Add after variable declarations
-
-// Color availability per style
-const STYLE_COLORS = {
-    'A': ['Black', 'White', 'Navy'],
-    'B': ['Black', 'White', 'Navy', 'Gray'],
-    'C': ['White', 'Navy', 'Gray'],
-    'D': ['Black', 'White', 'Gray']
-};
-
-// Update color options based on selected style
-function updateColorOptions() {
-    const colorOptions = document.getElementById('colorOptions');
-    
-    if (!colorOptions) {
-        console.error('Color options container not found');
-        return;
-    }
-    
-    if (!selectedStyle) {
-        colorOptions.innerHTML = '';
-        return;
-    }
-    
-    const availableColors = STYLE_COLORS[selectedStyle] || ['Black', 'White', 'Navy', 'Gray'];
-    
-    console.log('Updating colors for style', selectedStyle, ':', availableColors);
-    
-    colorOptions.innerHTML = '';
-    
-    availableColors.forEach(color => {
-        const btn = document.createElement('button');
-        btn.className = 'color-btn';
-        btn.setAttribute('data-color', color);
-        btn.onclick = () => selectColor(color);
-        
-        const label = document.createElement('span');
-        label.className = 'color-name';
-        label.textContent = color;
-        btn.appendChild(label);
-        
-        colorOptions.appendChild(btn);
-    });
-    
-    // Auto-select first color if none selected or current not available
-    if (!selectedColor || !availableColors.includes(selectedColor)) {
-        selectColor(availableColors[0]);
-    } else {
-        // Update active state for current color
-        const activeBtn = colorOptions.querySelector(`[data-color="${selectedColor}"]`);
-        if (activeBtn) {
-            activeBtn.classList.add('active');
-        }
-    }
-}
-
-// Select color
-function selectColor(color) {
-    selectedColor = color;
-    
-    console.log('Color selected:', color);
-    
-    // Update button states
-    document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-color') === color);
-    });
-    
-    // Update checkout button
-    updateCheckoutButton();
-}
-
-// Select size
-function selectSize(size) {
-    selectedSize = size;
-    
-    console.log('Size selected:', size);
-    
-    // Update button states
-    document.querySelectorAll('.size-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-size') === size);
-    });
-    
-    // Update checkout button
-    updateCheckoutButton();
-}
-
-// Zoom toggle - Fixed to crop/scale within frame
-let isZoomed = false;
-
-function toggleZoom() {
-    const canvas = document.getElementById('previewCanvas');
-    const toggleBtn = document.getElementById('zoomToggle');
-    
-    if (!canvas || !toggleBtn) return;
-    
-    isZoomed = !isZoomed;
-    
-    if (isZoomed) {
-        canvas.classList.add('zoomed');
-        toggleBtn.classList.add('active');
-        // Change icon to minus (zoom out)
-        toggleBtn.querySelector('svg').innerHTML = `
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M21 21l-4.35-4.35"/>
-            <line x1="8" y1="11" x2="14" y2="11"/>
-        `;
-    } else {
-        canvas.classList.remove('zoomed');
-        toggleBtn.classList.remove('active');
-        // Change icon to plus (zoom in)
-        toggleBtn.querySelector('svg').innerHTML = `
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M21 21l-4.35-4.35"/>
-            <line x1="11" y1="8" x2="11" y2="14"/>
-            <line x1="8" y1="11" x2="14" y2="11"/>
-        `;
-    }
-}
-
-// Update checkout button state
-function updateCheckoutButton() {
-    const btn = document.getElementById('ctaButton');
-    if (!btn) return;
-    
-    if (selectedStyle && selectedColor && selectedSize) {
-        btn.disabled = false;
-        btn.textContent = 'CONTINUE TO CHECKOUT →';
-    } else {
-        btn.disabled = true;
-        if (!selectedStyle) {
-            btn.textContent = 'Select a Style to Continue';
-        } else if (!selectedColor) {
-            btn.textContent = 'Select a Color to Continue';
-        } else if (!selectedSize) {
-            btn.textContent = 'Select a Size to Continue';
-        }
-    }
-}
-
-// CRITICAL: Update the selectCard function to call updateColorOptions
-// Find your existing selectCard function and ADD these lines at the end:
-
-/*
-// COMPLETE FIXED selectCard function - Replace your existing one
-
-function selectCard(index) {
-    currentCardIndex = index;
-    
-    const cards = document.querySelectorAll('.style-card');
-    cards.forEach((card, i) => {
-        if (i === index) {
-            card.style.transform = 'translateX(0) scale(1)';
-            card.style.opacity = '1';
-            card.style.zIndex = '10';
-        } else if (i < index) {
-            card.style.transform = 'translateX(-120%) scale(0.8)';
-            card.style.opacity = '0';
-            card.style.zIndex = '1';
-        } else {
-            card.style.transform = 'translateX(120%) scale(0.8)';
-            card.style.opacity = '0';
-            card.style.zIndex = '1';
-        }
-    });
-    
-    // Update style selection
-    const card = cards[index];
-    const style = card.getAttribute('data-style');
-    selectedStyle = style;
-    
-    console.log('✓ Style selected:', style);
-    
-    // Update design preview
-    const templatePath = `templates/Style_${selectedStyle}_${PRODUCTS[selectedProduct].shape}.svg`;
-    document.getElementById('bgImage').setAttributeNS('http://www.w3.org/1999/xlink', 'href', templatePath);
-    updateText();
-    
-    // CRITICAL: Update color options for this style
-    console.log('✓ Updating color options...');
-    updateColorOptions();
-    
-    // Enable/update checkout button
-    updateCheckoutButton();
-    
-    console.log('✓ selectCard complete');
-}
-
-
-
-*/
-
-
-function selectCard(index) {
-    currentCardIndex = index;
-    
-    const cards = document.querySelectorAll('.style-card');
-    cards.forEach((card, i) => {
-        if (i === index) {
-            card.style.transform = 'translateX(0) scale(1)';
-            card.style.opacity = '1';
-            card.style.zIndex = '10';
-        } else if (i < index) {
-            card.style.transform = 'translateX(-120%) scale(0.8)';
-            card.style.opacity = '0';
-            card.style.zIndex = '1';
-        } else {
-            card.style.transform = 'translateX(120%) scale(0.8)';
-            card.style.opacity = '0';
-            card.style.zIndex = '1';
-        }
-    });
-    
-    // Update style selection
-    const card = cards[index];
-    const style = card.getAttribute('data-style');
-    selectedStyle = style;
-    
-    console.log('Style selected:', style);
-    
-    // Update design preview
-    const templatePath = `templates/Style_${selectedStyle}_${PRODUCTS[selectedProduct].shape}.svg`;
-    document.getElementById('bgImage').setAttributeNS('http://www.w3.org/1999/xlink', 'href', templatePath);
-    updateText();
-    
-    // UPDATE COLOR OPTIONS FOR THIS STYLE
-    updateColorOptions();
-    
-    // Enable checkout button
-    updateCheckoutButton();
-}
-
-
-// Initialize on page load
-document.addEventListener('DOMContentLoaded', function() {
-    // Set default size active state
-    const defaultSize = document.querySelector('.size-btn[data-size="L"]');
-    if (defaultSize) {
-        defaultSize.classList.add('active');
-    }
-    
-    // Initialize color options if style already selected
-    if (selectedStyle) {
-        updateColorOptions();
-    }
-    
-    updateCheckoutButton();
-});
-
     
     const STYLES = {
         A: { font: "Libre Baskerville", color: "#F2E8C9", weight: "700", name: "Heritage" },
@@ -1562,6 +1252,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const shape = PRODUCTS[selectedProduct].shape;
         loadTemplate(style, shape);
+        
+        // Update color options for selected style
+        updateColorOptions();
         
         currentStep = 2;
         showStep(2);
@@ -1891,222 +1584,92 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     async function handleCheckout() {
-    // Validate selections
-    if (!selectedStyle || !selectedProduct || !selectedColor || !selectedSize) {
-        alert('Please select all options');
-        return;
-    }
-    
-    const checkoutBtn = document.getElementById('ctaButton');
-    const originalText = checkoutBtn.textContent;
-    checkoutBtn.textContent = 'Preparing design...';
-    checkoutBtn.disabled = true;
-    
-    try {
-        // VARIANT MAPPING
-        const VARIANT_MAP = {
-            'tee-black-s': { shopifyVariantId: '46057714417814', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
-            'tee-black-m': { shopifyVariantId: '46057714548886', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
-            'tee-black-l': { shopifyVariantId: '46057714516118', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000' },
-            'tee-black-xl': { shopifyVariantId: '46057714483350', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000' },
-            'tee-black-2xl': { shopifyVariantId: '46057714450582', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000' },
-            'tee-white-s': { shopifyVariantId: '46057714581654', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' },
-            'tee-white-m': { shopifyVariantId: '46057714712726', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000' },
-            'tee-white-l': { shopifyVariantId: '46057714679958', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000' },
-            'tee-white-xl': { shopifyVariantId: '46057714647190', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000' },
-            'tee-white-2xl': { shopifyVariantId: '46057714614422', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000' },
-            'tee-navy-s': { shopifyVariantId: '46057714745494', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-navy-m': { shopifyVariantId: '46057714876566', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-navy-l': { shopifyVariantId: '46057714843798', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-navy-xl': { shopifyVariantId: '46057714811030', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-navy-2xl': { shopifyVariantId: '46057714778262', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-gray-s': { shopifyVariantId: '46057714909334', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_gray_gpr_4-0_gildan_64000' },
-            'tee-gray-m': { shopifyVariantId: '46057715040406', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_gray_gpr_4-0_gildan_64000' },
-            'tee-gray-l': { shopifyVariantId: '46057715007638', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_gray_gpr_4-0_gildan_64000' },
-            'tee-gray-xl': { shopifyVariantId: '46057714974870', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_gray_gpr_4-0_gildan_64000' },
-            'tee-gray-2xl': { shopifyVariantId: '46057714942102', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_gray_gpr_4-0_gildan_64000' }
-        };
-        
-        console.log('Starting checkout process...');
-        
-        // 1. Get SVG and clone it
-        const svg = document.getElementById('previewSVG');
-        if (!svg) {
-            throw new Error('Design preview not found');
-        }
-        
-        const svgClone = svg.cloneNode(true);
-        
-        // 2. CRITICAL FIX: Embed background image as base64
-        checkoutBtn.textContent = 'Loading design elements...';
-        
-        const bgImage = svgClone.querySelector('#bgImage');
-        if (bgImage && bgImage.href.baseVal) {
-            const imageUrl = bgImage.href.baseVal;
-            console.log('Loading background image:', imageUrl);
-            
-            // Load image and convert to base64
-            const base64 = await new Promise((resolve, reject) => {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
+        if (currentStep < 4) {
+            currentStep++;
+            showStep(currentStep);
+        } else {
+            try {
+                const ctaBtn = document.getElementById('ctaButton');
+                ctaBtn.disabled = true;
+                ctaBtn.textContent = 'Generating design...';
                 
-                img.onload = function() {
-                    try {
-                        // Draw to canvas to get base64
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        const dataUrl = canvas.toDataURL('image/png');
-                        console.log('Background image converted to base64');
-                        resolve(dataUrl);
-                    } catch (err) {
-                        reject(err);
+                const pngBlob = await generate9000pxPNG();
+                
+                if (!pngBlob) {
+                    throw new Error('PNG generation failed');
+                }
+                
+                ctaBtn.textContent = 'Uploading design...';
+                const timestamp = Date.now();
+                const filename = `USA250_${selectedStyle}_${timestamp}`;
+                
+                const formData = new FormData();
+                formData.append('file', pngBlob);
+                formData.append('upload_preset', 'america250');
+                formData.append('folder', 'america250');
+                formData.append('public_id', filename);
+                
+                const cloudinaryResponse = await fetch(
+                    `https://api.cloudinary.com/v1_1/dqab444bd/image/upload`,
+                    {
+                        method: 'POST',
+                        body: formData
                     }
-                };
+                );
                 
-                img.onerror = () => reject(new Error('Failed to load background image'));
-                img.src = imageUrl;
+                if (!cloudinaryResponse.ok) {
+                    throw new Error('Cloudinary upload failed');
+                }
                 
-                setTimeout(() => reject(new Error('Background image load timeout')), 10000);
-            });
-            
-            // Replace external URL with base64
-            bgImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', base64);
-            console.log('Background image embedded in SVG');
-        }
-        
-        // Small delay for fonts
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // 3. Convert SVG (with embedded image) to PNG
-        checkoutBtn.textContent = 'Converting design...';
-        
-        const svgData = new XMLSerializer().serializeToString(svgClone);
-        const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
-        const url = URL.createObjectURL(svgBlob);
-        
-        // Create image from SVG
-        const img = new Image();
-        
-        const imageLoadPromise = new Promise((resolve, reject) => {
-            img.onload = () => {
-                console.log('SVG converted to image');
-                resolve();
-            };
-            img.onerror = () => reject(new Error('Failed to convert SVG'));
-            setTimeout(() => reject(new Error('SVG conversion timeout')), 10000);
-        });
-        
-        img.src = url;
-        await imageLoadPromise;
-        
-        // 4. Draw to high-res canvas
-        const canvas = document.createElement('canvas');
-        canvas.width = 9000;
-        canvas.height = 7200;
-        const ctx = canvas.getContext('2d');
-        
-        // Fill white background
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, 9000, 7200);
-        
-        // Calculate centered scaling
-        const svgWidth = 500;
-        const svgHeight = 400;
-        const scale = Math.min(9000 / svgWidth, 7200 / svgHeight);
-        const scaledWidth = svgWidth * scale;
-        const scaledHeight = svgHeight * scale;
-        const offsetX = (9000 - scaledWidth) / 2;
-        const offsetY = (7200 - scaledHeight) / 2;
-        
-        // Draw SVG
-        ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
-        
-        URL.revokeObjectURL(url);
-        
-        console.log('Canvas created:', canvas.width, 'x', canvas.height);
-        
-        // 5. Convert to blob
-        checkoutBtn.textContent = 'Generating PNG...';
-        
-        const blob = await new Promise((resolve, reject) => {
-            canvas.toBlob((b) => {
-                if (b) resolve(b);
-                else reject(new Error('Failed to create PNG'));
-            }, 'image/png', 1.0);
-        });
-        
-        const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
-        console.log('PNG created, size:', sizeMB + 'MB');
-        
-        if (blob.size < 10000) {
-            throw new Error('PNG file too small (' + sizeMB + 'MB) - design may not have rendered correctly');
-        }
-        
-        // 6. Upload to Cloudinary
-        checkoutBtn.textContent = 'Uploading design...';
-        
-        const formData = new FormData();
-        formData.append('file', blob);
-        formData.append('upload_preset', 'america250');
-        formData.append('folder', 'usa250-orders');
-        
-        const cloudinaryResponse = await fetch(
-            'https://api.cloudinary.com/v1_1/dqab444bd/image/upload',
-            {
-                method: 'POST',
-                body: formData
+                const cloudinaryData = await cloudinaryResponse.json();
+                const designUrl = cloudinaryData.secure_url;
+                
+                console.log('✓ Design uploaded:', designUrl);
+                
+                ctaBtn.textContent = 'Creating order...';
+                
+                const variantKey = `${selectedColor}-${selectedSize}`;
+                const variantId = VARIANT_MAP[variantKey];
+                
+                if (!variantId) {
+                    throw new Error(`No variant found for ${variantKey}`);
+                }
+                
+                const orderResponse = await fetch(SHOPIFY_CONFIG.backendUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        designUrl: designUrl,
+                        style: selectedStyle,
+                        cityText: cityText,
+                        groupText: groupText,
+                        color: selectedColor,
+                        size: selectedSize,
+                        variantId: variantId
+                    })
+                });
+                
+                const orderData = await orderResponse.json();
+                
+                if (orderData.success) {
+                    console.log('✓ Draft order created:', orderData.draftOrderId);
+                    window.location.href = orderData.checkoutUrl;
+                } else {
+                    throw new Error(orderData.error || 'Failed to create order');
+                }
+                
+            } catch (error) {
+                console.error('Checkout error:', error);
+                alert('Something went wrong: ' + error.message);
+                
+                const ctaBtn = document.getElementById('ctaButton');
+                ctaBtn.disabled = false;
+                ctaBtn.textContent = 'Try Again';
             }
-        );
-        
-        if (!cloudinaryResponse.ok) {
-            const errorText = await cloudinaryResponse.text();
-            throw new Error(`Upload failed: ${errorText}`);
         }
-        
-        const cloudinaryData = await cloudinaryResponse.json();
-        const designUrl = cloudinaryData.secure_url;
-        
-        console.log('✓ Design uploaded:', designUrl);
-        console.log('✓ Public ID:', cloudinaryData.public_id);
-        
-        // 7. Map variant
-        const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
-        const variant = VARIANT_MAP[variantKey];
-        
-        if (!variant) {
-            throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize}`);
-        }
-        
-        console.log('✓ Variant found:', variantKey);
-        
-        // 8. Build Shopify URL
-        checkoutBtn.textContent = 'Redirecting to checkout...';
-        
-        const shopifyUrl = new URL(`https://shop.4ship.ca/cart/${variant.shopifyVariantId}:1`);
-        shopifyUrl.searchParams.append('attributes[design_url]', designUrl);
-        shopifyUrl.searchParams.append('attributes[style]', selectedStyle);
-        shopifyUrl.searchParams.append('attributes[city]', document.getElementById('cityInput').value || 'Custom Design');
-        shopifyUrl.searchParams.append('attributes[group]', document.getElementById('groupInput').value || '');
-        shopifyUrl.searchParams.append('attributes[gelato_product]', variant.gelatoUid);
-        shopifyUrl.searchParams.append('attributes[gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
-        
-        console.log('✓ Redirecting to Shopify');
-        
-        // 9. Redirect
-        window.location.href = shopifyUrl.toString();
-        
-    } catch (error) {
-        console.error('✗ Checkout error:', error);
-        console.error('Stack:', error.stack);
-        alert('Checkout failed: ' + error.message + '\n\nPlease try again or contact support.');
-        checkoutBtn.textContent = originalText;
-        checkoutBtn.disabled = false;
     }
-}
-
     
     function init() {
         updateProgress();
@@ -2122,301 +1685,89 @@ document.addEventListener('DOMContentLoaded', function() {
     
     window.addEventListener('load', init);
 
-    // Final checkout function for v1.11 frontend
-// Add this to your index.html or main.js
 
-async function handleCheckout() {
-    // Validate selections
-    if (!selectedStyle || !selectedProduct || !selectedColor || !selectedSize) {
-        alert('Please select all options');
-        return;
-    }
+// Color/Size/Zoom Functions - v1.16
+
+const STYLE_COLORS = {
+    'A': ['Black', 'White', 'Navy'],
+    'B': ['Black', 'White', 'Navy', 'Gray'],
+    'C': ['White', 'Navy', 'Gray'],
+    'D': ['Black', 'White', 'Gray']
+};
+
+function updateColorOptions() {
+    const colorOptions = document.getElementById('colorOptions');
+    if (!colorOptions || !selectedStyle) return;
     
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    checkoutBtn.textContent = 'Generating design...';
-    checkoutBtn.disabled = true;
+    const availableColors = STYLE_COLORS[selectedStyle] || ['Black', 'White', 'Navy', 'Gray'];
+    colorOptions.innerHTML = '';
     
-    try {
-        // 1. Generate PNG from canvas
-        const canvas = document.getElementById('canvas');
-        const dataUrl = canvas.toDataURL('image/png');
-        const blob = await (await fetch(dataUrl)).blob();
+    availableColors.forEach(color => {
+        const btn = document.createElement('button');
+        btn.className = 'color-btn';
+        btn.setAttribute('data-color', color);
+        btn.onclick = () => selectColor(color);
         
-        console.log('Design generated, uploading to Cloudinary...');
+        const label = document.createElement('span');
+        label.className = 'color-name';
+        label.textContent = color;
+        btn.appendChild(label);
         
-        // 2. Upload to Cloudinary
-        const formData = new FormData();
-        formData.append('file', blob);
-        formData.append('upload_preset', 'america250');
-        
-        const cloudinaryResponse = await fetch(
-            'https://api.cloudinary.com/v1_1/dqab444bd/image/upload',
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
-        
-        if (!cloudinaryResponse.ok) {
-            throw new Error('Cloudinary upload failed');
-        }
-        
-        const cloudinaryData = await cloudinaryResponse.json();
-        const designUrl = cloudinaryData.secure_url;
-        
-        console.log('Design uploaded:', designUrl);
-        
-        // 3. Map product selection to Shopify variant
-        const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
-        
-        // TEMPORARY: For now, use placeholder variant ID
-        // You'll replace this with your actual variant mapping
-        const TEMP_VARIANT_ID = '46057714417814'; // Replace with your actual variant ID
-        
-        // Get Gelato product UID
-        const GELATO_UIDS = {
-            'tee-white-s': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000',
-            'tee-white-m': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000',
-            'tee-white-l': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000',
-            'tee-white-xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000',
-            'tee-white-2xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000',
-            'tee-black-s': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000',
-            'tee-black-m': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000',
-            'tee-black-l': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000',
-            'tee-black-xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000',
-            'tee-black-2xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000',
-            'tee-navy-s': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000',
-            'tee-navy-m': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000',
-            'tee-navy-l': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000',
-            'tee-navy-xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000',
-            'tee-navy-2xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000'
-        };
-        
-        const gelatoUid = GELATO_UIDS[variantKey];
-        if (!gelatoUid) {
-            throw new Error(`No Gelato product for: ${variantKey}`);
-        }
-        
-        // 4. Build Shopify cart URL
-        const shopifyUrl = new URL(`https://shop-4ship-ca.myshopify.com/cart/${TEMP_VARIANT_ID}:1`);
-        
-        // Add custom attributes (these get passed to webhook)
-        shopifyUrl.searchParams.append('attributes[design_url]', designUrl);
-        shopifyUrl.searchParams.append('attributes[style]', selectedStyle);
-        shopifyUrl.searchParams.append('attributes[city]', document.getElementById('cityInput').value);
-        shopifyUrl.searchParams.append('attributes[group]', document.getElementById('groupInput').value || '');
-        shopifyUrl.searchParams.append('attributes[gelato_product]', gelatoUid);
-        shopifyUrl.searchParams.append('attributes[gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
-        
-        console.log('Redirecting to Shopify:', shopifyUrl.toString());
-        
-        // 5. Redirect to Shopify
-        window.location.href = shopifyUrl.toString();
-        
-    } catch (error) {
-        console.error('Checkout error:', error);
-        alert('Checkout failed: ' + error.message);
-        checkoutBtn.textContent = 'Checkout';
-        checkoutBtn.disabled = false;
+        colorOptions.appendChild(btn);
+    });
+    
+    if (!selectedColor || !availableColors.includes(selectedColor)) {
+        selectColor(availableColors[0]);
+    } else {
+        const activeBtn = colorOptions.querySelector(`[data-color="${selectedColor}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
     }
 }
 
-
-// === NAVIGATION SYSTEM v1.14.2 ===
-console.log('Navigation system loading...');
-
-let currentNavStep = 1;
-
-function navigateToStep(step) {
-    console.log('Navigate to step:', step);
-    
-    const leftPanel = document.querySelector('.left-panel');
-    const rightPanel = document.querySelector('.right-panel');
-    
-    if (!leftPanel || !rightPanel) {
-        console.error('Panels not found!', {leftPanel, rightPanel});
-        return;
-    }
-    
-    const inputSections = document.querySelectorAll('.input-section');
-    const selectorSections = document.querySelectorAll('.selector-section');
-    
-    // Step 1: Show style cards only
-    if (step === 1) {
-        leftPanel.style.display = 'block';
-        rightPanel.style.display = 'none';
-        console.log('Step 1: Showing left panel (styles)');
-    }
-    // Step 2: Show preview + text inputs
-    else if (step === 2) {
-        leftPanel.style.display = 'none';
-        rightPanel.style.display = 'block';
-        inputSections.forEach(s => s.style.display = 'block');
-        selectorSections.forEach(s => s.style.display = 'none');
-        console.log('Step 2: Showing right panel with inputs');
-    }
-    // Step 3: Show preview + color/size
-    else if (step === 3) {
-        leftPanel.style.display = 'none';
-        rightPanel.style.display = 'block';
-        inputSections.forEach(s => s.style.display = 'none');
-        selectorSections.forEach(s => s.style.display = 'block');
-        console.log('Step 3: Showing right panel with selectors');
-    }
-    
-    currentNavStep = step;
-    updateNavigationButtons();
+function selectColor(color) {
+    selectedColor = color;
+    document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-color') === color);
+    });
 }
 
-function updateNavigationButtons() {
-    const backBtn = document.getElementById('navBackBtn');
-    const nextBtn = document.getElementById('navNextBtn');
-    
-    // Back button
-    if (backBtn) {
-        backBtn.style.display = currentNavStep === 1 ? 'none' : 'inline-flex';
-    }
-    
-    // Next button
-    if (nextBtn) {
-        let enabled = false;
-        let text = 'NEXT →';
-        
-        if (currentNavStep === 1) {
-            enabled = selectedStyle !== null;
-        } else if (currentNavStep === 2) {
-            const city = document.getElementById('cityInput')?.value || '';
-            enabled = city.length > 0;
-        } else if (currentNavStep === 3) {
-            enabled = selectedColor !== null && selectedSize !== null;
-            text = 'CONTINUE TO CHECKOUT →';
-        }
-        
-        nextBtn.disabled = !enabled;
-        nextBtn.textContent = text;
-    }
-    
-    // Progress bar
-    const progress = document.querySelector('.progress-fill');
-    if (progress) {
-        progress.style.width = ((currentNavStep / 3) * 100) + '%';
-    }
-    
-    // Step indicator
-    const indicator = document.querySelector('.step-indicator');
-    if (indicator) {
-        const titles = ['Choose Style', 'Customize Text', 'Select Options'];
-        indicator.textContent = `Step ${currentNavStep}/3: ${titles[currentNavStep-1]}`;
-    }
+function selectSize(size) {
+    selectedSize = size;
+    document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-size') === size);
+    });
 }
 
-function goBackSimple() {
-    console.log('Go back from step', currentNavStep);
-    if (currentNavStep > 1) {
-        navigateToStep(currentNavStep - 1);
+let isZoomed = false;
+function toggleZoom() {
+    const canvas = document.querySelector('.preview-canvas');
+    const toggleBtn = document.getElementById('zoomToggle');
+    
+    if (!canvas || !toggleBtn) return;
+    
+    isZoomed = !isZoomed;
+    
+    if (isZoomed) {
+        canvas.classList.add('zoomed');
+        toggleBtn.classList.add('active');
+        toggleBtn.querySelector('svg').innerHTML = `
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+        `;
+    } else {
+        canvas.classList.remove('zoomed');
+        toggleBtn.classList.remove('active');
+        toggleBtn.querySelector('svg').innerHTML = `
+            <circle cx="11" cy="11" r="8"/>
+            <path d="M21 21l-4.35-4.35"/>
+            <line x1="11" y1="8" x2="11" y2="14"/>
+            <line x1="8" y1="11" x2="14" y2="11"/>
+        `;
     }
 }
-
-function goNextSimple() {
-    console.log('Go next from step', currentNavStep);
-    
-    if (currentNavStep === 1 && selectedStyle) {
-        navigateToStep(2);
-    } else if (currentNavStep === 2) {
-        const city = document.getElementById('cityInput')?.value || '';
-        if (city) navigateToStep(3);
-    } else if (currentNavStep === 3 && selectedColor && selectedSize) {
-        handleCheckout();
-    }
-}
-
-// Initialize on load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded - initializing navigation');
-    navigateToStep(1);
-    
-    // City input listener
-    const cityInput = document.getElementById('cityInput');
-    if (cityInput) {
-        cityInput.addEventListener('input', updateNavigationButtons);
-    }
-});
-
-console.log('Navigation system loaded');
 
 </script>
-
-
-<!-- NAVIGATION BUTTONS -->
-<div class="simple-navigation">
-    <button class="simple-nav-btn back" id="navBackBtn" onclick="goBackSimple()">
-        ← BACK
-    </button>
-    <button class="simple-nav-btn next" id="navNextBtn" onclick="goNextSimple()">
-        NEXT →
-    </button>
-</div>
-
-<style>
-.simple-navigation {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(10, 10, 10, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 2px solid #333;
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    z-index: 1000;
-}
-
-.simple-nav-btn {
-    padding: 15px 40px;
-    font-size: 16px;
-    font-weight: 700;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 2px solid #333;
-    font-family: 'Montserrat', sans-serif;
-}
-
-.simple-nav-btn.back {
-    background: #161616;
-    color: white;
-}
-
-.simple-nav-btn.back:hover {
-    background: #333;
-    border-color: #d4af37;
-}
-
-.simple-nav-btn.next {
-    background: #d4af37;
-    color: #0a0a0a;
-    border-color: #d4af37;
-}
-
-.simple-nav-btn.next:hover {
-    background: #ffd700;
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-}
-
-.simple-nav-btn.next:disabled {
-    background: #333;
-    color: #666;
-    border-color: #333;
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.container { padding-bottom: 100px !important; }
-</style>
 
 </body>
 </html>
