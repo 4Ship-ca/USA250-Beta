@@ -1,3 +1,17 @@
+<!-- 
+USA250 v1.12 - Complete Shopify/Gelato Integration
+Last Updated: December 31, 2025
+
+Features:
+- Complete variant mapping (20 variants: Black/White/Navy/Gray × S/M/L/XL/2XL)
+- Robust SVG-to-PNG conversion with image preloading
+- Cloudinary upload integration
+- Shopify cart integration with custom attributes
+- Gelato fulfillment via webhook
+
+Store: https://shop.4ship.ca
+Backend: https://usa250-backend-gr41.vercel.app
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1480,45 +1494,142 @@ async function handleCheckout() {
     }
     
     const checkoutBtn = document.getElementById('ctaButton');
-    checkoutBtn.textContent = 'Generating design...';
+    const originalText = checkoutBtn.textContent;
+    checkoutBtn.textContent = 'Preparing design...';
     checkoutBtn.disabled = true;
     
     try {
-        // 1. Convert SVG to PNG
+        // VARIANT MAPPING - All 20 Shopify variants
+        const VARIANT_MAP = {
+            'tee-black-s': { shopifyVariantId: '46057714417814', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
+            'tee-black-m': { shopifyVariantId: '46057714548886', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
+            'tee-black-l': { shopifyVariantId: '46057714516118', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000' },
+            'tee-black-xl': { shopifyVariantId: '46057714483350', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000' },
+            'tee-black-2xl': { shopifyVariantId: '46057714450582', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000' },
+            'tee-white-s': { shopifyVariantId: '46057714581654', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' },
+            'tee-white-m': { shopifyVariantId: '46057714712726', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000' },
+            'tee-white-l': { shopifyVariantId: '46057714679958', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000' },
+            'tee-white-xl': { shopifyVariantId: '46057714647190', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000' },
+            'tee-white-2xl': { shopifyVariantId: '46057714614422', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000' },
+            'tee-navy-s': { shopifyVariantId: '46057714745494', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-navy-m': { shopifyVariantId: '46057714876566', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-navy-l': { shopifyVariantId: '46057714843798', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-navy-xl': { shopifyVariantId: '46057714811030', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-navy-2xl': { shopifyVariantId: '46057714778262', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-gray-s': { shopifyVariantId: '46057714909334', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_gray_gpr_4-0_gildan_64000' },
+            'tee-gray-m': { shopifyVariantId: '46057715040406', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_gray_gpr_4-0_gildan_64000' },
+            'tee-gray-l': { shopifyVariantId: '46057715007638', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_gray_gpr_4-0_gildan_64000' },
+            'tee-gray-xl': { shopifyVariantId: '46057714974870', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_gray_gpr_4-0_gildan_64000' },
+            'tee-gray-2xl': { shopifyVariantId: '46057714942102', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_gray_gpr_4-0_gildan_64000' }
+        };
+        
+        console.log('Starting checkout process...');
+        
+        // 1. Get SVG element
         const svg = document.getElementById('previewSVG');
+        if (!svg) {
+            throw new Error('Design preview not found');
+        }
+        
+        // 2. Wait for SVG images to load (CRITICAL FIX)
+        checkoutBtn.textContent = 'Loading design...';
+        const bgImage = document.getElementById('bgImage');
+        
+        if (bgImage && bgImage.href.baseVal) {
+            await new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.onload = () => {
+                    console.log('Background image loaded successfully');
+                    resolve();
+                };
+                img.onerror = () => {
+                    console.error('Failed to load background image');
+                    reject(new Error('Background image failed to load'));
+                };
+                img.src = bgImage.href.baseVal;
+                
+                // Timeout after 10 seconds
+                setTimeout(() => reject(new Error('Image load timeout')), 10000);
+            });
+        }
+        
+        // Small delay to ensure fonts are rendered
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // 3. Convert SVG to PNG
+        checkoutBtn.textContent = 'Converting design...';
+        
         const svgData = new XMLSerializer().serializeToString(svg);
         const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
         const url = URL.createObjectURL(svgBlob);
         
         // Create image from SVG
         const img = new Image();
-        img.src = url;
+        img.crossOrigin = 'anonymous';
         
-        await new Promise((resolve, reject) => {
-            img.onload = resolve;
-            img.onerror = reject;
+        const imageLoadPromise = new Promise((resolve, reject) => {
+            img.onload = () => {
+                console.log('SVG converted to image');
+                resolve();
+            };
+            img.onerror = () => reject(new Error('Failed to convert SVG'));
+            setTimeout(() => reject(new Error('SVG conversion timeout')), 10000);
         });
         
-        // Draw to canvas
+        img.src = url;
+        await imageLoadPromise;
+        
+        // 4. Draw to high-res canvas (9000x7200 for Gelato)
         const canvas = document.createElement('canvas');
-        canvas.width = 9000;  // High-res for Gelato
+        canvas.width = 9000;
         canvas.height = 7200;
         const ctx = canvas.getContext('2d');
-        ctx.fillStyle = 'white';
+        
+        // Fill with white background first
+        ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, 9000, 7200);
-        ctx.drawImage(img, 0, 0, 9000, 7200);
+        
+        // Calculate dimensions to maintain aspect ratio
+        const svgWidth = 500;
+        const svgHeight = 400;
+        const scale = Math.min(9000 / svgWidth, 7200 / svgHeight);
+        const scaledWidth = svgWidth * scale;
+        const scaledHeight = svgHeight * scale;
+        const offsetX = (9000 - scaledWidth) / 2;
+        const offsetY = (7200 - scaledHeight) / 2;
+        
+        // Draw SVG image
+        ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
         
         URL.revokeObjectURL(url);
         
-        // Convert to blob
-        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        console.log('Canvas created:', canvas.width, 'x', canvas.height);
         
-        console.log('Design generated, uploading to Cloudinary...');
+        // 5. Convert to blob
+        const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob((b) => {
+                if (b) {
+                    resolve(b);
+                } else {
+                    reject(new Error('Failed to create PNG'));
+                }
+            }, 'image/png', 1.0);
+        });
         
-        // 2. Upload to Cloudinary
+        console.log('PNG created, size:', (blob.size / 1024 / 1024).toFixed(2) + 'MB');
+        
+        if (blob.size < 1000) {
+            throw new Error('PNG file too small - design may not have rendered');
+        }
+        
+        // 6. Upload to Cloudinary
+        checkoutBtn.textContent = 'Uploading design...';
+        
         const formData = new FormData();
         formData.append('file', blob);
         formData.append('upload_preset', 'america250');
+        formData.append('folder', 'usa250-orders');
         
         const cloudinaryResponse = await fetch(
             'https://api.cloudinary.com/v1_1/dqab444bd/image/upload',
@@ -1529,61 +1640,49 @@ async function handleCheckout() {
         );
         
         if (!cloudinaryResponse.ok) {
-            throw new Error('Cloudinary upload failed');
+            const errorText = await cloudinaryResponse.text();
+            throw new Error(`Upload failed: ${errorText}`);
         }
         
         const cloudinaryData = await cloudinaryResponse.json();
         const designUrl = cloudinaryData.secure_url;
         
         console.log('Design uploaded:', designUrl);
+        console.log('Cloudinary public_id:', cloudinaryData.public_id);
         
-        // 3. Map product selection to Gelato
+        // 7. Map product selection to variant
         const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
+        const variant = VARIANT_MAP[variantKey];
         
-        const GELATO_UIDS = {
-            'tee-white-s': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000',
-            'tee-white-m': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000',
-            'tee-white-l': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000',
-            'tee-white-xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000',
-            'tee-white-2xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000',
-            'tee-black-s': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000',
-            'tee-black-m': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000',
-            'tee-black-l': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000',
-            'tee-black-xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000',
-            'tee-black-2xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000',
-            'tee-navy-s': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000',
-            'tee-navy-m': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000',
-            'tee-navy-l': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000',
-            'tee-navy-xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000',
-            'tee-navy-2xl': 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000'
-        };
-        
-        const gelatoUid = GELATO_UIDS[variantKey];
-        if (!gelatoUid) {
-            throw new Error(`No Gelato product for: ${variantKey}`);
+        if (!variant) {
+            throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize}`);
         }
         
-        // 4. Build Shopify cart URL
-        const TEMP_VARIANT_ID = '46057714417814'; // YOU NEED TO REPLACE THIS WITH YOUR ACTUAL SHOPIFY VARIANT ID
-        const shopifyUrl = new URL(`https://shop.4ship.ca/cart/${TEMP_VARIANT_ID}:1`);
+        console.log('Variant found:', variantKey, variant);
+        
+        // 8. Build Shopify cart URL
+        checkoutBtn.textContent = 'Redirecting to checkout...';
+        
+        const shopifyUrl = new URL(`https://shop.4ship.ca/cart/${variant.shopifyVariantId}:1`);
         
         // Add custom attributes
         shopifyUrl.searchParams.append('attributes[design_url]', designUrl);
         shopifyUrl.searchParams.append('attributes[style]', selectedStyle);
-        shopifyUrl.searchParams.append('attributes[city]', document.getElementById('cityInput').value);
+        shopifyUrl.searchParams.append('attributes[city]', document.getElementById('cityInput').value || 'Custom Design');
         shopifyUrl.searchParams.append('attributes[group]', document.getElementById('groupInput').value || '');
-        shopifyUrl.searchParams.append('attributes[gelato_product]', gelatoUid);
+        shopifyUrl.searchParams.append('attributes[gelato_product]', variant.gelatoUid);
         shopifyUrl.searchParams.append('attributes[gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
         
         console.log('Redirecting to Shopify:', shopifyUrl.toString());
         
-        // 5. Redirect to Shopify
+        // 9. Redirect to Shopify
         window.location.href = shopifyUrl.toString();
         
     } catch (error) {
         console.error('Checkout error:', error);
-        alert('Checkout failed: ' + error.message);
-        checkoutBtn.textContent = 'Checkout';
+        console.error('Error stack:', error.stack);
+        alert('Checkout failed: ' + error.message + '\n\nPlease try again or contact support.');
+        checkoutBtn.textContent = originalText;
         checkoutBtn.disabled = false;
     }
 }
