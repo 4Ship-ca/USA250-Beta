@@ -1,13 +1,16 @@
 <!-- 
-USA250 v1.12 - Complete Shopify/Gelato Integration
+USA250 v1.12-FINAL - Complete Shopify/Gelato Integration with SVG Fix
 Last Updated: December 31, 2025
 
+CRITICAL FIX: Background images now embedded as base64 before PNG conversion
+
 Features:
-- Complete variant mapping (20 variants: Black/White/Navy/Gray × S/M/L/XL/2XL)
-- Robust SVG-to-PNG conversion with image preloading
-- Cloudinary upload integration
+- SVG background images embedded inline (no more blank uploads!)
+- Complete variant mapping (20 variants)
+- Robust error handling with size validation
+- Cloudinary upload with folder organization
 - Shopify cart integration with custom attributes
-- Gelato fulfillment via webhook
+- Gelato fulfillment ready
 
 Store: https://shop.4ship.ca
 Backend: https://usa250-backend-gr41.vercel.app
@@ -1499,7 +1502,7 @@ async function handleCheckout() {
     checkoutBtn.disabled = true;
     
     try {
-        // VARIANT MAPPING - All 20 Shopify variants
+        // VARIANT MAPPING
         const VARIANT_MAP = {
             'tee-black-s': { shopifyVariantId: '46057714417814', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
             'tee-black-m': { shopifyVariantId: '46057714548886', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
@@ -1525,48 +1528,66 @@ async function handleCheckout() {
         
         console.log('Starting checkout process...');
         
-        // 1. Get SVG element
+        // 1. Get SVG and clone it
         const svg = document.getElementById('previewSVG');
         if (!svg) {
             throw new Error('Design preview not found');
         }
         
-        // 2. Wait for SVG images to load (CRITICAL FIX)
-        checkoutBtn.textContent = 'Loading design...';
-        const bgImage = document.getElementById('bgImage');
+        const svgClone = svg.cloneNode(true);
         
+        // 2. CRITICAL FIX: Embed background image as base64
+        checkoutBtn.textContent = 'Loading design elements...';
+        
+        const bgImage = svgClone.querySelector('#bgImage');
         if (bgImage && bgImage.href.baseVal) {
-            await new Promise((resolve, reject) => {
+            const imageUrl = bgImage.href.baseVal;
+            console.log('Loading background image:', imageUrl);
+            
+            // Load image and convert to base64
+            const base64 = await new Promise((resolve, reject) => {
                 const img = new Image();
                 img.crossOrigin = 'anonymous';
-                img.onload = () => {
-                    console.log('Background image loaded successfully');
-                    resolve();
-                };
-                img.onerror = () => {
-                    console.error('Failed to load background image');
-                    reject(new Error('Background image failed to load'));
-                };
-                img.src = bgImage.href.baseVal;
                 
-                // Timeout after 10 seconds
-                setTimeout(() => reject(new Error('Image load timeout')), 10000);
+                img.onload = function() {
+                    try {
+                        // Draw to canvas to get base64
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        const dataUrl = canvas.toDataURL('image/png');
+                        console.log('Background image converted to base64');
+                        resolve(dataUrl);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                
+                img.onerror = () => reject(new Error('Failed to load background image'));
+                img.src = imageUrl;
+                
+                setTimeout(() => reject(new Error('Background image load timeout')), 10000);
             });
+            
+            // Replace external URL with base64
+            bgImage.setAttributeNS('http://www.w3.org/1999/xlink', 'href', base64);
+            console.log('Background image embedded in SVG');
         }
         
-        // Small delay to ensure fonts are rendered
-        await new Promise(resolve => setTimeout(resolve, 200));
+        // Small delay for fonts
+        await new Promise(resolve => setTimeout(resolve, 300));
         
-        // 3. Convert SVG to PNG
+        // 3. Convert SVG (with embedded image) to PNG
         checkoutBtn.textContent = 'Converting design...';
         
-        const svgData = new XMLSerializer().serializeToString(svg);
+        const svgData = new XMLSerializer().serializeToString(svgClone);
         const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
         const url = URL.createObjectURL(svgBlob);
         
         // Create image from SVG
         const img = new Image();
-        img.crossOrigin = 'anonymous';
         
         const imageLoadPromise = new Promise((resolve, reject) => {
             img.onload = () => {
@@ -1580,17 +1601,17 @@ async function handleCheckout() {
         img.src = url;
         await imageLoadPromise;
         
-        // 4. Draw to high-res canvas (9000x7200 for Gelato)
+        // 4. Draw to high-res canvas
         const canvas = document.createElement('canvas');
         canvas.width = 9000;
         canvas.height = 7200;
         const ctx = canvas.getContext('2d');
         
-        // Fill with white background first
+        // Fill white background
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, 9000, 7200);
         
-        // Calculate dimensions to maintain aspect ratio
+        // Calculate centered scaling
         const svgWidth = 500;
         const svgHeight = 400;
         const scale = Math.min(9000 / svgWidth, 7200 / svgHeight);
@@ -1599,7 +1620,7 @@ async function handleCheckout() {
         const offsetX = (9000 - scaledWidth) / 2;
         const offsetY = (7200 - scaledHeight) / 2;
         
-        // Draw SVG image
+        // Draw SVG
         ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
         
         URL.revokeObjectURL(url);
@@ -1607,20 +1628,20 @@ async function handleCheckout() {
         console.log('Canvas created:', canvas.width, 'x', canvas.height);
         
         // 5. Convert to blob
+        checkoutBtn.textContent = 'Generating PNG...';
+        
         const blob = await new Promise((resolve, reject) => {
             canvas.toBlob((b) => {
-                if (b) {
-                    resolve(b);
-                } else {
-                    reject(new Error('Failed to create PNG'));
-                }
+                if (b) resolve(b);
+                else reject(new Error('Failed to create PNG'));
             }, 'image/png', 1.0);
         });
         
-        console.log('PNG created, size:', (blob.size / 1024 / 1024).toFixed(2) + 'MB');
+        const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
+        console.log('PNG created, size:', sizeMB + 'MB');
         
-        if (blob.size < 1000) {
-            throw new Error('PNG file too small - design may not have rendered');
+        if (blob.size < 10000) {
+            throw new Error('PNG file too small (' + sizeMB + 'MB) - design may not have rendered correctly');
         }
         
         // 6. Upload to Cloudinary
@@ -1647,10 +1668,10 @@ async function handleCheckout() {
         const cloudinaryData = await cloudinaryResponse.json();
         const designUrl = cloudinaryData.secure_url;
         
-        console.log('Design uploaded:', designUrl);
-        console.log('Cloudinary public_id:', cloudinaryData.public_id);
+        console.log('✓ Design uploaded:', designUrl);
+        console.log('✓ Public ID:', cloudinaryData.public_id);
         
-        // 7. Map product selection to variant
+        // 7. Map variant
         const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
         const variant = VARIANT_MAP[variantKey];
         
@@ -1658,14 +1679,12 @@ async function handleCheckout() {
             throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize}`);
         }
         
-        console.log('Variant found:', variantKey, variant);
+        console.log('✓ Variant found:', variantKey);
         
-        // 8. Build Shopify cart URL
+        // 8. Build Shopify URL
         checkoutBtn.textContent = 'Redirecting to checkout...';
         
         const shopifyUrl = new URL(`https://shop.4ship.ca/cart/${variant.shopifyVariantId}:1`);
-        
-        // Add custom attributes
         shopifyUrl.searchParams.append('attributes[design_url]', designUrl);
         shopifyUrl.searchParams.append('attributes[style]', selectedStyle);
         shopifyUrl.searchParams.append('attributes[city]', document.getElementById('cityInput').value || 'Custom Design');
@@ -1673,14 +1692,14 @@ async function handleCheckout() {
         shopifyUrl.searchParams.append('attributes[gelato_product]', variant.gelatoUid);
         shopifyUrl.searchParams.append('attributes[gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
         
-        console.log('Redirecting to Shopify:', shopifyUrl.toString());
+        console.log('✓ Redirecting to Shopify');
         
-        // 9. Redirect to Shopify
+        // 9. Redirect
         window.location.href = shopifyUrl.toString();
         
     } catch (error) {
-        console.error('Checkout error:', error);
-        console.error('Error stack:', error.stack);
+        console.error('✗ Checkout error:', error);
+        console.error('Stack:', error.stack);
         alert('Checkout failed: ' + error.message + '\n\nPlease try again or contact support.');
         checkoutBtn.textContent = originalText;
         checkoutBtn.disabled = false;
