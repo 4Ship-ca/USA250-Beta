@@ -1,6 +1,22 @@
-<!-- 
-USA250 v1.13 - Complete Color/Size Selector Integration + SVG Fix
+<!--
+USA250 v1.14 - Multi-Step Navigation
 Last Updated: January 1, 2026
+
+NEW FEATURES:
+- Back/Forward navigation buttons
+- 3-step flow: Style → Text → Options
+- Progress tracking
+- State preservation between steps
+- City/Group inputs hidden until step 2
+- Color/Size selectors hidden until step 3
+
+Step 1: Choose Style (card carousel)
+Step 2: Customize Text (city + group inputs)
+Step 3: Select Options (color + size)
+-->
+<!-- 
+USA250 v1.14 - Complete Color/Size Selector Integration + SVG Fix
+Last Updated: January 1, 2026 (v1.14 - Multi-step navigation with back/forward buttons, zoom behavior, inputs)
 
 NEW FEATURES:
 - Color selector (filtered by style)
@@ -337,16 +353,45 @@ Backend: https://usa250-backend-gr41.vercel.app
 
 /* Add this CSS after the existing preview-section styles */
 
-.preview-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* FIXED CSS - Replace selector styles section */
+
+.preview-title {
+    font-size: 14px;
+    color: var(--gold);
     margin-bottom: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
+/* Preview wrapper - Fixed size container */
+.preview-wrapper {
+    position: relative;
+    background: #f5f5f5;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    overflow: hidden; /* Crop when zoomed */
+}
+
+/* Preview canvas - zooms within wrapper */
+.preview-canvas {
+    width: 100%;
+    transition: transform 0.3s ease;
+    transform-origin: center center;
+}
+
+.preview-canvas.zoomed {
+    transform: scale(1.5);
+}
+
+/* Zoom button - Bottom right corner */
 .zoom-toggle {
-    background: var(--panel);
-    border: 1px solid var(--border);
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    background: rgba(10, 10, 10, 0.8);
+    border: 2px solid var(--border);
     border-radius: 8px;
     width: 40px;
     height: 40px;
@@ -356,30 +401,26 @@ Backend: https://usa250-backend-gr41.vercel.app
     cursor: pointer;
     color: var(--gold);
     transition: all 0.3s ease;
+    z-index: 10;
+    backdrop-filter: blur(10px);
 }
 
 .zoom-toggle:hover {
-    background: var(--border);
-    transform: scale(1.05);
+    background: rgba(10, 10, 10, 0.95);
+    border-color: var(--gold);
+    transform: scale(1.1);
 }
 
 .zoom-toggle.active {
     background: var(--gold);
     color: var(--bg);
+    border-color: var(--gold);
 }
 
-.preview-canvas {
-    background: #f5f5f5;
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 20px;
-    transition: all 0.3s ease;
-}
-
-.preview-canvas.zoomed {
-    transform: scale(1.5);
-    transform-origin: center center;
-    margin: 40px 0;
+#previewSVG {
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
 /* SELECTOR SECTIONS */
@@ -401,6 +442,14 @@ Backend: https://usa250-backend-gr41.vercel.app
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
+    min-height: 50px; /* Prevent layout shift when colors load */
+}
+
+.color-options:empty::after {
+    content: 'Select a style to see available colors';
+    color: #666;
+    font-size: 13px;
+    font-style: italic;
 }
 
 .color-btn {
@@ -494,7 +543,15 @@ Backend: https://usa250-backend-gr41.vercel.app
     .size-btn {
         flex: 0 0 calc(33.333% - 6px);
     }
+    
+    .zoom-toggle {
+        bottom: 10px;
+        right: 10px;
+        width: 36px;
+        height: 36px;
+    }
 }
+
 
         
         #previewSVG {
@@ -805,7 +862,96 @@ Backend: https://usa250-backend-gr41.vercel.app
 <body>
 
 <div class="progress-bar">
-    <div class="progress-fill" id="progressFill"></div>
+    <div class="progress-fill" id="progressFill">
+<!-- ADD THIS AT THE BOTTOM OF THE CONTAINER (before closing </div>) -->
+
+<div class="simple-navigation">
+    <button class="simple-nav-btn back" id="navBackBtn" onclick="goBackSimple()">
+        ← BACK
+    </button>
+    <button class="simple-nav-btn next" id="navNextBtn" onclick="goNextSimple()">
+        NEXT →
+    </button>
+</div>
+
+<!-- ADD THIS CSS TO YOUR STYLES SECTION -->
+<style>
+/* Simple Navigation Buttons */
+.simple-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 2px solid var(--border);
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    z-index: 1000;
+}
+
+.simple-nav-btn {
+    padding: 15px 40px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid var(--border);
+    font-family: 'Montserrat', sans-serif;
+}
+
+.simple-nav-btn.back {
+    background: var(--panel);
+    color: white;
+}
+
+.simple-nav-btn.back:hover {
+    background: var(--border);
+    border-color: var(--gold);
+}
+
+.simple-nav-btn.next {
+    background: var(--gold);
+    color: var(--bg);
+    border-color: var(--gold);
+}
+
+.simple-nav-btn.next:hover {
+    background: #ffd700;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+.simple-nav-btn.next:disabled {
+    background: var(--border);
+    color: #666;
+    border-color: var(--border);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Add padding to container for fixed nav */
+.container {
+    padding-bottom: 100px !important;
+}
+
+@media (max-width: 768px) {
+    .simple-navigation {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .simple-nav-btn {
+        width: 100%;
+    }
+}
+</style>
+
+</div>
 </div>
 
 <div class="container">
@@ -1035,10 +1181,29 @@ Backend: https://usa250-backend-gr41.vercel.app
     <!-- Right Panel: Preview -->
     <!-- Replace the right panel section (around line 860) with this -->
 
+<!-- FIXED Right Panel - Replace entire right-panel div -->
+
 <div class="right-panel">
     <div class="preview-section">
-        <div class="preview-header">
-            <div class="preview-title">Live Preview</div>
+        <div class="preview-title">Live Preview</div>
+        
+        <div class="preview-wrapper">
+            <div class="preview-canvas" id="previewCanvas">
+                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
+                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
+                    </defs>
+                    <image id="bgImage" x="0" y="0" width="500" height="400" preserveAspectRatio="xMidYMid meet" />
+                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
+                        <textPath href="#pathTop" startOffset="50%"></textPath>
+                    </text>
+                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
+                        <textPath href="#pathMid" startOffset="50%"></textPath>
+                    </text>
+                </svg>
+            </div>
+            
             <button class="zoom-toggle" id="zoomToggle" onclick="toggleZoom()">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="11" cy="11" r="8"/>
@@ -1049,27 +1214,11 @@ Backend: https://usa250-backend-gr41.vercel.app
             </button>
         </div>
         
-        <div class="preview-canvas" id="previewCanvas">
-            <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
-                    <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
-                </defs>
-                <image id="bgImage" x="0" y="0" width="500" height="400" preserveAspectRatio="xMidYMid meet" />
-                <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
-                    <textPath href="#pathTop" startOffset="50%"></textPath>
-                </text>
-                <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
-                    <textPath href="#pathMid" startOffset="50%"></textPath>
-                </text>
-            </svg>
-        </div>
-        
         <!-- COLOR SELECTOR -->
         <div class="selector-section">
             <div class="selector-label">Color</div>
             <div class="color-options" id="colorOptions">
-                <!-- Populated by updateColorOptions() -->
+                <!-- Populated by updateColorOptions() when style selected -->
             </div>
         </div>
         
@@ -1085,18 +1234,19 @@ Backend: https://usa250-backend-gr41.vercel.app
             </div>
         </div>
         
-        <!-- TEXT INPUTS (existing) -->
+        <!-- TEXT INPUTS - NO PRESET VALUES -->
         <div class="input-section">
             <label for="cityInput">City, State</label>
-            <input type="text" id="cityInput" placeholder="NEW YORK, NY" maxlength="30">
+            <input type="text" id="cityInput" placeholder="NEW YORK, NY" maxlength="30" value="">
         </div>
         
         <div class="input-section">
             <label for="groupInput">Group Name (Optional)</label>
-            <input type="text" id="groupInput" placeholder="THE SMITH FAMILY" maxlength="30">
+            <input type="text" id="groupInput" placeholder="THE SMITH FAMILY" maxlength="30" value="">
         </div>
     </div>
 </div>
+
 
 </div>
 
@@ -1125,19 +1275,33 @@ Backend: https://usa250-backend-gr41.vercel.app
 // Add these functions to your existing JavaScript section
 
 // Color availability per style
+// FIXED JAVASCRIPT - Add after variable declarations
+
+// Color availability per style
 const STYLE_COLORS = {
-    'A': ['Black', 'White', 'Navy'],           // Traditional - conservative colors
-    'B': ['Black', 'White', 'Navy', 'Gray'],   // Bold - all colors
-    'C': ['White', 'Navy', 'Gray'],            // Classic - lighter palette
-    'D': ['Black', 'White', 'Gray']            // Modern - monochrome + gray
+    'A': ['Black', 'White', 'Navy'],
+    'B': ['Black', 'White', 'Navy', 'Gray'],
+    'C': ['White', 'Navy', 'Gray'],
+    'D': ['Black', 'White', 'Gray']
 };
 
 // Update color options based on selected style
 function updateColorOptions() {
-    if (!selectedStyle) return;
-    
     const colorOptions = document.getElementById('colorOptions');
+    
+    if (!colorOptions) {
+        console.error('Color options container not found');
+        return;
+    }
+    
+    if (!selectedStyle) {
+        colorOptions.innerHTML = '';
+        return;
+    }
+    
     const availableColors = STYLE_COLORS[selectedStyle] || ['Black', 'White', 'Navy', 'Gray'];
+    
+    console.log('Updating colors for style', selectedStyle, ':', availableColors);
     
     colorOptions.innerHTML = '';
     
@@ -1152,17 +1316,18 @@ function updateColorOptions() {
         label.textContent = color;
         btn.appendChild(label);
         
-        // Set active if it's the current color
-        if (color === selectedColor) {
-            btn.classList.add('active');
-        }
-        
         colorOptions.appendChild(btn);
     });
     
-    // If current color not available in this style, select first available
-    if (!availableColors.includes(selectedColor)) {
+    // Auto-select first color if none selected or current not available
+    if (!selectedColor || !availableColors.includes(selectedColor)) {
         selectColor(availableColors[0]);
+    } else {
+        // Update active state for current color
+        const activeBtn = colorOptions.querySelector(`[data-color="${selectedColor}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active');
+        }
     }
 }
 
@@ -1170,14 +1335,14 @@ function updateColorOptions() {
 function selectColor(color) {
     selectedColor = color;
     
+    console.log('Color selected:', color);
+    
     // Update button states
     document.querySelectorAll('.color-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-color') === color);
     });
     
-    console.log('Color selected:', color);
-    
-    // Update checkout button state
+    // Update checkout button
     updateCheckoutButton();
 }
 
@@ -1185,29 +1350,32 @@ function selectColor(color) {
 function selectSize(size) {
     selectedSize = size;
     
+    console.log('Size selected:', size);
+    
     // Update button states
     document.querySelectorAll('.size-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-size') === size);
     });
     
-    console.log('Size selected:', size);
-    
-    // Update checkout button state
+    // Update checkout button
     updateCheckoutButton();
 }
 
-// Zoom toggle
+// Zoom toggle - Fixed to crop/scale within frame
 let isZoomed = false;
 
 function toggleZoom() {
     const canvas = document.getElementById('previewCanvas');
     const toggleBtn = document.getElementById('zoomToggle');
     
+    if (!canvas || !toggleBtn) return;
+    
     isZoomed = !isZoomed;
     
     if (isZoomed) {
         canvas.classList.add('zoomed');
         toggleBtn.classList.add('active');
+        // Change icon to minus (zoom out)
         toggleBtn.querySelector('svg').innerHTML = `
             <circle cx="11" cy="11" r="8"/>
             <path d="M21 21l-4.35-4.35"/>
@@ -1216,6 +1384,7 @@ function toggleZoom() {
     } else {
         canvas.classList.remove('zoomed');
         toggleBtn.classList.remove('active');
+        // Change icon to plus (zoom in)
         toggleBtn.querySelector('svg').innerHTML = `
             <circle cx="11" cy="11" r="8"/>
             <path d="M21 21l-4.35-4.35"/>
@@ -1225,9 +1394,10 @@ function toggleZoom() {
     }
 }
 
-// Update checkout button based on selections
+// Update checkout button state
 function updateCheckoutButton() {
     const btn = document.getElementById('ctaButton');
+    if (!btn) return;
     
     if (selectedStyle && selectedColor && selectedSize) {
         btn.disabled = false;
@@ -1244,9 +1414,58 @@ function updateCheckoutButton() {
     }
 }
 
-// MODIFY EXISTING selectCard function to update colors
-// Find the selectCard function and add this at the end:
-// FIND the selectCard function (around line 950-990) and REPLACE the end with this:
+// CRITICAL: Update the selectCard function to call updateColorOptions
+// Find your existing selectCard function and ADD these lines at the end:
+
+/*
+// COMPLETE FIXED selectCard function - Replace your existing one
+
+function selectCard(index) {
+    currentCardIndex = index;
+    
+    const cards = document.querySelectorAll('.style-card');
+    cards.forEach((card, i) => {
+        if (i === index) {
+            card.style.transform = 'translateX(0) scale(1)';
+            card.style.opacity = '1';
+            card.style.zIndex = '10';
+        } else if (i < index) {
+            card.style.transform = 'translateX(-120%) scale(0.8)';
+            card.style.opacity = '0';
+            card.style.zIndex = '1';
+        } else {
+            card.style.transform = 'translateX(120%) scale(0.8)';
+            card.style.opacity = '0';
+            card.style.zIndex = '1';
+        }
+    });
+    
+    // Update style selection
+    const card = cards[index];
+    const style = card.getAttribute('data-style');
+    selectedStyle = style;
+    
+    console.log('✓ Style selected:', style);
+    
+    // Update design preview
+    const templatePath = `templates/Style_${selectedStyle}_${PRODUCTS[selectedProduct].shape}.svg`;
+    document.getElementById('bgImage').setAttributeNS('http://www.w3.org/1999/xlink', 'href', templatePath);
+    updateText();
+    
+    // CRITICAL: Update color options for this style
+    console.log('✓ Updating color options...');
+    updateColorOptions();
+    
+    // Enable/update checkout button
+    updateCheckoutButton();
+    
+    console.log('✓ selectCard complete');
+}
+
+
+
+*/
+
 
 function selectCard(index) {
     currentCardIndex = index;
@@ -2101,6 +2320,143 @@ async function handleCheckout() {
         checkoutBtn.disabled = false;
     }
 }
+
+// SIMPLE NAVIGATION - Add to existing v1.13.1
+
+// Navigation state
+let navStep = 1;
+
+// Show/hide sections based on step
+function showSection(section) {
+    // Hide all optional sections
+    const styleSection = document.querySelector('.style-section');
+    const previewSection = document.querySelector('.preview-section');
+    const inputSections = document.querySelectorAll('.input-section');
+    const colorSection = document.querySelector('.selector-section');
+    const sizeSection = document.querySelectorAll('.selector-section')[1];
+    
+    // Step 1: Style selection only
+    if (section === 'style') {
+        if (styleSection) styleSection.style.display = 'block';
+        if (previewSection) previewSection.style.display = 'none';
+        inputSections.forEach(s => s.style.display = 'none');
+        navStep = 1;
+    }
+    
+    // Step 2: Text customization
+    else if (section === 'text') {
+        if (styleSection) styleSection.style.display = 'none';
+        if (previewSection) previewSection.style.display = 'block';
+        inputSections.forEach(s => s.style.display = 'block');
+        if (colorSection) colorSection.style.display = 'none';
+        if (sizeSection) sizeSection.style.display = 'none';
+        navStep = 2;
+    }
+    
+    // Step 3: Color/size selection
+    else if (section === 'options') {
+        if (styleSection) styleSection.style.display = 'none';
+        if (previewSection) previewSection.style.display = 'block';
+        inputSections.forEach(s => s.style.display = 'none');
+        if (colorSection) colorSection.style.display = 'block';
+        if (sizeSection) sizeSection.style.display = 'block';
+        navStep = 3;
+    }
+    
+    updateNavButtonsSimple();
+}
+
+// Simple back/next logic
+function goBackSimple() {
+    if (navStep === 2) {
+        showSection('style');
+    } else if (navStep === 3) {
+        showSection('text');
+    }
+}
+
+function goNextSimple() {
+    if (navStep === 1 && selectedStyle) {
+        showSection('text');
+    } else if (navStep === 2 && document.getElementById('cityInput')?.value) {
+        showSection('options');
+    } else if (navStep === 3 && selectedColor && selectedSize) {
+        handleCheckout();
+    }
+}
+
+// Update nav buttons
+function updateNavButtonsSimple() {
+    const backBtn = document.getElementById('navBackBtn');
+    const nextBtn = document.getElementById('navNextBtn');
+    
+    if (backBtn) {
+        backBtn.style.display = navStep === 1 ? 'none' : 'inline-flex';
+    }
+    
+    if (nextBtn) {
+        let canProceed = false;
+        let btnText = 'NEXT →';
+        
+        if (navStep === 1) {
+            canProceed = selectedStyle !== null;
+        } else if (navStep === 2) {
+            const cityValue = document.getElementById('cityInput')?.value || '';
+            canProceed = cityValue.length > 0;
+        } else if (navStep === 3) {
+            canProceed = selectedColor !== null && selectedSize !== null;
+            btnText = 'CONTINUE TO CHECKOUT →';
+        }
+        
+        nextBtn.disabled = !canProceed;
+        nextBtn.textContent = btnText;
+    }
+    
+    // Update progress
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) {
+        const percent = (navStep / 3) * 100;
+        progressFill.style.width = percent + '%';
+    }
+    
+    const stepIndicator = document.querySelector('.step-indicator');
+    if (stepIndicator) {
+        const titles = ['Choose Style', 'Customize Text', 'Select Options'];
+        stepIndicator.textContent = `Step ${navStep}/3: ${titles[navStep-1]}`;
+    }
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', function() {
+    showSection('style');
+    
+    // Update nav when selections change
+    const cityInput = document.getElementById('cityInput');
+    if (cityInput) {
+        cityInput.addEventListener('input', updateNavButtonsSimple);
+    }
+});
+
+// Override selectCard to update nav
+const originalSelectCard = window.selectCard;
+window.selectCard = function(index) {
+    if (originalSelectCard) originalSelectCard(index);
+    updateNavButtonsSimple();
+};
+
+// Override selectColor/selectSize to update nav
+const originalSelectColor = window.selectColor;
+window.selectColor = function(color) {
+    if (originalSelectColor) originalSelectColor(color);
+    updateNavButtonsSimple();
+};
+
+const originalSelectSize = window.selectSize;
+window.selectSize = function(size) {
+    if (originalSelectSize) originalSelectSize(size);
+    updateNavButtonsSimple();
+};
+
 </script>
 
 </body>
