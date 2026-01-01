@@ -1,5 +1,5 @@
 <!--
-USA250 v1.14 - Multi-Step Navigation
+USA250 v1.14.1 - Multi-Step Navigation (Fixed Preview)
 Last Updated: January 1, 2026
 
 NEW FEATURES:
@@ -2328,38 +2328,41 @@ let navStep = 1;
 
 // Show/hide sections based on step
 function showSection(section) {
-    // Hide all optional sections
-    const styleSection = document.querySelector('.style-section');
-    const previewSection = document.querySelector('.preview-section');
+    const leftPanel = document.querySelector('.left-panel');
+    const rightPanel = document.querySelector('.right-panel');
     const inputSections = document.querySelectorAll('.input-section');
-    const colorSection = document.querySelector('.selector-section');
-    const sizeSection = document.querySelectorAll('.selector-section')[1];
+    const selectorSections = document.querySelectorAll('.selector-section');
+    
+    console.log('Switching to section:', section);
     
     // Step 1: Style selection only
     if (section === 'style') {
-        if (styleSection) styleSection.style.display = 'block';
-        if (previewSection) previewSection.style.display = 'none';
-        inputSections.forEach(s => s.style.display = 'none');
+        if (leftPanel) leftPanel.style.display = 'block';
+        if (rightPanel) rightPanel.style.display = 'none';
         navStep = 1;
     }
     
-    // Step 2: Text customization
+    // Step 2: Text customization (show preview + inputs, hide selectors)
     else if (section === 'text') {
-        if (styleSection) styleSection.style.display = 'none';
-        if (previewSection) previewSection.style.display = 'block';
+        if (leftPanel) leftPanel.style.display = 'none';
+        if (rightPanel) rightPanel.style.display = 'block';
+        
+        // Show text inputs, hide color/size selectors
         inputSections.forEach(s => s.style.display = 'block');
-        if (colorSection) colorSection.style.display = 'none';
-        if (sizeSection) sizeSection.style.display = 'none';
+        selectorSections.forEach(s => s.style.display = 'none');
+        
         navStep = 2;
     }
     
-    // Step 3: Color/size selection
+    // Step 3: Options (show preview + selectors, hide inputs)
     else if (section === 'options') {
-        if (styleSection) styleSection.style.display = 'none';
-        if (previewSection) previewSection.style.display = 'block';
+        if (leftPanel) leftPanel.style.display = 'none';
+        if (rightPanel) rightPanel.style.display = 'block';
+        
+        // Hide text inputs, show color/size selectors
         inputSections.forEach(s => s.style.display = 'none');
-        if (colorSection) colorSection.style.display = 'block';
-        if (sizeSection) sizeSection.style.display = 'block';
+        selectorSections.forEach(s => s.style.display = 'block');
+        
         navStep = 3;
     }
     
