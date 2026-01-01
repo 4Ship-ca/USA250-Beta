@@ -1,10 +1,21 @@
 <!--
-USA250 v1.16.2 - Complete Feature Merge
-Base: Working v1.9 layout
-Added: Color/Size selectors, Zoom toggle
-Navigation: Simple 2-step flow
+USA250 v1.16.3 - SVG Background Color + Zoom Fix
 Last Updated: January 1, 2026
+
+FIXES:
+- Background color now changes INSIDE SVG (not wrapper)
+- Wrapper is transparent
+- Zoom button has black background
+- Enhanced console logging for debugging
+
+FEATURES:
+- Color selector (filtered by style)
+- Size selector (S/M/L/XL/2XL)
+- Zoom toggle (150%)
+- Live preview with dynamic background
+- PNG generation with base64 embedding
 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -754,7 +765,7 @@ Last Updated: January 1, 2026
 
 .preview-wrapper {
     position: relative;
-    background: #f5f5f5;
+    background: transparent;
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
@@ -777,7 +788,7 @@ Last Updated: January 1, 2026
     position: absolute;
     bottom: 15px;
     right: 15px;
-    background: rgba(10, 10, 10, 0.8);
+    background: rgba(0, 0, 0, 0.9);
     border: 2px solid var(--border);
     border-radius: 8px;
     width: 40px;
@@ -816,7 +827,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.16</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.16.3</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1048,6 +1059,8 @@ Last Updated: January 1, 2026
                         <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
                         <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
                     </defs>
+                    <!-- Background color rectangle -->
+                    <rect id="bgRect" x="0" y="0" width="500" height="400" fill="#f5f5f5"/>
                     <image id="bgImage" x="0" y="0" width="500" height="400" preserveAspectRatio="xMidYMid meet" />
                     <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
                         <textPath href="#pathTop" startOffset="50%"></textPath>
@@ -1857,20 +1870,25 @@ function updateColorOptions() {
 
 function selectColor(color) {
     selectedColor = color;
+    console.log('Color selected:', color);
+    
     document.querySelectorAll('.color-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-color') === color);
     });
     
-    // Update preview background to match shirt color
-    const previewWrapper = document.querySelector('.preview-wrapper');
-    if (previewWrapper) {
+    // Update SVG background rectangle to match shirt color
+    const bgRect = document.getElementById('bgRect');
+    if (bgRect) {
         const colorMap = {
             'Black': '#1a1a1a',
             'White': '#f5f5f5',
             'Navy': '#001f3f',
             'Gray': '#808080'
         };
-        previewWrapper.style.background = colorMap[color] || '#f5f5f5';
+        bgRect.setAttribute('fill', colorMap[color] || '#f5f5f5');
+        console.log('Background color changed to:', colorMap[color]);
+    } else {
+        console.error('bgRect element not found!');
     }
 }
 
