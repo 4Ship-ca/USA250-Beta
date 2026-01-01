@@ -1,22 +1,11 @@
 <!--
-USA250 v1.14.1 - Multi-Step Navigation (Fixed Preview)
+USA250 v1.14.2 - Clean Navigation Build
 Last Updated: January 1, 2026
-
-NEW FEATURES:
-- Back/Forward navigation buttons
-- 3-step flow: Style → Text → Options
-- Progress tracking
-- State preservation between steps
-- City/Group inputs hidden until step 2
-- Color/Size selectors hidden until step 3
-
-Step 1: Choose Style (card carousel)
-Step 2: Customize Text (city + group inputs)
-Step 3: Select Options (color + size)
+DEBUGGING: Console logs enabled
 -->
 <!-- 
-USA250 v1.14 - Complete Color/Size Selector Integration + SVG Fix
-Last Updated: January 1, 2026 (v1.14 - Multi-step navigation with back/forward buttons, zoom behavior, inputs)
+USA250 v1.13.1 - Complete Color/Size Selector Integration + SVG Fix
+Last Updated: January 1, 2026 (v1.13.1 - Fixed color selectors, zoom behavior, inputs)
 
 NEW FEATURES:
 - Color selector (filtered by style)
@@ -862,96 +851,7 @@ Backend: https://usa250-backend-gr41.vercel.app
 <body>
 
 <div class="progress-bar">
-    <div class="progress-fill" id="progressFill">
-<!-- ADD THIS AT THE BOTTOM OF THE CONTAINER (before closing </div>) -->
-
-<div class="simple-navigation">
-    <button class="simple-nav-btn back" id="navBackBtn" onclick="goBackSimple()">
-        ← BACK
-    </button>
-    <button class="simple-nav-btn next" id="navNextBtn" onclick="goNextSimple()">
-        NEXT →
-    </button>
-</div>
-
-<!-- ADD THIS CSS TO YOUR STYLES SECTION -->
-<style>
-/* Simple Navigation Buttons */
-.simple-navigation {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: rgba(10, 10, 10, 0.95);
-    backdrop-filter: blur(10px);
-    border-top: 2px solid var(--border);
-    padding: 20px;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    z-index: 1000;
-}
-
-.simple-nav-btn {
-    padding: 15px 40px;
-    font-size: 16px;
-    font-weight: 700;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 2px solid var(--border);
-    font-family: 'Montserrat', sans-serif;
-}
-
-.simple-nav-btn.back {
-    background: var(--panel);
-    color: white;
-}
-
-.simple-nav-btn.back:hover {
-    background: var(--border);
-    border-color: var(--gold);
-}
-
-.simple-nav-btn.next {
-    background: var(--gold);
-    color: var(--bg);
-    border-color: var(--gold);
-}
-
-.simple-nav-btn.next:hover {
-    background: #ffd700;
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-}
-
-.simple-nav-btn.next:disabled {
-    background: var(--border);
-    color: #666;
-    border-color: var(--border);
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-/* Add padding to container for fixed nav */
-.container {
-    padding-bottom: 100px !important;
-}
-
-@media (max-width: 768px) {
-    .simple-navigation {
-        flex-direction: column;
-        gap: 10px;
-    }
-    
-    .simple-nav-btn {
-        width: 100%;
-    }
-}
-</style>
-
-</div>
+    <div class="progress-fill" id="progressFill"></div>
 </div>
 
 <div class="container">
@@ -2321,146 +2221,202 @@ async function handleCheckout() {
     }
 }
 
-// SIMPLE NAVIGATION - Add to existing v1.13.1
 
-// Navigation state
-let navStep = 1;
+// === NAVIGATION SYSTEM v1.14.2 ===
+console.log('Navigation system loading...');
 
-// Show/hide sections based on step
-function showSection(section) {
+let currentNavStep = 1;
+
+function navigateToStep(step) {
+    console.log('Navigate to step:', step);
+    
     const leftPanel = document.querySelector('.left-panel');
     const rightPanel = document.querySelector('.right-panel');
+    
+    if (!leftPanel || !rightPanel) {
+        console.error('Panels not found!', {leftPanel, rightPanel});
+        return;
+    }
+    
     const inputSections = document.querySelectorAll('.input-section');
     const selectorSections = document.querySelectorAll('.selector-section');
     
-    console.log('Switching to section:', section);
-    
-    // Step 1: Style selection only
-    if (section === 'style') {
-        if (leftPanel) leftPanel.style.display = 'block';
-        if (rightPanel) rightPanel.style.display = 'none';
-        navStep = 1;
+    // Step 1: Show style cards only
+    if (step === 1) {
+        leftPanel.style.display = 'block';
+        rightPanel.style.display = 'none';
+        console.log('Step 1: Showing left panel (styles)');
     }
-    
-    // Step 2: Text customization (show preview + inputs, hide selectors)
-    else if (section === 'text') {
-        if (leftPanel) leftPanel.style.display = 'none';
-        if (rightPanel) rightPanel.style.display = 'block';
-        
-        // Show text inputs, hide color/size selectors
+    // Step 2: Show preview + text inputs
+    else if (step === 2) {
+        leftPanel.style.display = 'none';
+        rightPanel.style.display = 'block';
         inputSections.forEach(s => s.style.display = 'block');
         selectorSections.forEach(s => s.style.display = 'none');
-        
-        navStep = 2;
+        console.log('Step 2: Showing right panel with inputs');
     }
-    
-    // Step 3: Options (show preview + selectors, hide inputs)
-    else if (section === 'options') {
-        if (leftPanel) leftPanel.style.display = 'none';
-        if (rightPanel) rightPanel.style.display = 'block';
-        
-        // Hide text inputs, show color/size selectors
+    // Step 3: Show preview + color/size
+    else if (step === 3) {
+        leftPanel.style.display = 'none';
+        rightPanel.style.display = 'block';
         inputSections.forEach(s => s.style.display = 'none');
         selectorSections.forEach(s => s.style.display = 'block');
-        
-        navStep = 3;
+        console.log('Step 3: Showing right panel with selectors');
     }
     
-    updateNavButtonsSimple();
+    currentNavStep = step;
+    updateNavigationButtons();
 }
 
-// Simple back/next logic
+function updateNavigationButtons() {
+    const backBtn = document.getElementById('navBackBtn');
+    const nextBtn = document.getElementById('navNextBtn');
+    
+    // Back button
+    if (backBtn) {
+        backBtn.style.display = currentNavStep === 1 ? 'none' : 'inline-flex';
+    }
+    
+    // Next button
+    if (nextBtn) {
+        let enabled = false;
+        let text = 'NEXT →';
+        
+        if (currentNavStep === 1) {
+            enabled = selectedStyle !== null;
+        } else if (currentNavStep === 2) {
+            const city = document.getElementById('cityInput')?.value || '';
+            enabled = city.length > 0;
+        } else if (currentNavStep === 3) {
+            enabled = selectedColor !== null && selectedSize !== null;
+            text = 'CONTINUE TO CHECKOUT →';
+        }
+        
+        nextBtn.disabled = !enabled;
+        nextBtn.textContent = text;
+    }
+    
+    // Progress bar
+    const progress = document.querySelector('.progress-fill');
+    if (progress) {
+        progress.style.width = ((currentNavStep / 3) * 100) + '%';
+    }
+    
+    // Step indicator
+    const indicator = document.querySelector('.step-indicator');
+    if (indicator) {
+        const titles = ['Choose Style', 'Customize Text', 'Select Options'];
+        indicator.textContent = `Step ${currentNavStep}/3: ${titles[currentNavStep-1]}`;
+    }
+}
+
 function goBackSimple() {
-    if (navStep === 2) {
-        showSection('style');
-    } else if (navStep === 3) {
-        showSection('text');
+    console.log('Go back from step', currentNavStep);
+    if (currentNavStep > 1) {
+        navigateToStep(currentNavStep - 1);
     }
 }
 
 function goNextSimple() {
-    if (navStep === 1 && selectedStyle) {
-        showSection('text');
-    } else if (navStep === 2 && document.getElementById('cityInput')?.value) {
-        showSection('options');
-    } else if (navStep === 3 && selectedColor && selectedSize) {
+    console.log('Go next from step', currentNavStep);
+    
+    if (currentNavStep === 1 && selectedStyle) {
+        navigateToStep(2);
+    } else if (currentNavStep === 2) {
+        const city = document.getElementById('cityInput')?.value || '';
+        if (city) navigateToStep(3);
+    } else if (currentNavStep === 3 && selectedColor && selectedSize) {
         handleCheckout();
     }
 }
 
-// Update nav buttons
-function updateNavButtonsSimple() {
-    const backBtn = document.getElementById('navBackBtn');
-    const nextBtn = document.getElementById('navNextBtn');
-    
-    if (backBtn) {
-        backBtn.style.display = navStep === 1 ? 'none' : 'inline-flex';
-    }
-    
-    if (nextBtn) {
-        let canProceed = false;
-        let btnText = 'NEXT →';
-        
-        if (navStep === 1) {
-            canProceed = selectedStyle !== null;
-        } else if (navStep === 2) {
-            const cityValue = document.getElementById('cityInput')?.value || '';
-            canProceed = cityValue.length > 0;
-        } else if (navStep === 3) {
-            canProceed = selectedColor !== null && selectedSize !== null;
-            btnText = 'CONTINUE TO CHECKOUT →';
-        }
-        
-        nextBtn.disabled = !canProceed;
-        nextBtn.textContent = btnText;
-    }
-    
-    // Update progress
-    const progressFill = document.querySelector('.progress-fill');
-    if (progressFill) {
-        const percent = (navStep / 3) * 100;
-        progressFill.style.width = percent + '%';
-    }
-    
-    const stepIndicator = document.querySelector('.step-indicator');
-    if (stepIndicator) {
-        const titles = ['Choose Style', 'Customize Text', 'Select Options'];
-        stepIndicator.textContent = `Step ${navStep}/3: ${titles[navStep-1]}`;
-    }
-}
-
-// Initialize
+// Initialize on load
 document.addEventListener('DOMContentLoaded', function() {
-    showSection('style');
+    console.log('DOM loaded - initializing navigation');
+    navigateToStep(1);
     
-    // Update nav when selections change
+    // City input listener
     const cityInput = document.getElementById('cityInput');
     if (cityInput) {
-        cityInput.addEventListener('input', updateNavButtonsSimple);
+        cityInput.addEventListener('input', updateNavigationButtons);
     }
 });
 
-// Override selectCard to update nav
-const originalSelectCard = window.selectCard;
-window.selectCard = function(index) {
-    if (originalSelectCard) originalSelectCard(index);
-    updateNavButtonsSimple();
-};
-
-// Override selectColor/selectSize to update nav
-const originalSelectColor = window.selectColor;
-window.selectColor = function(color) {
-    if (originalSelectColor) originalSelectColor(color);
-    updateNavButtonsSimple();
-};
-
-const originalSelectSize = window.selectSize;
-window.selectSize = function(size) {
-    if (originalSelectSize) originalSelectSize(size);
-    updateNavButtonsSimple();
-};
+console.log('Navigation system loaded');
 
 </script>
+
+
+<!-- NAVIGATION BUTTONS -->
+<div class="simple-navigation">
+    <button class="simple-nav-btn back" id="navBackBtn" onclick="goBackSimple()">
+        ← BACK
+    </button>
+    <button class="simple-nav-btn next" id="navNextBtn" onclick="goNextSimple()">
+        NEXT →
+    </button>
+</div>
+
+<style>
+.simple-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(10, 10, 10, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 2px solid #333;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    z-index: 1000;
+}
+
+.simple-nav-btn {
+    padding: 15px 40px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: 2px solid #333;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.simple-nav-btn.back {
+    background: #161616;
+    color: white;
+}
+
+.simple-nav-btn.back:hover {
+    background: #333;
+    border-color: #d4af37;
+}
+
+.simple-nav-btn.next {
+    background: #d4af37;
+    color: #0a0a0a;
+    border-color: #d4af37;
+}
+
+.simple-nav-btn.next:hover {
+    background: #ffd700;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+}
+
+.simple-nav-btn.next:disabled {
+    background: #333;
+    color: #666;
+    border-color: #333;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.container { padding-bottom: 100px !important; }
+</style>
 
 </body>
 </html>
