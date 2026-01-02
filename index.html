@@ -1,5 +1,5 @@
 <!--
-USA250 v1.17.3 - Color Underlay Fix
+USA250 v1.17.7 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -318,8 +318,8 @@ Last Updated: January 1, 2026
         
         .preview-canvas {
             width: 100%;
-            /* Fill the available right-panel space better while staying responsive */
-            max-width: clamp(380px, 55vw, 720px);
+            /* Mobile-first: use full available width; desktop overrides below */
+            max-width: 100%;
             margin: 0 auto;
             aspect-ratio: 5/4;
             background: #000;
@@ -332,6 +332,7 @@ Last Updated: January 1, 2026
         }
         
         #previewSVG {
+            display: block;
             width: 100%;
             height: 100%;
             max-width: 100%;
@@ -569,7 +570,9 @@ Last Updated: January 1, 2026
             }
             
             .preview-canvas {
-                max-width: 600px;
+                /* Desktop/tablet: make the preview fill ~75% of the right panel */
+                width: 75%;
+                max-width: 980px;
             }
             
             .advanced-controls {
@@ -645,6 +648,10 @@ Last Updated: January 1, 2026
     margin-bottom: 20px;
 }
 
+
+.selector-section.color-section {
+    margin-bottom: 32px; /* extra space between Color and Size */
+}
 .selector-label {
     font-size: 14px;
     color: var(--gold);
@@ -777,6 +784,11 @@ Last Updated: January 1, 2026
         flex: 1 0 70px;
         min-width: 70px;
     }
+
+    /* Mobile: give the full-width preview a subtle border so it reads as a "frame" */
+    .preview-canvas {
+        border: 2px solid rgba(255, 255, 255, 0.14);
+    }
 }
 
 .preview-row {
@@ -785,7 +797,7 @@ Last Updated: January 1, 2026
     justify-content: center;
     gap: 12px;
     width: 100%;
-    max-width: 640px;
+    max-width: 100%;
     margin: 0 auto 20px;
 }
 
@@ -801,6 +813,12 @@ Last Updated: January 1, 2026
     .color-row .zoom-toggle {
         margin-left: auto;
     }
+
+    .preview-wrapper {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
 }
 
 .preview-wrapper {
@@ -808,6 +826,11 @@ Last Updated: January 1, 2026
     background: #111;
     border-radius: 15px;
     padding: 20px;
+    width: 88%;
+    min-width: 75%;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
     margin-bottom: 0;
     overflow: hidden; /* Crop when zoomed */
 }
@@ -859,7 +882,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.17.3</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.17.7</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1093,7 +1116,7 @@ Last Updated: January 1, 2026
                         <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
                     </defs>
                     <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
-                    <image id="bgImage" x="0" y="0" width="500" height="400" preserveAspectRatio="xMidYMid meet" />
+                    <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
                     <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
                         <textPath href="#pathTop" startOffset="50%"></textPath>
                     </text>
@@ -1107,7 +1130,7 @@ Last Updated: January 1, 2026
         
         
         <!-- COLOR SELECTOR -->
-        <div class="selector-section">
+        <div class="selector-section color-section">
             <div class="selector-label">Color</div>
             <div class="color-row">
                 <div class="color-options" id="colorOptions">
@@ -1151,7 +1174,7 @@ Last Updated: January 1, 2026
     let currentCardIndex = 0;
     let selectedStyle = null;
     let selectedProduct = 'tee';
-    let selectedColor = 'White';
+    let selectedColor = null; // default chosen per-style in updateColorOptions()
     let selectedSize = 'L';
     let cityText = '';
     let groupText = '';
@@ -1989,10 +2012,14 @@ Last Updated: January 1, 2026
 // Color/Size/Zoom Functions - v1.16
 
 const STYLE_COLORS = {
-    'A': ['Black', 'White', 'Navy'],
-    'B': ['Black', 'White', 'Navy', 'Gray'],
-    'C': ['White', 'Navy', 'Gray'],
-    'D': ['Black', 'White', 'Gray']
+    // Style 1 (A): Black + Navy only
+    'A': ['Black', 'Navy'],
+    // Style 2 (B): Black + Navy only
+    'B': ['Black', 'Navy'],
+    // Style 3 (C): all four colours
+    'C': ['Black', 'Navy', 'White', 'Gray'],
+    // Style 4 (D): White + Gray only (default Gray)
+    'D': ['Gray', 'White']
 };
 
 function updateColorOptions() {
