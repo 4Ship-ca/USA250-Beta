@@ -1,5 +1,5 @@
 <!--
-USA250 v1.17.8 - Preview Fill / Cover Cropping
+USA250 v1.17.9 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -882,7 +882,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.17.8</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.17.9</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1810,8 +1810,10 @@ Last Updated: January 1, 2026
         const svgClone = svg.cloneNode(true);
         
         // Preview-only underlays: remove them for exported print PNG (keep transparency)
-        const _exportBg = svgClone.querySelector('#bgImage');
-        if (_exportBg) _exportBg.remove();
+        // IMPORTANT: #bgImage is the *design layer* (crest/template). Do NOT remove it.
+        // If we ever add a true preview-only mockup layer, it should use id="mockupImage".
+        const _exportMockup = svgClone.querySelector('#mockupImage');
+        if (_exportMockup) _exportMockup.remove();
         const _exportShirt = svgClone.querySelector('#shirtFill');
         if (_exportShirt) {
             _exportShirt.setAttribute('fill', 'none');
