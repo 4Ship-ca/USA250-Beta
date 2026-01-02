@@ -1,5 +1,5 @@
 <!--
-USA250 v1.17.7 - Preview Fill / Cover Cropping
+USA250 v1.17.8 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -882,7 +882,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.17.7</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.17.8</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1669,11 +1669,6 @@ Last Updated: January 1, 2026
             const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
             const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
             const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
-            
-            const templatePath = `templates/Style_${selectedStyle}_${PRODUCTS[selectedProduct].shape}.svg`;
-            const bgImage = await loadImage(templatePath);
-            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-            
             const svgNS = 'http://www.w3.org/2000/svg';
             const svg = document.createElementNS(svgNS, 'svg');
             svg.setAttribute('width', canvas.width);
@@ -1813,7 +1808,16 @@ Last Updated: January 1, 2026
         }
         
         const svgClone = svg.cloneNode(true);
-        // Help exported SVG self-load fonts even when rendered via Blob URL
+        
+        // Preview-only underlays: remove them for exported print PNG (keep transparency)
+        const _exportBg = svgClone.querySelector('#bgImage');
+        if (_exportBg) _exportBg.remove();
+        const _exportShirt = svgClone.querySelector('#shirtFill');
+        if (_exportShirt) {
+            _exportShirt.setAttribute('fill', 'none');
+            _exportShirt.setAttribute('fill-opacity', '0');
+        }
+// Help exported SVG self-load fonts even when rendered via Blob URL
         injectFontImport(svgClone);
         
         // 2. CRITICAL FIX: Embed background image as base64
@@ -1892,11 +1896,6 @@ Last Updated: January 1, 2026
         canvas.width = 9000;
         canvas.height = 7200;
         const ctx = canvas.getContext('2d');
-        
-        // Fill white background
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, 9000, 7200);
-        
         // Calculate centered scaling
         const svgWidth = 500;
         const svgHeight = 400;
