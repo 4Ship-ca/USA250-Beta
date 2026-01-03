@@ -469,6 +469,109 @@ Last Updated: January 1, 2026
             color: #888;
             cursor: not-allowed;
         }
+
+        .cta-row {
+            display: flex;
+            gap: 12px;
+            align-items: stretch;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .cta-row .mega-btn {
+            margin: 0;
+            max-width: none;
+            flex: 1 1 auto;
+        }
+
+        .back-btn {
+            flex: 0 0 auto;
+            background: #222;
+            border: 2px solid #444;
+            border-radius: 15px;
+            padding: 20px 16px;
+            color: white;
+            font-size: 14px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s, border-color 0.2s;
+        }
+
+        .back-btn:active {
+            transform: scale(0.98);
+        }
+
+        .back-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Advanced sliders (always visible) */
+        .advanced-controls {
+            margin-top: 18px;
+            padding: 18px;
+            background: #1a1a1a;
+            border-radius: 15px;
+            border: 2px solid #333;
+        }
+
+        .advanced-title {
+            font-size: 13px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            margin-bottom: 14px;
+        }
+
+        .slider-group {
+            margin-bottom: 15px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .slider-value {
+            color: var(--gold);
+            font-family: monospace;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 5px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--gold);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: var(--gold);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
         
         /* Desktop styles */
         @media (min-width: 768px) {
@@ -633,6 +736,17 @@ Last Updated: January 1, 2026
                 position: static;
                 background: transparent;
                 padding: 20px 0;
+            }
+
+            .cta-row {
+                max-width: 450px;
+                margin: 0; /* left-justified inside left panel */
+                justify-content: flex-start;
+            }
+
+            .back-btn {
+                padding: 16px 14px;
+                font-size: 13px;
             }
         }
         
@@ -991,9 +1105,6 @@ Last Updated: January 1, 2026
                        placeholder="MIAMI, FLORIDA" oninput="updateCity()">
                 <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
             </div>
-            
-            <div class="suggestions">
-                <div class="suggestion-chip" onclick="useCity('MIAMI, FL')">Miami, FL</div>
                 <div class="suggestion-chip" onclick="useCity('NEW YORK, NY')">New York, NY</div>
                 <div class="suggestion-chip" onclick="useCity('LOS ANGELES, CA')">Los Angeles, CA</div>
                 <div class="suggestion-chip" onclick="useCity('CHICAGO, IL')">Chicago, IL</div>
@@ -1010,9 +1121,6 @@ Last Updated: January 1, 2026
                        placeholder="THE SMITH FAMILY" oninput="updateGroup()">
                 <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
             </div>
-            
-            <div class="suggestions">
-                <div class="suggestion-chip" onclick="useGroup('THE SMITH FAMILY')">The Smith Family</div>
                 <div class="suggestion-chip" onclick="useGroup('CLASS OF 2026')">Class of 2026</div>
                 <div class="suggestion-chip" onclick="useGroup('TEAM USA')">Team USA</div>
                 <div class="suggestion-chip" onclick="useGroup('AMERICA 250')">America 250</div>
@@ -1067,7 +1175,40 @@ Last Updated: January 1, 2026
                 </button>
             </div>
             
-            <div class="advanced-controls hidden">
+            
+        </div>
+    </div>
+
+        
+    
+    <!-- Right Panel: Preview -->
+    <div class="right-panel">
+        <div class="preview-section">
+            <div class="preview-title">Live Preview</div>
+            <div class="preview-row">
+                <div class="preview-wrapper">
+                <div class="preview-canvas" id="previewCanvas">
+                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
+                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
+                    </defs>
+                    <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
+                    <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
+                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
+                        <textPath href="#pathTop" startOffset="50%"></textPath>
+                    </text>
+                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
+                        <textPath href="#pathMid" startOffset="50%"></textPath>
+                    </text>
+                </svg>
+            </div>
+                </div>
+</div>
+        
+        
+        <div class="advanced-controls">
+                <div class="advanced-title">Adjust Text Placement</div>
                 <div class="slider-group">
                     <div class="slider-label">
                         <span>City Size</span>
@@ -1100,35 +1241,7 @@ Last Updated: January 1, 2026
                     <input type="range" id="groupYSlider" min="50" max="400" value="282" oninput="updateSlider('groupY', this.value)">
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <!-- Right Panel: Preview -->
-    <div class="right-panel">
-        <div class="preview-section">
-            <div class="preview-title">Live Preview</div>
-            <div class="preview-row">
-                <div class="preview-wrapper">
-                <div class="preview-canvas" id="previewCanvas">
-                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
-                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
-                    </defs>
-                    <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
-                    <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
-                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
-                        <textPath href="#pathTop" startOffset="50%"></textPath>
-                    </text>
-                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
-                        <textPath href="#pathMid" startOffset="50%"></textPath>
-                    </text>
-                </svg>
-            </div>
-                </div>
-</div>
-        
-        
+
         <!-- COLOR SELECTOR -->
         <div class="selector-section color-section">
             <div class="selector-label">Color</div>
@@ -1162,11 +1275,16 @@ Last Updated: January 1, 2026
     </div>
 </div>
 
+
+
 <div class="sticky-cta">
-    <button class="mega-btn" id="ctaButton" onclick="handleCheckout()" disabled>
-        Select a Style to Continue
-    </button>
-</div>
+            <div class="cta-row">
+                <button class="back-btn" id="backButton" onclick="goBack()" disabled>← Back</button>
+                <button class="mega-btn" id="ctaButton" onclick="primaryAction()" disabled>
+                    Select a Style to Continue
+                </button>
+            </div>
+        </div>
 
 <script>
     // State management
@@ -1613,7 +1731,16 @@ Last Updated: January 1, 2026
         }
     }
     
-    function showStep(step) {
+    
+    let _isPopNavigation = false;
+
+    function updateBackButton() {
+        const backBtn = document.getElementById('backButton');
+        if (!backBtn) return;
+        backBtn.disabled = currentStep <= 1;
+    }
+
+    function showStep(step, pushState = true) {
         for (let i = 1; i <= 4; i++) {
             document.getElementById(`step${i}`)?.classList.add('hidden');
         }
@@ -1621,6 +1748,16 @@ Last Updated: January 1, 2026
         updateProgress();
         updateStepIndicator();
         updateCTA();
+        updateBackButton();
+
+        // Keep browser Back/Forward in sync with the wizard
+        if (pushState && !_isPopNavigation) {
+            try {
+                history.pushState({ step }, '', `#step${step}`);
+            } catch (e) {
+                // ignore
+            }
+        }
     }
     
     function updateProgress() {
@@ -1652,6 +1789,55 @@ Last Updated: January 1, 2026
             btn.textContent = 'Continue to Checkout →';
             btn.disabled = false;
         }
+
+    function primaryAction() {
+        if (currentStep === 1) {
+            if (!selectedStyle) return;
+            currentStep = 2;
+            showStep(2);
+            return;
+        }
+        if (currentStep === 2) {
+            if (!cityText) return;
+            currentStep = 3;
+            showStep(3);
+            return;
+        }
+        if (currentStep === 3) {
+            if (!groupText) return;
+            currentStep = 4;
+            showStep(4);
+            return;
+        }
+        // Step 4
+        handleCheckout();
+    }
+
+    function goBack() {
+        if (currentStep <= 1) return;
+        try {
+            history.back();
+        } catch (e) {
+            currentStep = Math.max(1, currentStep - 1);
+            showStep(currentStep, false);
+        }
+    }
+
+    // Initialize history + handle browser Back/Forward with persistence
+    try {
+        history.replaceState({ step: 1 }, '', '#step1');
+    } catch (e) {
+        // ignore
+    }
+
+    window.addEventListener('popstate', (e) => {
+        const step = e?.state?.step;
+        if (!step) return;
+        _isPopNavigation = true;
+        currentStep = Math.max(1, Math.min(4, step));
+        showStep(currentStep, false);
+        _isPopNavigation = false;
+    });
     }
     
     async function generate9000pxPNG() {
