@@ -1,5 +1,5 @@
 <!--
-USA250 v1.17.9c - Preview Fill / Cover Cropping
+USA250 v1.17.9 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -871,84 +871,6 @@ Last Updated: January 1, 2026
 }
 
 
-
-        .sticky-cta {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 12px;
-        }
-        .mega-btn {
-            max-width: none;
-            margin: 0;
-            flex: 1;
-        }
-        .back-btn {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid var(--border);
-            color: var(--gold);
-            padding: 16px 18px;
-            border-radius: 15px;
-            font-size: 16px;
-            cursor: pointer;
-            min-width: 130px;
-        }
-        .back-btn:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-        }
-
-        /* Step 2/3 adjustments */
-        .adjustments-block {
-            margin-top: 16px;
-            padding: 14px;
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            background: rgba(255,255,255,0.03);
-        }
-        .adjustments-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .adjustments-title {
-            font-weight: 700;
-            color: var(--gold);
-            letter-spacing: 1px;
-            font-size: 13px;
-            text-transform: uppercase;
-        }
-        .adjustments-toggle {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: #ddd;
-            padding: 8px 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            white-space: nowrap;
-        }
-        .adjustments-toggle .chev {
-            display: inline-block;
-            transform: rotate(0deg);
-            transition: transform 0.15s ease;
-        }
-        .adjustments-toggle.active .chev {
-            transform: rotate(180deg);
-        }
-
-        /* On narrow screens, keep basic visible and advanced collapsed by default */
-        @media (max-width: 767px) {
-            .back-btn { min-width: 110px; padding: 14px 14px; }
-            .adjustments-header { flex-direction: column; align-items: stretch; }
-            .adjustments-toggle { width: 100%; justify-content: space-between; }
-        }
-
 </style>
 </head>
 <body>
@@ -960,7 +882,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.17.9c</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.17.9</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1069,46 +991,10 @@ Last Updated: January 1, 2026
                        placeholder="MIAMI, FLORIDA" oninput="updateCity()">
                 <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
             </div>
-            <!-- Adjustments: City (always available while typing) -->
-            <div class="adjustments-block" id="cityAdjustments">
-                <div class="adjustments-header">
-                    <div class="adjustments-title">Adjust City Text</div>
-                    <button class="adjustments-toggle" type="button" onclick="toggleAdvancedAdjustments('city')">
-                        Advanced adjustments
-                        <span class="chev" id="cityChev">▾</span>
-                    </button>
-                </div>
-
-                <div class="adjustments-basic">
-                    <div class="slider-group">
-                        <div class="slider-label">
-                            <span>City Size</span>
-                            <span class="slider-value" id="citySizeVal">10</span>
-                        </div>
-                        <input type="range" id="citySizeSlider" min="10" max="80" value="10" oninput="updateSlider('citySize', this.value)">
-                    </div>
-
-                    <div class="slider-group">
-                        <div class="slider-label">
-                            <span>City Y-Position</span>
-                            <span class="slider-value" id="cityYVal">223</span>
-                        </div>
-                        <input type="range" id="cityYSlider" min="0" max="300" value="223" oninput="updateSlider('cityY', this.value)">
-                    </div>
-                </div>
-
-                <div class="adjustments-advanced hidden" id="cityAdvanced">
-                    <div class="slider-group">
-                        <div class="slider-label">
-                            <span>City Arc</span>
-                            <span class="slider-value" id="cityArcVal">64</span>
-                        </div>
-                        <input type="range" id="cityArcSlider" min="10" max="450" value="64" oninput="updateSlider('cityArc', this.value)">
-                    </div>
-                </div>
-            </div>
-
-<div class="suggestion-chip" onclick="useCity('NEW YORK, NY')">New York, NY</div>
+            
+            <div class="suggestions">
+                <div class="suggestion-chip" onclick="useCity('MIAMI, FL')">Miami, FL</div>
+                <div class="suggestion-chip" onclick="useCity('NEW YORK, NY')">New York, NY</div>
                 <div class="suggestion-chip" onclick="useCity('LOS ANGELES, CA')">Los Angeles, CA</div>
                 <div class="suggestion-chip" onclick="useCity('CHICAGO, IL')">Chicago, IL</div>
             </div>
@@ -1124,46 +1010,10 @@ Last Updated: January 1, 2026
                        placeholder="THE SMITH FAMILY" oninput="updateGroup()">
                 <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
             </div>
-            <!-- Adjustments: Group (always available while typing) -->
-            <div class="adjustments-block" id="groupAdjustments">
-                <div class="adjustments-header">
-                    <div class="adjustments-title">Adjust Group Text</div>
-                    <button class="adjustments-toggle" type="button" onclick="toggleAdvancedAdjustments('group')">
-                        Advanced adjustments
-                        <span class="chev" id="groupChev">▾</span>
-                    </button>
-                </div>
-
-                <div class="adjustments-basic">
-                    <div class="slider-group">
-                        <div class="slider-label">
-                            <span>Group Size</span>
-                            <span class="slider-value" id="groupSizeVal">8</span>
-                        </div>
-                        <input type="range" id="groupSizeSlider" min="8" max="50" value="8" oninput="updateSlider('groupSize', this.value)">
-                    </div>
-
-                    <div class="slider-group">
-                        <div class="slider-label">
-                            <span>Group Y-Position</span>
-                            <span class="slider-value" id="groupYVal">282</span>
-                        </div>
-                        <input type="range" id="groupYSlider" min="50" max="400" value="282" oninput="updateSlider('groupY', this.value)">
-                    </div>
-                </div>
-
-                <div class="adjustments-advanced hidden" id="groupAdvanced">
-                    <div class="slider-group">
-                        <div class="slider-label">
-                            <span>Group Arc</span>
-                            <span class="slider-value" id="groupArcVal">64</span>
-                        </div>
-                        <input type="range" id="groupArcSlider" min="10" max="450" value="64" oninput="updateSlider('groupArc', this.value)">
-                    </div>
-                </div>
-            </div>
-
-<div class="suggestion-chip" onclick="useGroup('CLASS OF 2026')">Class of 2026</div>
+            
+            <div class="suggestions">
+                <div class="suggestion-chip" onclick="useGroup('THE SMITH FAMILY')">The Smith Family</div>
+                <div class="suggestion-chip" onclick="useGroup('CLASS OF 2026')">Class of 2026</div>
                 <div class="suggestion-chip" onclick="useGroup('TEAM USA')">Team USA</div>
                 <div class="suggestion-chip" onclick="useGroup('AMERICA 250')">America 250</div>
             </div>
@@ -1216,7 +1066,14 @@ Last Updated: January 1, 2026
                     🔄 Reset to Auto
                 </button>
             </div>
-<input type="range" id="citySizeSlider" min="10" max="80" value="10" oninput="updateSlider('citySize', this.value)">
+            
+            <div class="advanced-controls hidden">
+                <div class="slider-group">
+                    <div class="slider-label">
+                        <span>City Size</span>
+                        <span class="slider-value" id="citySizeVal">10</span>
+                    </div>
+                    <input type="range" id="citySizeSlider" min="10" max="80" value="10" oninput="updateSlider('citySize', this.value)">
                 </div>
                 
                 <div class="slider-group">
@@ -1305,14 +1162,11 @@ Last Updated: January 1, 2026
     </div>
 </div>
 
-
 <div class="sticky-cta">
-    <button class="back-btn" id="backButton" type="button" onclick="goBack()" disabled>← Back</button>
-    <button class="mega-btn" id="ctaButton" onclick="handlePrimaryAction()" disabled>
+    <button class="mega-btn" id="ctaButton" onclick="handleCheckout()" disabled>
         Select a Style to Continue
     </button>
 </div>
-
 
 <script>
     // State management
@@ -1540,11 +1394,6 @@ Last Updated: January 1, 2026
         const shapeText = product.shape === 'Sq' ? 'Square (DTG)' : 'Oval (Merch)';
         document.getElementById('shapeIndicator').textContent = shapeText;
         initializeMockups();
-        updateBackButton();
-        // Initialize arc sliders from baselineArch defaults
-        if (document.getElementById('cityArcSlider')) updateSlider('cityArc', baselineArch.cityArch || 64);
-        if (document.getElementById('groupArcSlider')) updateSlider('groupArc', baselineArch.groupArch || 64);
-        syncStepFromHash();
         if (selectedStyle) {
             loadTemplate(selectedStyle, product.shape);
         }
@@ -1626,7 +1475,7 @@ Last Updated: January 1, 2026
         document.getElementById('cityCounter').textContent = remaining;
         updatePreview();
         if (cityText.length > 0 && currentStep === 2) {
-            updateCTA();
+            updateCTA('Continue →');
         }
     }
     
@@ -1645,7 +1494,7 @@ Last Updated: January 1, 2026
         document.getElementById('groupCounter').textContent = remaining;
         updatePreview();
         if (groupText.length > 0 && currentStep === 3) {
-            updateCTA();
+            updateCTA('Continue →');
         }
     }
     
@@ -1666,9 +1515,8 @@ Last Updated: January 1, 2026
             current = Math.max(0, Math.min(300, current + (delta * 5)));
             updateSlider('cityY', current);
         } else if (property === 'arc') {
-            let current = parseInt(document.getElementById('cityArcSlider')?.value || baselineArch.cityArch || 64);
-            current = Math.max(10, Math.min(450, current + delta));
-            updateSlider('cityArc', current);
+            baselineArch.cityArch = Math.max(10, Math.min(450, baselineArch.cityArch + delta));
+            updatePreview();
         }
     }
     
@@ -1682,9 +1530,8 @@ Last Updated: January 1, 2026
             current = Math.max(50, Math.min(400, current + (delta * 5)));
             updateSlider('groupY', current);
         } else if (property === 'arc') {
-            let current = parseInt(document.getElementById('groupArcSlider')?.value || baselineArch.groupArch || 64);
-            current = Math.max(10, Math.min(450, current + delta));
-            updateSlider('groupArc', current);
+            baselineArch.groupArch = Math.max(10, Math.min(450, baselineArch.groupArch + delta));
+            updatePreview();
         }
     }
     
@@ -1701,8 +1548,6 @@ Last Updated: January 1, 2026
         updateSlider('cityY', 223);
         updateSlider('groupSize', 8);
         updateSlider('groupY', 282);
-        updateSlider('cityArc', 64);
-        updateSlider('groupArc', 64);
     }
     
     function formatText(text, baseSize) {
@@ -1727,19 +1572,13 @@ Last Updated: January 1, 2026
         const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
         const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
         const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
-        const cityArc = parseInt(document.getElementById('cityArcSlider')?.value || baselineArch.cityArch || 64);
-        const groupArc = parseInt(document.getElementById('groupArcSlider')?.value || baselineArch.groupArch || 64);
-
-        // Keep baselineArch in sync with sliders
-        baselineArch.cityArch = cityArc;
-        baselineArch.groupArch = groupArc;
-
-const pathTop = document.getElementById('pathTop');
+        
+        const pathTop = document.getElementById('pathTop');
         const pathMid = document.getElementById('pathMid');
         
         if (pathTop && pathMid) {
-            pathTop.setAttribute('d', `M 20,${cityY} A 230,${cityArc} 0 0,1 480,${cityY}`);
-            pathMid.setAttribute('d', `M 20,${groupY} A 230,${groupArc} 0 0,1 480,${groupY}`);
+            pathTop.setAttribute('d', `M 20,${cityY} A 230,${baselineArch.cityArch} 0 0,1 480,${cityY}`);
+            pathMid.setAttribute('d', `M 20,${groupY} A 230,${baselineArch.groupArch} 0 0,1 480,${groupY}`);
         }
         
         const cityContainer = document.querySelector('#cityText');
@@ -1782,65 +1621,9 @@ const pathTop = document.getElementById('pathTop');
         updateProgress();
         updateStepIndicator();
         updateCTA();
-        updateBackButton();
     }
     
-    
-    function updateBackButton() {
-        const backBtn = document.getElementById('backButton');
-        if (!backBtn) return;
-        backBtn.disabled = (currentStep <= 1);
-    }
-
-    function handlePrimaryAction() {
-        if (currentStep === 1) {
-            if (!selectedStyle) return;
-            currentStep = 2;
-            showStep(2);
-        } else if (currentStep === 2) {
-            if (!cityText) return;
-            currentStep = 3;
-            showStep(3);
-        } else if (currentStep === 3) {
-            if (!groupText) return;
-            currentStep = 4;
-            showStep(4);
-        } else if (currentStep === 4) {
-            handleCheckout();
-            return;
-        }
-
-        // Persist step in URL (optional, supports browser back/forward)
-        try { location.hash = `step${currentStep}`; } catch (e) {}
-    }
-
-    function goBack() {
-        if (currentStep <= 1) return;
-        currentStep = Math.max(1, currentStep - 1);
-        showStep(currentStep);
-        try { location.hash = `step${currentStep}`; } catch (e) {}
-    }
-
-    function toggleAdvancedAdjustments(which) {
-        const adv = document.getElementById(which + 'Advanced');
-        const btn = document.querySelector(`#${which}Adjustments .adjustments-toggle`);
-        if (!adv) return;
-        const isHidden = adv.classList.contains('hidden');
-        adv.classList.toggle('hidden', !isHidden);
-        if (btn) btn.classList.toggle('active', isHidden);
-    }
-
-    // Restore step from hash on load + respond to browser navigation
-    function syncStepFromHash() {
-        const h = (location.hash || '').replace('#','').trim();
-        const m = h.match(/^step([1-4])$/);
-        if (!m) return;
-        const s = parseInt(m[1], 10);
-        currentStep = s;
-        showStep(s);
-    }
-
-function updateProgress() {
+    function updateProgress() {
         const progress = (currentStep / 4) * 100;
         document.getElementById('progressFill').style.width = progress + '%';
     }
@@ -2216,11 +1999,6 @@ function updateProgress() {
         updateProgress();
         updateStepIndicator();
         initializeMockups();
-        updateBackButton();
-        // Initialize arc sliders from baselineArch defaults
-        if (document.getElementById('cityArcSlider')) updateSlider('cityArc', baselineArch.cityArch || 64);
-        if (document.getElementById('groupArcSlider')) updateSlider('groupArc', baselineArch.groupArch || 64);
-        syncStepFromHash();
         
         if (window.innerWidth >= 768) {
             document.querySelector('.style-cards').classList.add('hidden');
@@ -2230,7 +2008,6 @@ function updateProgress() {
     }
     
     window.addEventListener('load', init);
-    window.addEventListener('hashchange', syncStepFromHash);
 
 
 // Color/Size/Zoom Functions - v1.16
