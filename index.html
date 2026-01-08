@@ -4,6 +4,11 @@ Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
 Last Updated: January 1, 2026
+
+PATCH (Manual-entry flow fix):
+- Sticky CTA now runs handlePrimaryAction() which advances steps 1->2->3->4
+- Checkout only runs on step 4
+- Manual typing now mimics chip flow (chips still auto-advance)
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -318,7 +323,6 @@ Last Updated: January 1, 2026
         
         .preview-canvas {
             width: 100%;
-            /* Mobile-first: use full available width; desktop overrides below */
             max-width: 100%;
             margin: 0 auto;
             aspect-ratio: 5/4;
@@ -570,7 +574,6 @@ Last Updated: January 1, 2026
             }
             
             .preview-canvas {
-                /* Desktop/tablet: make the preview fill ~75% of the right panel */
                 width: 75%;
                 max-width: 980px;
             }
@@ -648,9 +651,8 @@ Last Updated: January 1, 2026
     margin-bottom: 20px;
 }
 
-
 .selector-section.color-section {
-    margin-bottom: 32px; /* extra space between Color and Size */
+    margin-bottom: 32px;
 }
 .selector-label {
     font-size: 14px;
@@ -664,7 +666,7 @@ Last Updated: January 1, 2026
 /* COLOR OPTIONS */
 .color-row {
     display: flex;
-    align-items: flex-end; /* keep zoom button at lower-right of the color area */
+    align-items: flex-end;
     justify-content: space-between;
     gap: 12px;
 }
@@ -682,7 +684,7 @@ Last Updated: January 1, 2026
     display: flex;
     gap: 12px;
     flex-wrap: wrap;
-    min-height: 50px; /* Prevent layout shift when colors load */
+    min-height: 50px;
 }
 
 .color-options:empty::after {
@@ -785,7 +787,6 @@ Last Updated: January 1, 2026
         min-width: 70px;
     }
 
-    /* Mobile: give the full-width preview a subtle border so it reads as a "frame" */
     .preview-canvas {
         border: 2px solid rgba(255, 255, 255, 0.14);
     }
@@ -832,15 +833,13 @@ Last Updated: January 1, 2026
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 0;
-    overflow: hidden; /* Crop when zoomed */
+    overflow: hidden;
 }
 
-/* Zoom affects SVG only (frame/container does not grow) */
 .preview-canvas.zoomed #previewSVG {
     transform: scale(1.5);
 }
 
-/* Zoom button - Bottom right corner */
 .zoom-toggle {
     flex: 0 0 auto;
     position: relative;
@@ -869,8 +868,6 @@ Last Updated: January 1, 2026
     border-color: var(--gold);
     color: var(--gold);
 }
-
-
 </style>
 </head>
 <body>
@@ -1163,7 +1160,8 @@ Last Updated: January 1, 2026
 </div>
 
 <div class="sticky-cta">
-    <button class="mega-btn" id="ctaButton" onclick="handleCheckout()" disabled>
+    <!-- PATCH: CTA now advances steps; checkout only on step 4 -->
+    <button class="mega-btn" id="ctaButton" onclick="handlePrimaryAction()" disabled>
         Select a Style to Continue
     </button>
 </div>
@@ -1233,13 +1231,10 @@ Last Updated: January 1, 2026
             styleEl.setAttribute('data-export-fonts', '1');
             styleEl.textContent = `@import url("${EXPORT_FONT_IMPORT_URL}");`;
 
-            // Put it at the top so it is applied early
             const firstChild = svgEl.firstChild;
             if (firstChild) svgEl.insertBefore(styleEl, firstChild);
             else svgEl.appendChild(styleEl);
-        } catch (e) {
-            // non-fatal
-        }
+        } catch (e) {}
     }
 
     async function ensureFontsLoadedForExport() {
@@ -1268,7 +1263,6 @@ Last Updated: January 1, 2026
                 });
             });
 
-            // Don't ever hang checkout/export on fonts
             await Promise.race([
                 Promise.all(loads),
                 new Promise(resolve => setTimeout(resolve, 2000))
@@ -1278,12 +1272,9 @@ Last Updated: January 1, 2026
                 document.fonts.ready,
                 new Promise(resolve => setTimeout(resolve, 2000))
             ]);
-        } catch (e) {
-            // non-fatal
-        }
+        } catch (e) {}
     }
 
-    
     // Shopify Integration
     const SHOPIFY_CONFIG = {
         backendUrl: 'https://usa250-backend.vercel.app/api/create-draft-order',
@@ -1416,7 +1407,6 @@ Last Updated: January 1, 2026
         const shape = PRODUCTS[selectedProduct].shape;
         loadTemplate(style, shape);
         
-        // Update color options for selected style
         updateColorOptions();
         
         currentStep = 2;
@@ -1474,9 +1464,7 @@ Last Updated: January 1, 2026
         const remaining = 50 - cityText.length;
         document.getElementById('cityCounter').textContent = remaining;
         updatePreview();
-        if (cityText.length > 0 && currentStep === 2) {
-            updateCTA('Continue →');
-        }
+        updateCTA();
     }
     
     function useGroup(group) {
@@ -1493,9 +1481,46 @@ Last Updated: January 1, 2026
         const remaining = 35 - groupText.length;
         document.getElementById('groupCounter').textContent = remaining;
         updatePreview();
-        if (groupText.length > 0 && currentStep === 3) {
-            updateCTA('Continue →');
+        updateCTA();
+    }
+
+    // ------------------------------------------------------------
+    // PATCH: Primary CTA should advance steps (manual entry flow)
+    // ------------------------------------------------------------
+    function handlePrimaryAction() {
+        // Guard: should never be clickable if disabled, but keep it safe.
+        if (currentStep === 1) {
+            if (!selectedStyle) return;
+            currentStep = 2;
+            showStep(2);
+            // Focus for fast manual entry
+            setTimeout(() => document.getElementById('cityInput')?.focus(), 0);
+            return;
         }
+
+        if (currentStep === 2) {
+            if (!cityText) {
+                document.getElementById('cityInput')?.focus();
+                return;
+            }
+            currentStep = 3;
+            showStep(3);
+            setTimeout(() => document.getElementById('groupInput')?.focus(), 0);
+            return;
+        }
+
+        if (currentStep === 3) {
+            if (!groupText) {
+                document.getElementById('groupInput')?.focus();
+                return;
+            }
+            currentStep = 4;
+            showStep(4);
+            return;
+        }
+
+        // Step 4
+        return handleCheckout();
     }
     
     function toggleTweak() {
@@ -1661,7 +1686,6 @@ Last Updated: January 1, 2026
             canvas.width = 500 * scale;
             canvas.height = 400 * scale;
             const ctx = canvas.getContext('2d');
-            // Make sure the chosen font is ready for SVG->canvas rendering
             await ensureFontsLoadedForExport();
             
             const style = STYLES[selectedStyle];
@@ -1748,7 +1772,6 @@ Last Updated: January 1, 2026
             const img = new Image();
             img.decoding = 'async';
 
-            // Only set crossOrigin for absolute http(s) URLs
             if (isString && /^https?:\/\//i.test(src)) {
                 img.crossOrigin = 'anonymous';
             }
@@ -1763,7 +1786,6 @@ Last Updated: January 1, 2026
     }
 
     async function handleCheckout() {
-    // Validate selections
     if (!selectedStyle || !selectedProduct || !selectedColor || !selectedSize) {
         alert('Please select all options');
         return;
@@ -1775,7 +1797,6 @@ Last Updated: January 1, 2026
     checkoutBtn.disabled = true;
     
     try {
-        // VARIANT MAPPING
         const VARIANT_MAP = {
             'tee-black-s': { shopifyVariantId: '46057714417814', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
             'tee-black-m': { shopifyVariantId: '46057714548886', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
@@ -1801,7 +1822,6 @@ Last Updated: January 1, 2026
         
         console.log('Starting checkout process...');
         
-        // 1. Get SVG and clone it
         const svg = document.getElementById('previewSVG');
         if (!svg) {
             throw new Error('Design preview not found');
@@ -1809,9 +1829,6 @@ Last Updated: January 1, 2026
         
         const svgClone = svg.cloneNode(true);
         
-        // Preview-only underlays: remove them for exported print PNG (keep transparency)
-        // IMPORTANT: #bgImage is the *design layer* (crest/template). Do NOT remove it.
-        // If we ever add a true preview-only mockup layer, it should use id="mockupImage".
         const _exportMockup = svgClone.querySelector('#mockupImage');
         if (_exportMockup) _exportMockup.remove();
         const _exportShirt = svgClone.querySelector('#shirtFill');
@@ -1819,10 +1836,9 @@ Last Updated: January 1, 2026
             _exportShirt.setAttribute('fill', 'none');
             _exportShirt.setAttribute('fill-opacity', '0');
         }
-// Help exported SVG self-load fonts even when rendered via Blob URL
+
         injectFontImport(svgClone);
         
-        // 2. CRITICAL FIX: Embed background image as base64
         checkoutBtn.textContent = 'Loading design elements...';
         
         const bgImage = svgClone.querySelector('#bgImage');
@@ -1830,7 +1846,6 @@ Last Updated: January 1, 2026
             const imageUrl = bgImage.href.baseVal;
             console.log('Loading background image:', imageUrl);
             
-            // Load image and convert to base64 (cached)
             const base64 = await (async () => {
                 if (_assetCache.bgBase64.has(imageUrl)) return _assetCache.bgBase64.get(imageUrl);
 
@@ -1840,7 +1855,6 @@ Last Updated: January 1, 2026
                 
                 img.onload = function() {
                     try {
-                        // Draw to canvas to get base64
                         const canvas = document.createElement('canvas');
                         canvas.width = img.width;
                         canvas.height = img.height;
@@ -1863,22 +1877,19 @@ Last Updated: January 1, 2026
                 _assetCache.bgBase64.set(imageUrl, p);
                 return p;
             })();
-            // Replace external URL with base64
+
             bgImage.setAttribute('href', base64);
             console.log('Background image embedded in SVG');
         }
         
-        // Ensure fonts are actually loaded before we serialize SVG for export
         await ensureFontsLoadedForExport();
         
-        // 3. Convert SVG (with embedded image) to PNG
         checkoutBtn.textContent = 'Converting design...';
         
         const svgData = new XMLSerializer().serializeToString(svgClone);
         const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
         const url = URL.createObjectURL(svgBlob);
         
-        // Create image from SVG
         const img = new Image();
         
         const imageLoadPromise = new Promise((resolve, reject) => {
@@ -1893,12 +1904,11 @@ Last Updated: January 1, 2026
         img.src = url;
         await imageLoadPromise;
         
-        // 4. Draw to high-res canvas
         const canvas = document.createElement('canvas');
         canvas.width = 9000;
         canvas.height = 7200;
         const ctx = canvas.getContext('2d');
-        // Calculate centered scaling
+        
         const svgWidth = 500;
         const svgHeight = 400;
         const scale = Math.min(9000 / svgWidth, 7200 / svgHeight);
@@ -1907,14 +1917,12 @@ Last Updated: January 1, 2026
         const offsetX = (9000 - scaledWidth) / 2;
         const offsetY = (7200 - scaledHeight) / 2;
         
-        // Draw SVG
         ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
         
         URL.revokeObjectURL(url);
         
         console.log('Canvas created:', canvas.width, 'x', canvas.height);
         
-        // 5. Convert to blob
         checkoutBtn.textContent = 'Generating PNG...';
         
         const blob = await new Promise((resolve, reject) => {
@@ -1931,7 +1939,6 @@ Last Updated: January 1, 2026
             throw new Error('PNG file too small (' + sizeMB + 'MB) - design may not have rendered correctly');
         }
         
-        // 6. Upload to Cloudinary
         checkoutBtn.textContent = 'Uploading design...';
         
         const formData = new FormData();
@@ -1958,7 +1965,6 @@ Last Updated: January 1, 2026
         console.log('✓ Design uploaded:', designUrl);
         console.log('✓ Public ID:', cloudinaryData.public_id);
         
-        // 7. Map variant
         const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
         const variant = VARIANT_MAP[variantKey];
         
@@ -1968,7 +1974,6 @@ Last Updated: January 1, 2026
         
         console.log('✓ Variant found:', variantKey);
         
-        // 8. Build Shopify URL
         checkoutBtn.textContent = 'Redirecting to checkout...';
         
         const shopifyUrl = new URL(`https://shop.4ship.ca/cart/${variant.shopifyVariantId}:1`);
@@ -1981,7 +1986,6 @@ Last Updated: January 1, 2026
         
         console.log('✓ Redirecting to Shopify');
         
-        // 9. Redirect
         window.location.href = shopifyUrl.toString();
         
     } catch (error) {
@@ -1992,8 +1996,6 @@ Last Updated: January 1, 2026
         checkoutBtn.disabled = false;
     }
 }
-
-
     
     function init() {
         updateProgress();
@@ -2013,13 +2015,9 @@ Last Updated: January 1, 2026
 // Color/Size/Zoom Functions - v1.16
 
 const STYLE_COLORS = {
-    // Style 1 (A): Black + Navy only
     'A': ['Black', 'Navy'],
-    // Style 2 (B): Black + Navy only
     'B': ['Black', 'Navy'],
-    // Style 3 (C): all four colours
     'C': ['Black', 'Navy', 'White', 'Gray'],
-    // Style 4 (D): White + Gray only (default Gray)
     'D': ['Gray', 'White']
 };
 
@@ -2047,7 +2045,6 @@ function updateColorOptions() {
     if (!selectedColor || !availableColors.includes(selectedColor)) {
         selectColor(availableColors[0]);
     } else {
-        // Re-apply color to update background
         selectColor(selectedColor);
     }
 }
@@ -2058,7 +2055,6 @@ function selectColor(color) {
         btn.classList.toggle('active', btn.getAttribute('data-color') === color);
     });
 
-    // Update shirt underlay inside the SVG (so transparent mockup areas reflect the selected shirt colour)
     const colorMap = {
         'Black': '#1a1a1a',
         'White': '#f5f5f5',
@@ -2070,7 +2066,6 @@ function selectColor(color) {
     if (shirtFill) {
         shirtFill.setAttribute('fill', colorMap[color] || '#1a1a1a');
     }
-
 }
 
 function selectSize(size) {
