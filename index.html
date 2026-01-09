@@ -1,5 +1,5 @@
 <!--
-USA250 v1.18.2 - Preview Fill / Cover Cropping
+USA250 v1.18.3 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -477,7 +477,7 @@ Last Updated: January 1, 2026
             cursor: not-allowed;
         }
 
-        /* v1.18.2 - CTA dual buttons + quantity */
+        /* v1.18.3 - CTA dual buttons + quantity */
         .cta-row{
             width: 100%;
             max-width: 520px;
@@ -956,7 +956,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.18.2</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.18.3</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1234,7 +1234,7 @@ Last Updated: January 1, 2026
         </div>
 
 
-        <!-- QUANTITY SELECTOR (v1.18.2) -->
+        <!-- QUANTITY SELECTOR (v1.18.3) -->
         <div class="selector-section">
             <div class="selector-label">Quantity</div>
             <div class="qty-row">
@@ -1596,7 +1596,7 @@ let cityText = '';
         }
 
     // -------------------------
-    // v1.18.2 - Persist + DesignID
+    // v1.18.3 - Persist + DesignID
     // -------------------------
     const STORAGE_KEY = 'usa250_designer_state_v1_18';
 
@@ -1753,8 +1753,7 @@ let cityText = '';
     // Persist state on key changes
     function persistAfterChange() { persistState(); }
 
-    }
-    
+
     function toggleTweak() {
         const controls = document.getElementById('tweakControls');
         const btn = document.getElementById('tweakToggle');
@@ -2046,7 +2045,7 @@ let cityText = '';
 
     
     // -------------------------
-    // v1.18.2 - Cloud + Cart flow
+    // v1.18.3 - Cloud + Cart flow
     // -------------------------
     const CLOUDINARY = {
         cloudName: 'dqab444bd',
@@ -2367,7 +2366,7 @@ let cityText = '';
         updateStepIndicator();
         initializeMockups();
 
-        // v1.18.2: restore design from share link or local storage
+        // v1.18.3: restore design from share link or local storage
         const params = new URLSearchParams(window.location.search);
         const designJsonUrl = params.get('design_json');
 
