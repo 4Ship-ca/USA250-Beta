@@ -1,5 +1,5 @@
 <!--
-USA250 v1.20.0 - Preview Fill / Cover Cropping
+USA250 v1.21.1 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -963,23 +963,32 @@ Last Updated: January 1, 2026
 
 
 
-/* Mobile Layout Fix: Preview on top, Panels below */
-@media (max-width: 767px) {
+/* Mobile/Tablet Layout Fix: Preview on top, Panels below */
+@media (max-width: 1024px) {
     .container {
-        display: flex;
-        flex-direction: column;
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 10px !important;
     }
     .right-panel {
-        order: 1; /* Preview on top */
-        position: relative;
-        top: 0;
-        margin-bottom: 20px;
+        order: 1 !important;
+        position: relative !important;
+        top: 0 !important;
+        width: 100% !important;
+        margin-bottom: 20px !important;
     }
     .left-panel {
-        order: 2; /* Controls below */
+        order: 2 !important;
+        width: 100% !important;
+        height: auto !important;
+        overflow: visible !important;
     }
     .header {
-        order: 0; /* Logo stays at very top if inside container, but it's inside left-panel currently */
+        text-align: center !important;
+    }
+    .preview-canvas {
+        width: 100% !important;
+        max-width: 100% !important;
     }
 }
 
@@ -2168,7 +2177,6 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         
         // 8. Add item to Shopify cart via POST
         // NOTE: Internal properties are prefixed with '_' to hide them from the standard Shopify cart view.
-        // Most Shopify themes automatically hide line item properties starting with an underscore.
         checkoutBtn.textContent = 'Adding to cart...';
 
         const designId = (window.crypto && crypto.randomUUID)
@@ -2176,11 +2184,21 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
             : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
         const qty = Math.max(1, Math.min(99, parseInt(selectedQuantity || 1, 10) || 1));
 
-        // Because the designer is hosted on a different domain than the shop,
-        // we use a standard HTML form POST instead of AJAX to avoid CORS issues.
+        // CUMULATIVE CART FIX:
+        // Instead of a direct form submit which can sometimes lose session context on cross-domain,
+        // we use a hidden iframe to perform the add-to-cart. This ensures the Shopify session
+        // cookies are handled correctly by the browser within the shop's domain context.
+        
+        const iframeName = 'shopify_add_iframe_' + Date.now();
+        const iframe = document.createElement('iframe');
+        iframe.name = iframeName;
+        iframe.style.display = 'none';
+        document.body.appendChild(iframe);
+
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = 'https://shop.4ship.ca/cart/add';
+        form.target = iframeName; // Submit into the hidden iframe
 
         const addField = (name, value) => {
             const input = document.createElement('input');
@@ -2190,11 +2208,8 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
             form.appendChild(input);
         };
 
-        // Core Shopify fields
         addField('id', variant.shopifyVariantId);
         addField('quantity', String(qty));
-
-        // Line item properties
         addField('properties[_design_id]', designId);
         addField('properties[_style]', selectedStyle);
         addField('properties[color]', selectedColor);
@@ -2204,14 +2219,14 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         addField('properties[_design_url]', designUrl);
         addField('properties[_gelato_product]', variant.gelatoUid);
         addField('properties[_gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
-
-        // Ensure we land on the cart after the add
-        // To land on a custom page, change '/cart' to your desired path (e.g., '/pages/custom-cart')
-        addField('return_to', '/cart');
+        
+        // After adding to cart in the iframe, we redirect the main window to the cart
+        iframe.onload = () => {
+            console.log('✓ Item added to cart via iframe');
+            window.location.href = 'https://shop.4ship.ca/cart';
+        };
 
         document.body.appendChild(form);
-
-        console.log('✓ Submitting line item to Shopify cart');
         form.submit();
 
     } catch (error) {
