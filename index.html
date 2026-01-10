@@ -1,5 +1,5 @@
 <!--
-USA250 v1.19.2 - Preview Fill / Cover Cropping
+USA250 v1.20.0 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -11,7 +11,9 @@ Last Updated: January 1, 2026
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>America 250 - Design Your Style</title>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Cinzel:wght@700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
+    
+    <link rel=\"icon\" href=\"data:,\">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Cinzel:wght@700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
@@ -470,81 +472,7 @@ Last Updated: January 1, 2026
             cursor: not-allowed;
         }
         
-        
-        .mega-btn:disabled {
-            background: #444;
-            color: #888;
-            cursor: not-allowed;
-        }
-
-        /* v1.19.2 - CTA dual buttons + quantity */
-        .cta-row{
-            width: 100%;
-            max-width: 520px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-        }
-        .mega-btn.secondary{
-            background: transparent;
-            border: 2px solid var(--gold);
-            color: var(--gold);
-            box-shadow: none;
-        }
-        .mega-btn.secondary:active{
-            transform: scale(0.98);
-        }
-        .mega-btn.secondary:disabled{
-            border-color: #444;
-            color: #777;
-            background: transparent;
-        }
-        @media (min-width: 768px){
-            .cta-row{
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .qty-row{
-            display:flex;
-            align-items:center;
-            gap:10px;
-        }
-        .qty-btn{
-            width:44px;
-            height:44px;
-            border-radius:10px;
-            border:2px solid var(--border);
-            background: var(--panel);
-            color:#fff;
-            font-size:20px;
-            font-weight:900;
-            cursor:pointer;
-        }
-        .qty-btn:active{
-            border-color: var(--gold);
-            color: var(--gold);
-            transform: scale(0.98);
-        }
-        .qty-input{
-            flex:1;
-            min-width:0;
-            height:44px;
-            border-radius:10px;
-            border:2px solid var(--border);
-            background:#1a1a1a;
-            color:#fff;
-            text-align:center;
-            font-size:16px;
-            font-weight:800;
-            outline:none;
-        }
-        .qty-input:focus{
-            border-color: var(--gold);
-        }
-
-/* Desktop styles */
+        /* Desktop styles */
         @media (min-width: 768px) {
             .container {
                 display: grid;
@@ -844,6 +772,47 @@ Last Updated: January 1, 2026
     color: var(--bg);
 }
 
+
+.quantity-controls{
+    display:flex;
+    gap:10px;
+    align-items:center;
+}
+
+.qty-btn{
+    width:48px;
+    height:44px;
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: white;
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.qty-btn:hover{
+    border-color: var(--gold);
+}
+
+.qty-input{
+    flex:1;
+    height:44px;
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    color: white;
+    font-weight: 800;
+    font-size: 16px;
+    text-align: center;
+    outline: none;
+}
+
+.qty-input:focus{
+    border-color: var(--gold);
+}
 /* Mobile responsive */
 @media (max-width: 768px) {
     .color-options {
@@ -945,29 +914,6 @@ Last Updated: January 1, 2026
 }
 
 
-
-.step-content {
-            width: 100%;
-            max-width: 520px;
-            margin: 0 auto;
-            /* v1.19.2: smooth step transitions */
-            opacity: 1;
-            transform: translateY(0);
-            transition: opacity 0.25s ease, transform 0.25s ease;
-            will-change: opacity, transform;
-        }
-
-        /* "hidden" keeps element in flow for transition start, then we apply display-none after */
-        .step-content.hidden {
-            opacity: 0;
-            transform: translateY(10px);
-            pointer-events: none;
-        }
-
-        /* v1.19.2: helper class toggled after transition completes */
-        .step-content.display-none {
-            display: none !important;
-        }
 </style>
 </head>
 <body>
@@ -979,12 +925,12 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.19.2</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.20.0</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
         <!-- STEP 1: Style Selection -->
-        <div class="style-section step-content" data-step="1" id="step1">
+        <div class="style-section" id="step1">
             <h2 class="section-title">Choose Your Style</h2>
             
             <div class="product-selector">
@@ -1072,7 +1018,7 @@ Last Updated: January 1, 2026
         </div>
         
         <!-- STEP 2: Location -->
-        <div class="location-section step-content hidden display-none" data-step="2" id="step2">
+        <div class="location-section hidden" id="step2">
             <h2 class="section-title">Your Location</h2>
             
             <button class="locate-btn" onclick="useGeolocation()">
@@ -1098,7 +1044,7 @@ Last Updated: January 1, 2026
         </div>
         
         <!-- STEP 3: Group Name -->
-        <div class="location-section step-content hidden display-none" data-step="3" id="step3">
+        <div class="location-section hidden" id="step3">
             <h2 class="section-title">Your Group</h2>
             
             <div class="input-group">
@@ -1117,7 +1063,7 @@ Last Updated: January 1, 2026
         </div>
         
         <!-- STEP 4: Tweak -->
-        <div class="tweak-section step-content hidden display-none" data-step="4" id="step4">
+        <div class="tweak-section hidden" id="step4">
             <div class="tweak-toggle">
                 <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">
                     ⚙️ Fine-Tune Your Design
@@ -1255,36 +1201,25 @@ Last Updated: January 1, 2026
                 <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
             </div>
         </div>
+</div>
+    </div>
+</div>
 
-
-        <!-- QUANTITY SELECTOR (v1.19.2) -->
+<!-- QUANTITY SELECTOR -->
         <div class="selector-section">
             <div class="selector-label">Quantity</div>
-            <div class="qty-row">
-                <button class="qty-btn" onclick="bumpQty(-1)" aria-label="Decrease quantity">−</button>
-                <input class="qty-input" id="qtyInput" type="number" min="1" max="99" value="1" inputmode="numeric" pattern="[0-9]*"
-                       oninput="setQtyFromInput(this.value)" />
-                <button class="qty-btn" onclick="bumpQty(1)" aria-label="Increase quantity">+</button>
+            <div class="quantity-controls">
+                <button class="qty-btn" type="button" onclick="changeQuantity(-1)">−</button>
+                <input id="quantityInput" class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" oninput="setQuantityFromInput(this.value)">
+                <button class="qty-btn" type="button" onclick="changeQuantity(1)">+</button>
             </div>
         </div>
 
-</div>
-    </div>
-
-        </div>
-
-
 <div class="sticky-cta">
-    <div class="cta-row">
-        <button class="mega-btn" id="ctaButton" onclick="handlePrimaryAction()" disabled>
-            Select a Style to Continue
-        </button>
-        <button class="mega-btn secondary" id="addToCartButton" onclick="handleAddToCart()" disabled style="display:none;">
-            Add to Cart
-        </button>
-    </div>
+    <button class="mega-btn" id="ctaButton" onclick="handlePrimaryAction()" disabled>
+        Select a Style to Continue
+    </button>
 </div>
-
 
 <script>
     // State management
@@ -1294,10 +1229,14 @@ Last Updated: January 1, 2026
     let selectedProduct = 'tee';
     let selectedColor = null; // default chosen per-style in updateColorOptions()
     let selectedSize = 'L';
-        let selectedQty = 1;
+    
+    let selectedQuantity = 1;
 let cityText = '';
     let groupText = '';
-    let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
+    
+    let _cityAdvanceTimer = null;
+    let _groupAdvanceTimer = null;
+let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     
     const PRODUCTS = {
         'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' }
@@ -1540,8 +1479,8 @@ let cityText = '';
         
         currentStep = 2;
         showStep(2);
-        persistAfterChange();
     }
+    
     async function loadTemplate(style, shape) {
         try {
             const templatePath = `templates/Style_${style}_${shape}.svg`;
@@ -1588,22 +1527,27 @@ let cityText = '';
         }, 300);
     }
     
-    function updateCity() {
-        cityText = document.getElementById('cityInput').value.toUpperCase();
+        function updateCity() {
+        cityText = (document.getElementById('cityInput').value || '').toUpperCase().slice(0, 50);
+        document.getElementById('cityInput').value = cityText;
+
         const remaining = 50 - cityText.length;
         document.getElementById('cityCounter').textContent = remaining;
-        updatePreview();
 
-        if (cityText.length > 0 && currentStep === 2) {
-            updateCTA('Continue →');
-        } else {
-            updateCTA();
+        updatePreview();
+        updateCTA();
+
+        // Mimic the pre-canned flow: once the user types a valid value, advance after a short pause.
+        if (currentStep === 2 && cityText.trim().length > 0) {
+            clearTimeout(_cityAdvanceTimer);
+            _cityAdvanceTimer = setTimeout(() => {
+                if (currentStep === 2 && cityText.trim().length > 0) {
+                    currentStep = 3;
+                    showStep(3);
+                }
+            }, 350);
         }
 
-        if (typeof persistAfterChange === 'function') persistAfterChange();
-    }
-
-    
     function useGroup(group) {
         document.getElementById('groupInput').value = group;
         updateGroup();
@@ -1613,180 +1557,31 @@ let cityText = '';
         }, 300);
     }
     
-    function updateGroup() {
-        groupText = document.getElementById('groupInput').value.toUpperCase();
+        function updateGroup() {
+        groupText = (document.getElementById('groupInput').value || '').toUpperCase().slice(0, 35);
+        document.getElementById('groupInput').value = groupText;
+
         const remaining = 35 - groupText.length;
         document.getElementById('groupCounter').textContent = remaining;
-        updatePreview();
 
-        if (groupText.length > 0 && currentStep === 3) {
-            updateCTA('Continue →');
-        } else {
-            updateCTA();
-        }
-
-        if (typeof persistAfterChange === 'function') persistAfterChange();
-    }
-
-
-    // -------------------------
-    // v1.19.2 - Persist + DesignID
-    // -------------------------
-    const STORAGE_KEY = 'usa250_designer_state_v1_18_6';
-
-    function uuidv4() {
-        // RFC4122-ish UUID (good enough for IDs in browser)
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-            const r = (crypto.getRandomValues(new Uint8Array(1))[0] & 15);
-            const v = c === 'x' ? r : (r & 0x3) | 0x8;
-            return v.toString(16);
-        });
-    }
-
-    function getStateSnapshot() {
-        return {
-            v: '1.18',
-            t: new Date().toISOString(),
-            step: currentStep,
-            selectedStyle,
-            selectedProduct,
-            selectedColor,
-            selectedSize,
-            selectedQty,
-            cityText,
-            groupText,
-            sliders: {
-                citySize: Number(document.getElementById('citySizeSlider')?.value || 10),
-                cityY: Number(document.getElementById('cityYSlider')?.value || 223),
-                groupSize: Number(document.getElementById('groupSizeSlider')?.value || 8),
-                groupY: Number(document.getElementById('groupYSlider')?.value || 282)
-            },
-            baselineArch: { ...baselineArch }
-        };
-    }
-
-    function persistState() {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(getStateSnapshot()));
-        } catch (e) {}
-    }
-
-    async function restoreStateFromLocal() {
-        try {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return false;
-            const st = JSON.parse(raw);
-            if (!st || !st.selectedStyle) return false;
-            await applyDesignPayload(st, { goToStep: st.step || 2, persist: false });
-            return true;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    function buildDesignPayloadForCloud() {
-        // Cloud payload (shareable across devices)
-        return {
-            v: '1.18',
-            created_at: new Date().toISOString(),
-            selectedStyle,
-            selectedProduct,
-            selectedColor,
-            selectedSize,
-            selectedQty,
-            cityText,
-            groupText,
-            sliders: {
-                citySize: Number(document.getElementById('citySizeSlider')?.value || 10),
-                cityY: Number(document.getElementById('cityYSlider')?.value || 223),
-                groupSize: Number(document.getElementById('groupSizeSlider')?.value || 8),
-                groupY: Number(document.getElementById('groupYSlider')?.value || 282)
-            },
-            baselineArch: { ...baselineArch }
-        };
-    }
-
-    async function applyDesignPayload(payload, opts = {}) {
-        const { goToStep = 4, persist = true } = opts;
-
-        if (!payload) return;
-
-        // Style
-        selectedStyle = payload.selectedStyle || payload.style || selectedStyle;
-        selectedProduct = payload.selectedProduct || payload.product || selectedProduct;
-        selectedColor = payload.selectedColor || payload.color || selectedColor;
-        selectedSize = payload.selectedSize || payload.size || selectedSize;
-        selectedQty = Number(payload.selectedQty || payload.qty || selectedQty || 1);
-
-        // Inputs
-        cityText = (payload.cityText || payload.city || cityText || '').toUpperCase();
-        groupText = (payload.groupText || payload.group || groupText || '').toUpperCase();
-
-        const cityEl = document.getElementById('cityInput');
-        const groupEl = document.getElementById('groupInput');
-        if (cityEl) cityEl.value = cityText;
-        if (groupEl) groupEl.value = groupText;
-
-        // Sliders
-        const s = payload.sliders || {};
-        if (document.getElementById('citySizeSlider') && s.citySize != null) document.getElementById('citySizeSlider').value = s.citySize;
-        if (document.getElementById('cityYSlider') && s.cityY != null) document.getElementById('cityYSlider').value = s.cityY;
-        if (document.getElementById('groupSizeSlider') && s.groupSize != null) document.getElementById('groupSizeSlider').value = s.groupSize;
-        if (document.getElementById('groupYSlider') && s.groupY != null) document.getElementById('groupYSlider').value = s.groupY;
-
-        // baseline arch
-        if (payload.baselineArch) baselineArch = { ...baselineArch, ...payload.baselineArch };
-
-        // Update UI selections
-        document.querySelectorAll('.style-card-desktop').forEach(card => card.classList.remove('selected'));
-        document.querySelector(`.style-card-desktop[data-style="${selectedStyle}"]`)?.classList.add('selected');
-
-        // product + template
-        const shape = PRODUCTS[selectedProduct]?.shape || 'Sq';
-        await loadTemplate(selectedStyle, shape);
-
-        // colors + sizes + qty
-        updateColorOptions();
-        if (selectedColor) selectColor(selectedColor);
-        if (selectedSize) selectSize(selectedSize);
-        setQtyFromInput(String(selectedQty));
-
-        // counters + preview
-        updateCity();
-        updateGroup();
-        updatePreview();
-
-        currentStep = Math.max(1, Math.min(4, Number(goToStep)));
-        showStep(currentStep);
-
-        if (persist) persistState();
-    }
-
-    // Restore on BFCache/back navigation
-    window.addEventListener('pageshow', async (evt) => {
-        // If page restored from cache, ensure UI state and CTA are correct.
         updatePreview();
         updateCTA();
-        persistAfterChange();
-    });
 
-    // Quantity handlers
-    function setQtyFromInput(val) {
-        const n = Math.max(1, Math.min(99, parseInt(val || '1', 10) || 1));
-        selectedQty = n;
-        const el = document.getElementById('qtyInput');
-        if (el && String(el.value) !== String(n)) el.value = String(n);
-        persistState();
+        // Mimic the pre-canned flow: once the user types a valid value, advance after a short pause.
+        if (currentStep === 3 && groupText.trim().length > 0) {
+            clearTimeout(_groupAdvanceTimer);
+            _groupAdvanceTimer = setTimeout(() => {
+                if (currentStep === 3 && groupText.trim().length > 0) {
+                    currentStep = 4;
+                    showStep(4);
+                }
+            }, 350);
+        }
     }
 
-    function bumpQty(delta) {
-        setQtyFromInput(String((selectedQty || 1) + delta));
     }
-
-    // Persist state on key changes
-    function persistAfterChange() { try { persistState(); } catch(e) {} }
-
-function toggleTweak() {
+    
+    function toggleTweak() {
         const controls = document.getElementById('tweakControls');
         const btn = document.getElementById('tweakToggle');
         controls.classList.toggle('active');
@@ -1902,40 +1697,15 @@ function toggleTweak() {
     }
     
     function showStep(step) {
-        currentStep = step;
-
-        // Update step indicator
-        const stepIndicator = document.getElementById('stepIndicator');
-        if (stepIndicator) stepIndicator.textContent =
-            `Step ${step} of 4: ` + (step === 1 ? 'Pick Your Style' : step === 2 ? 'Enter Your Location' : step === 3 ? 'Enter Your Group' : 'Preview & Buy');
-
-        // v1.19.2: animated transitions for the existing step containers (#step1..#step4)
-        const DURATION = 260; // ms (match CSS transition)
-        const steps = [1,2,3,4].map(i => document.getElementById(`step${i}`)).filter(Boolean);
-
-        steps.forEach((el) => {
-            const elStep = Number(el.getAttribute('data-step') || el.id.replace('step','') || '0');
-            const isTarget = elStep === step;
-
-            if (isTarget) {
-                el.classList.remove('display-none');
-                // Force reflow to ensure transition triggers
-                void el.offsetWidth;
-                el.classList.remove('hidden');
-            } else {
-                el.classList.add('hidden');
-                setTimeout(() => {
-                    const stillNotTarget = Number(el.getAttribute('data-step') || el.id.replace('step','') || '0') !== currentStep;
-                    if (stillNotTarget) el.classList.add('display-none');
-                }, DURATION);
-            }
-        });
-
-        try { updateProgress(); } catch(e) {}
-        try { updateStepIndicator(); } catch(e) {}
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById(`step${i}`)?.classList.add('hidden');
+        }
+        document.getElementById(`step${step}`)?.classList.remove('hidden');
+        updateProgress();
+        updateStepIndicator();
         updateCTA();
-        try { persistState(); } catch(e) {}
     }
+    
     function updateProgress() {
         const progress = (currentStep / 4) * 100;
         document.getElementById('progressFill').style.width = progress + '%';
@@ -1946,51 +1716,55 @@ function toggleTweak() {
         document.getElementById('stepIndicator').textContent = `Step ${currentStep} of 4: ${steps[currentStep - 1]}`;
     }
     
-    
     function updateCTA(text) {
-        const primary = document.getElementById('ctaButton');
-        const addBtn = document.getElementById('addToCartButton');
-
-        // Defensive
-        if (!primary) return;
-
-        // Show/hide secondary button only on step 4
-        if (addBtn) {
-            addBtn.style.display = (currentStep === 4) ? 'block' : 'none';
-        }
-
-        // Validation gates
-        const canContinueStep1 = !!selectedStyle;
-        const canContinueStep2 = !!cityText;
-        const canContinueStep3 = !!groupText;
-        const canCheckout = !!(selectedStyle && cityText && groupText && selectedColor && selectedSize && selectedQty);
-
+        const btn = document.getElementById('ctaButton');
+        
         if (text) {
-            primary.textContent = text;
-            primary.disabled = false;
-            if (addBtn) addBtn.disabled = !canCheckout;
+            btn.textContent = text;
+            btn.disabled = false;
+        } else if (currentStep === 1) {
+            btn.textContent = selectedStyle ? 'Continue →' : 'Select a Style to Continue';
+            btn.disabled = !selectedStyle;
+        } else if (currentStep === 2) {
+            btn.textContent = cityText ? 'Continue →' : 'Enter Your Location';
+            btn.disabled = !cityText;
+        } else if (currentStep === 3) {
+            btn.textContent = groupText ? 'Continue →' : 'Enter Your Group Name';
+            btn.disabled = !groupText;
+        } else if (currentStep === 4) {
+            btn.textContent = 'Continue to Checkout →';
+            btn.disabled = false;
+        }
+    }
+    
+    // Primary CTA behavior:
+    // Steps 1-3: advance through the wizard (manual entry mimics the pre-canned flow).
+    // Step 4: perform checkout redirect.
+    function handlePrimaryAction() {
+        if (currentStep === 1) {
+            if (!selectedStyle) return;
+            currentStep = 2;
+            showStep(2);
             return;
         }
 
-        if (currentStep === 1) {
-            primary.textContent = canContinueStep1 ? 'Continue →' : 'Select a Style to Continue';
-            primary.disabled = !canContinueStep1;
-            if (addBtn) addBtn.disabled = true;
-        } else if (currentStep === 2) {
-            primary.textContent = canContinueStep2 ? 'Continue →' : 'Enter Your Location';
-            primary.disabled = !canContinueStep2;
-            if (addBtn) addBtn.disabled = true;
-        } else if (currentStep === 3) {
-            primary.textContent = canContinueStep3 ? 'Continue →' : 'Enter Your Group Name';
-            primary.disabled = !canContinueStep3;
-            if (addBtn) addBtn.disabled = true;
-        } else if (currentStep === 4) {
-            primary.textContent = 'Buy Now →';
-            primary.disabled = !canCheckout;
-            if (addBtn) addBtn.disabled = !canCheckout;
+        if (currentStep === 2) {
+            if (!cityText) return;
+            currentStep = 3;
+            showStep(3);
+            return;
         }
-    }
 
+        if (currentStep === 3) {
+            if (!groupText) return;
+            currentStep = 4;
+            showStep(4);
+            return;
+        }
+
+        // Step 4: do the real checkout/cart redirect
+        handleCheckout();
+    }
     async function generate9000pxPNG() {
         try {
             const canvas = document.createElement('canvas');
@@ -1998,10 +1772,7 @@ function toggleTweak() {
             canvas.width = 500 * scale;
             canvas.height = 400 * scale;
             const ctx = canvas.getContext('2d');
-            
-        ctx.imageSmoothingEnabled = true;
-        try { ctx.imageSmoothingQuality = 'high'; } catch(e) {}
-// Make sure the chosen font is ready for SVG->canvas rendering
+            // Make sure the chosen font is ready for SVG->canvas rendering
             await ensureFontsLoadedForExport();
             
             const style = STYLES[selectedStyle];
@@ -2102,503 +1873,259 @@ function toggleTweak() {
         return p;
     }
 
+    async function handleCheckout() {
+    // Validate selections
+    if (!selectedStyle || !selectedProduct || !selectedColor || !selectedSize) {
+        alert('Please select all options');
+        return;
+    }
     
-    // -------------------------
-    // v1.19.2 - Cloud + Cart flow
-    // -------------------------
-    const CLOUDINARY = {
-        cloudName: 'dqab444bd',
-        imageUploadPreset: 'america250',
-        // IMPORTANT: create a second *unsigned* preset configured for RAW uploads (resource_type=raw)
-        rawUploadPreset: 'america250_raw',
-        folderImages: 'usa250-designs',
-        folderJson: 'usa250-designs-json'
-    };
-
+    const checkoutBtn = document.getElementById('ctaButton');
+    const originalText = checkoutBtn.textContent;
+    checkoutBtn.textContent = 'Preparing design...';
+    checkoutBtn.disabled = true;
     
-const SHOPIFY = {
-        // If this designer is hosted OFF-Shopify (e.g., GitHub Pages on 4ship.shop),
-        // we must post to your Shopify domain to add items to cart.
-        storeBaseUrl: 'https://shop.4ship.ca'
-    };
-
-    function isSameOriginShopify() {
-        try {
-            const target = new URL(SHOPIFY.storeBaseUrl);
-            return window.location.origin === target.origin;
-        } catch (e) {
-            return false;
-        }
-    }
-
-    // Cross-origin safe add-to-cart: build a form and POST to Shopify.
-    // This works even when the designer is hosted on a different domain.
-    function submitCartAddForm(variantId, qty, properties, returnTo) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `${SHOPIFY.storeBaseUrl}/cart/add`;
-        form.style.display = 'none';
-
-        const addField = (name, value) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = String(value ?? '');
-            form.appendChild(input);
+    try {
+        // VARIANT MAPPING
+        const VARIANT_MAP = {
+            'tee-black-s': { shopifyVariantId: '46057714417814', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
+            'tee-black-m': { shopifyVariantId: '46057714548886', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
+            'tee-black-l': { shopifyVariantId: '46057714516118', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000' },
+            'tee-black-xl': { shopifyVariantId: '46057714483350', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000' },
+            'tee-black-2xl': { shopifyVariantId: '46057714450582', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000' },
+            'tee-white-s': { shopifyVariantId: '46057714581654', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' },
+            'tee-white-m': { shopifyVariantId: '46057714712726', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000' },
+            'tee-white-l': { shopifyVariantId: '46057714679958', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000' },
+            'tee-white-xl': { shopifyVariantId: '46057714647190', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000' },
+            'tee-white-2xl': { shopifyVariantId: '46057714614422', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000' },
+            'tee-navy-s': { shopifyVariantId: '46057714745494', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-navy-m': { shopifyVariantId: '46057714876566', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-navy-l': { shopifyVariantId: '46057714843798', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-navy-xl': { shopifyVariantId: '46057714811030', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-navy-2xl': { shopifyVariantId: '46057714778262', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000' },
+            'tee-gray-s': { shopifyVariantId: '46057714909334', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_gray_gpr_4-0_gildan_64000' },
+            'tee-gray-m': { shopifyVariantId: '46057715040406', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_gray_gpr_4-0_gildan_64000' },
+            'tee-gray-l': { shopifyVariantId: '46057715007638', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_gray_gpr_4-0_gildan_64000' },
+            'tee-gray-xl': { shopifyVariantId: '46057714974870', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_gray_gpr_4-0_gildan_64000' },
+            'tee-gray-2xl': { shopifyVariantId: '46057714942102', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_gray_gpr_4-0_gildan_64000' }
         };
-
-        addField('id', variantId);
-        addField('quantity', qty);
-
-        if (returnTo) addField('return_to', returnTo);
-
-        if (properties && typeof properties === 'object') {
-            Object.entries(properties).forEach(([k, v]) => {
-                addField(`properties[${k}]`, v);
-            });
-        }
-
-        document.body.appendChild(form);
-        form.submit();
-    }
-
-function getVariantKey() {
-        // Prefer product-color-size, but support legacy color-size maps (v1.17)
-        const p = (selectedProduct || '').toString();
-        const c = (selectedColor || '').toString();
-        const s = (selectedSize || '').toString();
-        return {
-            prodKey: `${p}-${c}-${s}`.toLowerCase(),
-            prodKeyRaw: `${p}-${c}-${s}`,
-            colorSize: `${c}-${s}`,
-            colorSizeLower: `${c}-${s}`.toLowerCase()
-        };
-    }
-
-    function getVariant() {
-        const keys = getVariantKey();
-
-        // If VARIANT_MAP already contains rich objects, return them directly
-        const candidates = [
-            keys.prodKey,
-            keys.prodKeyRaw,
-            keys.colorSize,
-            keys.colorSizeLower
-        ];
-
-        for (const k of candidates) {
-            const v = VARIANT_MAP[k];
-            if (!v) continue;
-
-            // New-style object map support
-            if (typeof v === 'object') return v;
-
-            // Legacy string/number variant id support
-            return {
-                shopifyVariantId: String(v),
-                gelatoUid: (PRODUCTS[selectedProduct] && PRODUCTS[selectedProduct].gelatoUid) ? PRODUCTS[selectedProduct].gelatoUid : ''
-            };
-        }
-
-        return null;
-    }
-
-    async function uploadCloudinaryImage(blob, publicId) {
-        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`;
-        const fd = new FormData();
-        fd.append('file', blob);
-        fd.append('upload_preset', CLOUDINARY.imageUploadPreset);
-        fd.append('folder', CLOUDINARY.folderImages);
-        if (publicId) fd.append('public_id', publicId);
-        const res = await fetch(url, { method: 'POST', body: fd });
-        if (!res.ok) throw new Error('Cloudinary image upload failed');
-        return await res.json();
-    }
-
-    // v1.19.2: Store JSON as an SVG "image" in Cloudinary (works with your existing IMAGE unsigned preset),
-    // avoiding the need for a RAW unsigned preset. The JSON is base64 inside <desc id="payload">.
-    async function uploadCloudinaryJsonAsSvg(jsonObj, publicId) {
-        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`;
-
-        const jsonStr = JSON.stringify(jsonObj);
-        const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
-
-        const svg = `<?xml version="1.0" encoding="UTF-8"?>`
-            + `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1">`
-            + `<desc id="payload">B64:${b64}</desc>`
-            + `</svg>`;
-
-        const blob = new Blob([svg], { type: 'image/svg+xml' });
-
-        const fd = new FormData();
-        fd.append('file', blob, `${publicId || 'design'}.svg`);
-        fd.append('upload_preset', CLOUDINARY.imageUploadPreset);
-        fd.append('folder', CLOUDINARY.folderJson);
-        if (publicId) fd.append('public_id', `${publicId}_json`);
-
-        const res = await fetch(url, { method: 'POST', body: fd });
-        if (!res.ok) throw new Error('Cloudinary JSON(SVG) upload failed (ensure preset allows SVG uploads)');
-        return await res.json();
-    }
-
-    async function renderDesignPNG(targetW, targetH) {
-        // Clone preview SVG, embed bg image as base64, render to canvas at target size.
+        
+        console.log('Starting checkout process...');
+        
+        // 1. Get SVG and clone it
         const svg = document.getElementById('previewSVG');
-        if (!svg) throw new Error('Design preview not found');
-
-        // Ensure fonts
-        await ensureFontsLoadedForExport();
-
+        if (!svg) {
+            throw new Error('Design preview not found');
+        }
+        
         const svgClone = svg.cloneNode(true);
-
+        
+        // Preview-only underlays: remove them for exported print PNG (keep transparency)
+        // IMPORTANT: #bgImage is the *design layer* (crest/template). Do NOT remove it.
+        // If we ever add a true preview-only mockup layer, it should use id="mockupImage".
         const _exportMockup = svgClone.querySelector('#mockupImage');
         if (_exportMockup) _exportMockup.remove();
-
         const _exportShirt = svgClone.querySelector('#shirtFill');
         if (_exportShirt) {
             _exportShirt.setAttribute('fill', 'none');
             _exportShirt.setAttribute('fill-opacity', '0');
         }
-
+// Help exported SVG self-load fonts even when rendered via Blob URL
         injectFontImport(svgClone);
-
-        // Embed background image into SVG as base64
+        
+        // 2. CRITICAL FIX: Embed background image as base64
+        checkoutBtn.textContent = 'Loading design elements...';
+        
         const bgImage = svgClone.querySelector('#bgImage');
-        if (bgImage) {
-            const href = bgImage.getAttribute('href') || bgImage.href?.baseVal;
-            if (href && !href.startsWith('data:')) {
-                const base64 = await (async () => {
-                    if (_assetCache.bgBase64.has(href)) return _assetCache.bgBase64.get(href);
+        if (bgImage && bgImage.href.baseVal) {
+            const imageUrl = bgImage.href.baseVal;
+            console.log('Loading background image:', imageUrl);
+            
+            // Load image and convert to base64 (cached)
+            const base64 = await (async () => {
+                if (_assetCache.bgBase64.has(imageUrl)) return _assetCache.bgBase64.get(imageUrl);
 
-                    const p = new Promise((resolve, reject) => {
-                        const img = new Image();
-                        img.crossOrigin = 'anonymous';
-                        img.onload = function () {
-                            try {
-                                const c = document.createElement('canvas');
-                                c.width = img.width;
-                                c.height = img.height;
-                                const ctx = c.getContext('2d');
-                                ctx.drawImage(img, 0, 0);
-                                resolve(c.toDataURL('image/png'));
-                            } catch (err) { reject(err); }
-                        };
-                        img.onerror = () => reject(new Error('Failed to load background image'));
-                        img.src = href;
-                        setTimeout(() => reject(new Error('Background image load timeout')), 10000);
-                    });
+                const p = new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                
+                img.onload = function() {
+                    try {
+                        // Draw to canvas to get base64
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        const dataUrl = canvas.toDataURL('image/png');
+                        console.log('Background image converted to base64');
+                        resolve(dataUrl);
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                
+                img.onerror = () => reject(new Error('Failed to load background image'));
+                img.src = imageUrl;
+                
+                setTimeout(() => reject(new Error('Background image load timeout')), 10000);
+                });
 
-                    _assetCache.bgBase64.set(href, p);
-                    return p;
-                })();
-                bgImage.setAttribute('href', base64);
-            }
+                _assetCache.bgBase64.set(imageUrl, p);
+                return p;
+            })();
+            // Replace external URL with base64
+            bgImage.setAttribute('href', base64);
+            console.log('Background image embedded in SVG');
         }
-
+        
+        // Ensure fonts are actually loaded before we serialize SVG for export
+        await ensureFontsLoadedForExport();
+        
+        // 3. Convert SVG (with embedded image) to PNG
+        checkoutBtn.textContent = 'Converting design...';
+        
         const svgData = new XMLSerializer().serializeToString(svgClone);
-        const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+        const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
         const url = URL.createObjectURL(svgBlob);
-
-        const img = await new Promise((resolve, reject) => {
-            const im = new Image();
-            im.onload = () => resolve(im);
-            im.onerror = () => reject(new Error('Failed to convert SVG to image'));
-            im.src = url;
+        
+        // Create image from SVG
+        const img = new Image();
+        
+        const imageLoadPromise = new Promise((resolve, reject) => {
+            img.onload = () => {
+                console.log('SVG converted to image');
+                resolve();
+            };
+            img.onerror = () => reject(new Error('Failed to convert SVG'));
             setTimeout(() => reject(new Error('SVG conversion timeout')), 10000);
         });
-
+        
+        img.src = url;
+        await imageLoadPromise;
+        
+        // 4. Draw to high-res canvas
         const canvas = document.createElement('canvas');
-        canvas.width = targetW;
-        canvas.height = targetH;
+        canvas.width = 9000;
+        canvas.height = 7200;
         const ctx = canvas.getContext('2d');
-
+        // Calculate centered scaling
         const svgWidth = 500;
         const svgHeight = 400;
-        const scale = Math.min(targetW / svgWidth, targetH / svgHeight);
+        const scale = Math.min(9000 / svgWidth, 7200 / svgHeight);
         const scaledWidth = svgWidth * scale;
         const scaledHeight = svgHeight * scale;
-        const offsetX = (targetW - scaledWidth) / 2;
-        const offsetY = (targetH - scaledHeight) / 2;
-
+        const offsetX = (9000 - scaledWidth) / 2;
+        const offsetY = (7200 - scaledHeight) / 2;
+        
+        // Draw SVG
         ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
-
+        
         URL.revokeObjectURL(url);
-
-        return await new Promise((resolve, reject) => {
-            canvas.toBlob((b) => b ? resolve(b) : reject(new Error('Failed to create PNG')), 'image/png', 1.0);
+        
+        console.log('Canvas created:', canvas.width, 'x', canvas.height);
+        
+        // 5. Convert to blob
+        checkoutBtn.textContent = 'Generating PNG...';
+        
+        const blob = await new Promise((resolve, reject) => {
+            canvas.toBlob((b) => {
+                if (b) resolve(b);
+                else reject(new Error('Failed to create PNG'));
+            }, 'image/png', 1.0);
         });
-    }
-
-    async function prepareDesignAssets() {
-        const variant = getVariant();
-        if (!variant) throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize}`);
-
-        const designId = `dsgn_${uuidv4()}`;
-
-        // 1) JSON payload (shareable across devices)
-        const payload = buildDesignPayloadForCloud();
-
-        // 2) Thumbnail for fast preview (cart/email)
-        const thumbBlob = await renderDesignPNG(1500, 1200);
-
-        // 3) Print PNG for production
-        const printBlob = await renderDesignPNG(9000, 7200);
-
-        // 4) Upload assets
-        const [thumbUp, printUp, jsonUp] = await Promise.all([
-            uploadCloudinaryImage(thumbBlob, `${designId}_thumb`),
-            uploadCloudinaryImage(printBlob, `${designId}_print`),
-            uploadCloudinaryJsonAsSvg(payload, `${designId}`)
-        ]);
-
-        return {
-            designId,
-            variant,
-            thumbUrl: thumbUp.secure_url,
-            printUrl: printUp.secure_url,
-            jsonUrl: jsonUp.secure_url
-        };
-    }
-
-    async function addToCartShopify(variantId, quantity, properties) {
-        // Must be hosted on the Shopify domain for /cart/add.js to work.
-        const res = await fetch('/cart/add.js', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify({
-                items: [{
-                    id: variantId,
-                    quantity,
-                    properties
-                }]
-            })
-        });
-        if (!res.ok) {
-            const t = await res.text().catch(() => '');
-            throw new Error('Shopify cart add failed: ' + (t || res.status));
+        
+        const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
+        console.log('PNG created, size:', sizeMB + 'MB');
+        
+        if (blob.size < 10000) {
+            throw new Error('PNG file too small (' + sizeMB + 'MB) - design may not have rendered correctly');
         }
-        return await res.json();
-    }
-
-    function fallbackCartAddUrl(variantId, quantity, properties) {
-        // Fallback non-AJAX add (works even if Ajax blocked, but URL can be long)
-        const base = isSameOriginShopify() ? window.location.origin : SHOPIFY.storeBaseUrl;
-        const u = new URL('/cart/add', base);
-        u.searchParams.set('id', variantId);
-        u.searchParams.set('quantity', String(quantity || 1));
-        if (properties) {
-            Object.keys(properties).forEach((k) => {
-                u.searchParams.set(`properties[${k}]`, String(properties[k]));
-            });
-        }
-        return u.toString();
-    }
-
-    function buildEditUrl(jsonUrl) {
-        const u = new URL(window.location.href);
-        u.searchParams.set('design_json', jsonUrl);
-        u.searchParams.delete('buy');
-        u.searchParams.delete('add');
-        return u.toString();
-    }
-
-    async function handleAddToCart() {
-        const primary = document.getElementById('ctaButton');
-        const addBtn = document.getElementById('addToCartButton');
-        const originalPrimary = primary?.textContent || 'Buy Now →';
-        const originalAdd = addBtn?.textContent || 'Add to Cart';
-
-        try {
-            if (primary) { primary.textContent = 'Saving design...'; primary.disabled = true; }
-            if (addBtn) { addBtn.textContent = 'Adding...'; addBtn.disabled = true; }
-
-            const { designId, variant, thumbUrl, printUrl, jsonUrl } = await prepareDesignAssets();
-
-            const props = {
-                design_id: designId,
-                design_json_url: jsonUrl,
-                design_thumb_url: thumbUrl,
-                design_print_url: printUrl,
-                style: selectedStyle,
-                city: document.getElementById('cityInput')?.value || '',
-                group: document.getElementById('groupInput')?.value || '',
-                gelato_product: variant.gelatoUid || '',
-                gelato_template: '45d4d937-e9bd-4ba3-83fe-1d7d965cce40',
-                edit_url: buildEditUrl(jsonUrl)
-            };
-
-            // v1.19.2: If hosted off-Shopify, use cross-origin form POST to Shopify.
-            if (!isSameOriginShopify()) {
-                submitCartAddForm(variant.shopifyVariantId, selectedQty, props, '/cart');
-                return;
+        
+        // 6. Upload to Cloudinary
+        checkoutBtn.textContent = 'Uploading design...';
+        
+        const formData = new FormData();
+        formData.append('file', blob);
+        formData.append('upload_preset', 'america250');
+        formData.append('folder', 'usa250-orders');
+        
+        const cloudinaryResponse = await fetch(
+            'https://api.cloudinary.com/v1_1/dqab444bd/image/upload',
+            {
+                method: 'POST',
+                body: formData
             }
-
-            // Same-origin Shopify: AJAX add then go to cart
-            try {
-                await addToCartShopify(variant.shopifyVariantId, selectedQty, props);
-                window.location.href = '/cart';
-            } catch (e) {
-                // Fallback redirect add (same-origin)
-                window.location.href = fallbackCartAddUrl(variant.shopifyVariantId, selectedQty, props);
-            }
-
-        } catch (error) {
-            console.error('Add to cart error:', error);
-            alert('Add to cart failed: ' + error.message);
-            if (primary) { primary.textContent = originalPrimary; primary.disabled = false; }
-            if (addBtn) { addBtn.textContent = originalAdd; addBtn.disabled = false; }
+        );
+        
+        if (!cloudinaryResponse.ok) {
+            const errorText = await cloudinaryResponse.text();
+            throw new Error(`Upload failed: ${errorText}`);
         }
+        
+        const cloudinaryData = await cloudinaryResponse.json();
+        const designUrl = cloudinaryData.secure_url;
+        
+        console.log('✓ Design uploaded:', designUrl);
+        console.log('✓ Public ID:', cloudinaryData.public_id);
+        
+        // 7. Map variant
+        const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
+        const variant = VARIANT_MAP[variantKey];
+        
+        if (!variant) {
+            throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize}`);
+        }
+        
+        console.log('✓ Variant found:', variantKey);
+        
+        // 8. Build Shopify URL
+        checkoutBtn.textContent = 'Redirecting to checkout...';
+        
+        const designId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
+        const qty = Math.max(1, Math.min(99, parseInt(selectedQuantity || 1, 10) || 1));
+        const shopifyUrl = new URL(`https://shop.4ship.ca/cart/${variant.shopifyVariantId}:${qty}`);
+        shopifyUrl.searchParams.append('attributes[design_url]', designUrl);
+        shopifyUrl.searchParams.append('attributes[style]', selectedStyle);
+
+        // Line item properties (these travel with the item into the order)
+        shopifyUrl.searchParams.append('properties[design_id]', designId);
+        shopifyUrl.searchParams.append('properties[style]', selectedStyle);
+        shopifyUrl.searchParams.append('properties[color]', selectedColor);
+        shopifyUrl.searchParams.append('properties[size]', selectedSize);
+        shopifyUrl.searchParams.append('properties[quantity]', String(qty));
+        shopifyUrl.searchParams.append('properties[city]', document.getElementById('cityInput').value || '');
+        shopifyUrl.searchParams.append('properties[group]', document.getElementById('groupInput').value || '');
+        if (typeof designUrl !== 'undefined' && designUrl) {
+            shopifyUrl.searchParams.append('properties[design_url]', designUrl);
+        }
+        shopifyUrl.searchParams.append('attributes[city]', document.getElementById('cityInput').value || 'Custom Design');
+        shopifyUrl.searchParams.append('attributes[group]', document.getElementById('groupInput').value || '');
+        shopifyUrl.searchParams.append('attributes[gelato_product]', variant.gelatoUid);
+        shopifyUrl.searchParams.append('attributes[gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
+        
+        console.log('✓ Redirecting to Shopify');
+        
+        // 9. Redirect
+        window.location.href = shopifyUrl.toString();
+        
+    } catch (error) {
+        console.error('✗ Checkout error:', error);
+        console.error('Stack:', error.stack);
+        alert('Checkout failed: ' + error.message + '\n\nPlease try again or contact support.');
+        checkoutBtn.textContent = originalText;
+        checkoutBtn.disabled = false;
     }
-
-
-        } catch (error) {
-            console.error('Add to cart error:', error);
-            alert('Add to cart failed: ' + error.message);
-            if (primary) { primary.textContent = originalPrimary; primary.disabled = false; }
-            if (addBtn) { addBtn.textContent = originalAdd; addBtn.disabled = false; }
-        }
-    }
-
-    async function handleCheckout() {
-        const primary = document.getElementById('ctaButton');
-        const addBtn = document.getElementById('addToCartButton');
-        const original = primary?.textContent || 'Buy Now →';
-
-        try {
-            if (primary) { primary.textContent = 'Saving & redirecting...'; primary.disabled = true; }
-            if (addBtn) addBtn.disabled = true;
-
-            const { designId, variant, thumbUrl, printUrl, jsonUrl } = await prepareDesignAssets();
-
-            const props = {
-                design_id: designId,
-                design_json_url: jsonUrl,
-                design_thumb_url: thumbUrl,
-                design_print_url: printUrl,
-                style: selectedStyle,
-                city: document.getElementById('cityInput')?.value || '',
-                group: document.getElementById('groupInput')?.value || '',
-                gelato_product: variant.gelatoUid || '',
-                gelato_template: '45d4d937-e9bd-4ba3-83fe-1d7d965cce40',
-                edit_url: buildEditUrl(jsonUrl)
-            };
-
-            // v1.19.2: If hosted off-Shopify, use a cross-origin form POST and request checkout redirect.
-            if (!isSameOriginShopify()) {
-                submitCartAddForm(variant.shopifyVariantId, selectedQty, props, '/checkout');
-                return;
-            }
-
-            // Same-origin Shopify: AJAX add then go to checkout (preserves multi-item cart)
-            try {
-                await addToCartShopify(variant.shopifyVariantId, selectedQty, props);
-                window.location.href = '/checkout';
-            } catch (e) {
-                // Fallback: add then user lands in cart, they can proceed
-                window.location.href = fallbackCartAddUrl(variant.shopifyVariantId, selectedQty, props);
-            }
-
-        } catch (error) {
-            console.error('Checkout error:', error);
-            alert('Checkout failed: ' + error.message);
-            if (primary) { primary.textContent = original; primary.disabled = false; }
-            if (addBtn) addBtn.disabled = false;
-        }
-    }
-
-
-        } catch (error) {
-            console.error('Checkout error:', error);
-            alert('Checkout failed: ' + error.message);
-            if (primary) { primary.textContent = original; primary.disabled = false; }
-            if (addBtn) addBtn.disabled = false;
-        }
-    }
-
-    // Primary CTA (step-by-step). On step 4, it triggers Buy Now.
-    function handlePrimaryAction() {
-        if (currentStep === 1) {
-            if (!selectedStyle) return;
-            currentStep = 2;
-            showStep(2);
-            setTimeout(() => document.getElementById('cityInput')?.focus(), 0);
-            return;
-        }
-        if (currentStep === 2) {
-            if (!cityText) { document.getElementById('cityInput')?.focus(); return; }
-            currentStep = 3;
-            showStep(3);
-            setTimeout(() => document.getElementById('groupInput')?.focus(), 0);
-            return;
-        }
-        if (currentStep === 3) {
-            if (!groupText) { document.getElementById('groupInput')?.focus(); return; }
-            currentStep = 4;
-            showStep(4);
-            return;
-        }
-        // Step 4
-        return handleCheckout();
-    }
-
+}
 
 
     
-    async function init() {
+    function init() {
         updateProgress();
         updateStepIndicator();
         initializeMockups();
-
-        // v1.19.2: restore design from share link (design_json) or optionally resume last local state (?resume=1)
-        const params = new URLSearchParams(window.location.search);
-        const designJsonUrl = params.get('design_json');
-        const resume = params.get('resume') === '1';
-
-        // Always start from a clean visible step layout
-        showStep(1);
-
-        if (designJsonUrl) {
-            try {
-                const res = await fetch(designJsonUrl, { cache: 'no-store' });
-
-                // v1.19.0+: design_json may be a JSON file OR an SVG wrapper containing base64 JSON
-                let payload = null;
-                const ct = (res.headers.get('content-type') || '').toLowerCase();
-
-                if (ct.includes('application/json')) {
-                    payload = await res.json();
-                } else {
-                    const txt = await res.text();
-                    const m = txt.match(/<desc\s+id=["']payload["']>\s*B64:([A-Za-z0-9+/=]+)\s*<\/desc>/i);
-                    if (!m) throw new Error('design_json payload not found in SVG');
-                    const jsonStr = decodeURIComponent(escape(atob(m[1])));
-                    payload = JSON.parse(jsonStr);
-                }
-
-                await applyDesignPayload(payload, { goToStep: 4, persist: true });
-            } catch (e) {
-                console.warn('Failed to load shared design JSON:', e);
-                if (resume) {
-                    try { await restoreStateFromLocal(); } catch(err) {}
-                } else {
-                    // Start fresh
-                    try { localStorage.removeItem(STORAGE_KEY); } catch(err) {}
-                    const c = document.getElementById('cityInput'); if (c) c.value = '';
-                    const g = document.getElementById('groupInput'); if (g) g.value = '';
-                    showStep(1);
-                }
-            }
-        } else if (resume) {
-            try { await restoreStateFromLocal(); } catch(e) {}
-        } else {
-            // Default: start fresh (no surprise persistence)
-            try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-            const c = document.getElementById('cityInput'); if (c) c.value = '';
-            const g = document.getElementById('groupInput'); if (g) g.value = '';
-            showStep(1);
-        }
-
-if (window.innerWidth >= 768) {
+        
+        if (window.innerWidth >= 768) {
             document.querySelector('.style-cards').classList.add('hidden');
             document.querySelector('.style-cards-desktop').classList.remove('hidden');
             document.querySelector('.advanced-controls').classList.remove('hidden');
@@ -2669,14 +2196,27 @@ function selectColor(color) {
         shirtFill.setAttribute('fill', colorMap[color] || '#1a1a1a');
     }
 
-        persistAfterChange();
 }
+
 function selectSize(size) {
     selectedSize = size;
     document.querySelectorAll('.size-btn').forEach(btn => {
         btn.classList.toggle('active', btn.getAttribute('data-size') === size);
     });
-        persistAfterChange();
+}
+
+function changeQuantity(delta){
+    const next = Math.max(1, Math.min(99, (parseInt(selectedQuantity || 1, 10) || 1) + delta));
+    selectedQuantity = next;
+    const inp = document.getElementById('quantityInput');
+    if (inp) inp.value = String(next);
+}
+
+function setQuantityFromInput(val){
+    const n = Math.max(1, Math.min(99, parseInt(val || '1', 10) || 1));
+    selectedQuantity = n;
+    const inp = document.getElementById('quantityInput');
+    if (inp && inp.value !== String(n)) inp.value = String(n);
 }
 
 let isZoomed = false;
@@ -2707,16 +2247,6 @@ function toggleZoom() {
         `;
     }
 }
-
-    // v1.19.2: boot
-    document.addEventListener('DOMContentLoaded', () => {
-        try {
-            const p = init();
-            if (p && typeof p.then === 'function') p.catch(e => console.warn('Init failed', e));
-        } catch (e) {
-            console.warn('Init failed', e);
-        }
-    });
 
 </script>
 
