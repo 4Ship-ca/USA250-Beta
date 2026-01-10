@@ -1,5 +1,5 @@
 <!--
-USA250 v1.19.0 - Preview Fill / Cover Cropping
+USA250 v1.19.1 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -477,7 +477,7 @@ Last Updated: January 1, 2026
             cursor: not-allowed;
         }
 
-        /* v1.19.0 - CTA dual buttons + quantity */
+        /* v1.19.1 - CTA dual buttons + quantity */
         .cta-row{
             width: 100%;
             max-width: 520px;
@@ -950,7 +950,7 @@ Last Updated: January 1, 2026
             width: 100%;
             max-width: 520px;
             margin: 0 auto;
-            /* v1.19.0: smooth step transitions */
+            /* v1.19.1: smooth step transitions */
             opacity: 1;
             transform: translateY(0);
             transition: opacity 0.25s ease, transform 0.25s ease;
@@ -964,7 +964,7 @@ Last Updated: January 1, 2026
             pointer-events: none;
         }
 
-        /* v1.19.0: helper class toggled after transition completes */
+        /* v1.19.1: helper class toggled after transition completes */
         .step-content.display-none {
             display: none !important;
         }
@@ -979,12 +979,12 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.19.0</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.19.1</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
         <!-- STEP 1: Style Selection -->
-        <div class="style-section" id="step1">
+        <div class="style-section step-content" data-step="1" id="step1">
             <h2 class="section-title">Choose Your Style</h2>
             
             <div class="product-selector">
@@ -1072,7 +1072,7 @@ Last Updated: January 1, 2026
         </div>
         
         <!-- STEP 2: Location -->
-        <div class="location-section hidden" id="step2">
+        <div class="location-section step-content hidden display-none" data-step="2" id="step2">
             <h2 class="section-title">Your Location</h2>
             
             <button class="locate-btn" onclick="useGeolocation()">
@@ -1098,7 +1098,7 @@ Last Updated: January 1, 2026
         </div>
         
         <!-- STEP 3: Group Name -->
-        <div class="location-section hidden" id="step3">
+        <div class="location-section step-content hidden display-none" data-step="3" id="step3">
             <h2 class="section-title">Your Group</h2>
             
             <div class="input-group">
@@ -1117,7 +1117,7 @@ Last Updated: January 1, 2026
         </div>
         
         <!-- STEP 4: Tweak -->
-        <div class="tweak-section hidden" id="step4">
+        <div class="tweak-section step-content hidden display-none" data-step="4" id="step4">
             <div class="tweak-toggle">
                 <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">
                     ⚙️ Fine-Tune Your Design
@@ -1257,7 +1257,7 @@ Last Updated: January 1, 2026
         </div>
 
 
-        <!-- QUANTITY SELECTOR (v1.19.0) -->
+        <!-- QUANTITY SELECTOR (v1.19.1) -->
         <div class="selector-section">
             <div class="selector-label">Quantity</div>
             <div class="qty-row">
@@ -1630,7 +1630,7 @@ let cityText = '';
 
 
     // -------------------------
-    // v1.19.0 - Persist + DesignID
+    // v1.19.1 - Persist + DesignID
     // -------------------------
     const STORAGE_KEY = 'usa250_designer_state_v1_18_6';
 
@@ -1906,22 +1906,36 @@ function toggleTweak() {
 
         // Update step indicator
         const stepIndicator = document.getElementById('stepIndicator');
-        if (stepIndicator) stepIndicator.textContent = `Step ${step} of 4`;
+        if (stepIndicator) stepIndicator.textContent =
+            `Step ${step} of 4: ` + (step === 1 ? 'Pick Your Style' : step === 2 ? 'Enter Your Location' : step === 3 ? 'Enter Your Group' : 'Preview & Buy');
 
-        // v1.19.0: animated step transitions
-        const steps = Array.from(document.querySelectorAll('.step-content'));
+        // v1.19.1: animated transitions for the existing step containers (#step1..#step4)
         const DURATION = 260; // ms (match CSS transition)
+        const steps = [1,2,3,4].map(i => document.getElementById(`step${i}`)).filter(Boolean);
 
         steps.forEach((el) => {
-            const elStep = Number(el.getAttribute('data-step') || '0');
+            const elStep = Number(el.getAttribute('data-step') || el.id.replace('step','') || '0');
             const isTarget = elStep === step;
 
             if (isTarget) {
                 el.classList.remove('display-none');
-                // Force reflow so transition triggers
+                // Force reflow to ensure transition triggers
                 void el.offsetWidth;
                 el.classList.remove('hidden');
             } else {
+                el.classList.add('hidden');
+                setTimeout(() => {
+                    const stillNotTarget = Number(el.getAttribute('data-step') || el.id.replace('step','') || '0') !== currentStep;
+                    if (stillNotTarget) el.classList.add('display-none');
+                }, DURATION);
+            }
+        });
+
+        try { updateProgress(); } catch(e) {}
+        try { updateStepIndicator(); } catch(e) {}
+        updateCTA();
+        try { persistState(); } catch(e) {}
+    } else {
                 el.classList.add('hidden');
                 setTimeout(() => {
                     const stillNotTarget = Number(el.getAttribute('data-step') || '0') !== currentStep;
@@ -2101,7 +2115,7 @@ function toggleTweak() {
 
     
     // -------------------------
-    // v1.19.0 - Cloud + Cart flow
+    // v1.19.1 - Cloud + Cart flow
     // -------------------------
     const CLOUDINARY = {
         cloudName: 'dqab444bd',
@@ -2112,7 +2126,54 @@ function toggleTweak() {
         folderJson: 'usa250-designs-json'
     };
 
-    function getVariantKey() {
+    
+const SHOPIFY = {
+        // If this designer is hosted OFF-Shopify (e.g., GitHub Pages on 4ship.shop),
+        // we must post to your Shopify domain to add items to cart.
+        storeBaseUrl: 'https://shop.4ship.ca'
+    };
+
+    function isSameOriginShopify() {
+        try {
+            const target = new URL(SHOPIFY.storeBaseUrl);
+            return window.location.origin === target.origin;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    // Cross-origin safe add-to-cart: build a form and POST to Shopify.
+    // This works even when the designer is hosted on a different domain.
+    function submitCartAddForm(variantId, qty, properties, returnTo) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `${SHOPIFY.storeBaseUrl}/cart/add`;
+        form.style.display = 'none';
+
+        const addField = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = String(value ?? '');
+            form.appendChild(input);
+        };
+
+        addField('id', variantId);
+        addField('quantity', qty);
+
+        if (returnTo) addField('return_to', returnTo);
+
+        if (properties && typeof properties === 'object') {
+            Object.entries(properties).forEach(([k, v]) => {
+                addField(`properties[${k}]`, v);
+            });
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+
+function getVariantKey() {
         // Prefer product-color-size, but support legacy color-size maps (v1.17)
         const p = (selectedProduct || '').toString();
         const c = (selectedColor || '').toString();
@@ -2165,7 +2226,7 @@ function toggleTweak() {
         return await res.json();
     }
 
-    // v1.19.0: Store JSON as an SVG "image" in Cloudinary (works with your existing IMAGE unsigned preset),
+    // v1.19.1: Store JSON as an SVG "image" in Cloudinary (works with your existing IMAGE unsigned preset),
     // avoiding the need for a RAW unsigned preset. The JSON is base64 inside <desc id="payload">.
     async function uploadCloudinaryJsonAsSvg(jsonObj, publicId) {
         const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`;
@@ -2332,7 +2393,8 @@ function toggleTweak() {
 
     function fallbackCartAddUrl(variantId, quantity, properties) {
         // Fallback non-AJAX add (works even if Ajax blocked, but URL can be long)
-        const u = new URL('/cart/add', window.location.origin);
+        const base = isSameOriginShopify() ? window.location.origin : SHOPIFY.storeBaseUrl;
+        const u = new URL('/cart/add', base);
         u.searchParams.set('id', variantId);
         u.searchParams.set('quantity', String(quantity || 1));
         if (properties) {
@@ -2376,13 +2438,29 @@ function toggleTweak() {
                 edit_url: buildEditUrl(jsonUrl)
             };
 
+            // v1.19.1: If hosted off-Shopify, use cross-origin form POST to Shopify.
+            if (!isSameOriginShopify()) {
+                submitCartAddForm(variant.shopifyVariantId, selectedQty, props, '/cart');
+                return;
+            }
+
+            // Same-origin Shopify: AJAX add then go to cart
             try {
                 await addToCartShopify(variant.shopifyVariantId, selectedQty, props);
                 window.location.href = '/cart';
             } catch (e) {
-                // Fallback redirect add
+                // Fallback redirect add (same-origin)
                 window.location.href = fallbackCartAddUrl(variant.shopifyVariantId, selectedQty, props);
             }
+
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            alert('Add to cart failed: ' + error.message);
+            if (primary) { primary.textContent = originalPrimary; primary.disabled = false; }
+            if (addBtn) { addBtn.textContent = originalAdd; addBtn.disabled = false; }
+        }
+    }
+
 
         } catch (error) {
             console.error('Add to cart error:', error);
@@ -2416,7 +2494,13 @@ function toggleTweak() {
                 edit_url: buildEditUrl(jsonUrl)
             };
 
-            // Add to cart first, then go to checkout (preserves multi-item cart)
+            // v1.19.1: If hosted off-Shopify, use a cross-origin form POST and request checkout redirect.
+            if (!isSameOriginShopify()) {
+                submitCartAddForm(variant.shopifyVariantId, selectedQty, props, '/checkout');
+                return;
+            }
+
+            // Same-origin Shopify: AJAX add then go to checkout (preserves multi-item cart)
             try {
                 await addToCartShopify(variant.shopifyVariantId, selectedQty, props);
                 window.location.href = '/checkout';
@@ -2424,6 +2508,15 @@ function toggleTweak() {
                 // Fallback: add then user lands in cart, they can proceed
                 window.location.href = fallbackCartAddUrl(variant.shopifyVariantId, selectedQty, props);
             }
+
+        } catch (error) {
+            console.error('Checkout error:', error);
+            alert('Checkout failed: ' + error.message);
+            if (primary) { primary.textContent = original; primary.disabled = false; }
+            if (addBtn) addBtn.disabled = false;
+        }
+    }
+
 
         } catch (error) {
             console.error('Checkout error:', error);
@@ -2467,39 +2560,56 @@ function toggleTweak() {
         updateStepIndicator();
         initializeMockups();
 
-        // v1.19.0: restore design from share link or local storage
+        // v1.19.1: restore design from share link (design_json) or optionally resume last local state (?resume=1)
         const params = new URLSearchParams(window.location.search);
         const designJsonUrl = params.get('design_json');
+        const resume = params.get('resume') === '1';
+
+        // Always start from a clean visible step layout
+        showStep(1);
 
         if (designJsonUrl) {
             try {
                 const res = await fetch(designJsonUrl, { cache: 'no-store' });
 
-// v1.19.0: design_json may be a JSON file OR an SVG wrapper containing base64 JSON
-let payload = null;
-const ct = (res.headers.get('content-type') || '').toLowerCase();
+                // v1.19.0+: design_json may be a JSON file OR an SVG wrapper containing base64 JSON
+                let payload = null;
+                const ct = (res.headers.get('content-type') || '').toLowerCase();
 
-if (ct.includes('application/json')) {
-    payload = await res.json();
-} else {
-    const txt = await res.text();
-    const m = txt.match(/<desc\s+id=["']payload["']>\s*B64:([A-Za-z0-9+/=]+)\s*<\/desc>/i);
-    if (!m) throw new Error('design_json payload not found in SVG');
-    const jsonStr = decodeURIComponent(escape(atob(m[1])));
-    payload = JSON.parse(jsonStr);
-}
+                if (ct.includes('application/json')) {
+                    payload = await res.json();
+                } else {
+                    const txt = await res.text();
+                    const m = txt.match(/<desc\s+id=["']payload["']>\s*B64:([A-Za-z0-9+/=]+)\s*<\/desc>/i);
+                    if (!m) throw new Error('design_json payload not found in SVG');
+                    const jsonStr = decodeURIComponent(escape(atob(m[1])));
+                    payload = JSON.parse(jsonStr);
+                }
 
-await applyDesignPayload(payload, { goToStep: 4, persist: true });
+                await applyDesignPayload(payload, { goToStep: 4, persist: true });
             } catch (e) {
                 console.warn('Failed to load shared design JSON:', e);
-                await restoreStateFromLocal();
+                if (resume) {
+                    try { await restoreStateFromLocal(); } catch(err) {}
+                } else {
+                    // Start fresh
+                    try { localStorage.removeItem(STORAGE_KEY); } catch(err) {}
+                    const c = document.getElementById('cityInput'); if (c) c.value = '';
+                    const g = document.getElementById('groupInput'); if (g) g.value = '';
+                    showStep(1);
+                }
             }
+        } else if (resume) {
+            try { await restoreStateFromLocal(); } catch(e) {}
         } else {
-            await restoreStateFromLocal();
+            // Default: start fresh (no surprise persistence)
+            try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+            const c = document.getElementById('cityInput'); if (c) c.value = '';
+            const g = document.getElementById('groupInput'); if (g) g.value = '';
+            showStep(1);
         }
 
-        
-        if (window.innerWidth >= 768) {
+if (window.innerWidth >= 768) {
             document.querySelector('.style-cards').classList.add('hidden');
             document.querySelector('.style-cards-desktop').classList.remove('hidden');
             document.querySelector('.advanced-controls').classList.remove('hidden');
@@ -2608,6 +2718,16 @@ function toggleZoom() {
         `;
     }
 }
+
+    // v1.19.1: boot
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            const p = init();
+            if (p && typeof p.then === 'function') p.catch(e => console.warn('Init failed', e));
+        } catch (e) {
+            console.warn('Init failed', e);
+        }
+    });
 
 </script>
 
