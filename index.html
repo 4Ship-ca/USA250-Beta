@@ -789,35 +789,44 @@ Last Updated: January 1, 2026
     font-weight: 700;
 }
 
-/* SIZE OPTIONS */
+
+/* Standardized Size Buttons */
 .size-options {
     display: flex;
-    gap: 8px;
+    gap: 12px;
+    flex-wrap: wrap;
 }
 
 .size-btn {
-    flex: 1;
-    padding: 12px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 3px solid var(--border);
     background: var(--panel);
-    border: 2px solid var(--border);
-    border-radius: 8px;
     color: white;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    flex: none;
 }
 
 .size-btn:hover {
-    background: var(--border);
+    transform: scale(1.1);
     border-color: var(--gold);
 }
 
 .size-btn.active {
-    background: var(--gold);
     border-color: var(--gold);
-    color: var(--bg);
+    background: var(--gold);
+    color: black;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
 }
+
 
 
 .quantity-controls{
@@ -1162,11 +1171,9 @@ body > .sticky-cta {
                 </div>
             </div>
         </div>
-        
-        
-        </div>
+    </div>
     
-        <!-- Right Panel: Preview & Steps 2-4 -->
+    <!-- Right Panel: Preview & Steps 2-4 -->
     <div class="right-panel">
         <div class="preview-section">
             <div class="preview-title">Live Preview</div>
@@ -1205,12 +1212,6 @@ body > .sticky-cta {
                 <input type="text" class="text-input" id="cityInput" maxlength="50" placeholder="MIAMI, FLORIDA" oninput="updateCity()">
                 <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
             </div>
-            <div class="suggestions">
-                <div class="suggestion-chip" onclick="useCity('MIAMI, FL')">Miami, FL</div>
-                <div class="suggestion-chip" onclick="useCity('NEW YORK, NY')">New York, NY</div>
-                <div class="suggestion-chip" onclick="useCity('LOS ANGELES, CA')">Los Angeles, CA</div>
-                <div class="suggestion-chip" onclick="useCity('CHICAGO, IL')">Chicago, IL</div>
-            </div>
         </div>
 
         <!-- STEP 3: Group Name -->
@@ -1220,12 +1221,6 @@ body > .sticky-cta {
                 <label class="input-label">Group or Family Name</label>
                 <input type="text" class="text-input" id="groupInput" maxlength="35" placeholder="THE SMITH FAMILY" oninput="updateGroup()">
                 <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
-            </div>
-            <div class="suggestions">
-                <div class="suggestion-chip" onclick="useGroup('THE SMITH FAMILY')">The Smith Family</div>
-                <div class="suggestion-chip" onclick="useGroup('CLASS OF 2026')">Class of 2026</div>
-                <div class="suggestion-chip" onclick="useGroup('TEAM USA')">Team USA</div>
-                <div class="suggestion-chip" onclick="useGroup('AMERICA 250')">America 250</div>
             </div>
         </div>
 
@@ -1312,34 +1307,9 @@ body > .sticky-cta {
                 <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()" style="flex: 1;">Continue →</button>
             </div>
         </div>
-        
-        
-
-        <!-- Sticky CTA for Right Panel -->
-        <div class="sticky-cta" style="margin-top: 20px;">
-            <div style="display: flex; gap: 10px;">
-                <button class="toggle-btn" id="backBtn" onclick="goBack()" style="flex: 0 0 60px; padding: 15px 0;">←</button>
-                <button class="mega-btn" id="ctaButton" onclick="handlePrimaryAction()" style="flex: 1;">Continue →</button>
-            </div>
-        </div>
-        </div>
-        
-        
-            
-            <div class="suggestions">
-                <div class="suggestion-chip" onclick="useGroup('THE SMITH FAMILY')">The Smith Family</div>
-                <div class="suggestion-chip" onclick="useGroup('CLASS OF 2026')">Class of 2026</div>
-                <div class="suggestion-chip" onclick="useGroup('TEAM USA')">Team USA</div>
-                <div class="suggestion-chip" onclick="useGroup('AMERICA 250')">America 250</div>
-            </div>
-        </div>
-        
-
-
     </div>
-        
-        
-        <!-- COLOR SELECTOR -->
+    
+    <!-- COLOR SELECTOR -->
         <div class="selector-section color-section">
             <div class="selector-label">Color</div>
             <div class="color-row">
@@ -1361,16 +1331,16 @@ body > .sticky-cta {
 <!-- SIZE SELECTOR -->
         <div class="selector-section">
             <div class="selector-label">Size</div>
+            
             <div class="size-options">
                 <button class="size-btn" data-size="S" onclick="selectSize('S')">S</button>
                 <button class="size-btn" data-size="M" onclick="selectSize('M')">M</button>
                 <button class="size-btn active" data-size="L" onclick="selectSize('L')">L</button>
                 <button class="size-btn" data-size="XL" onclick="selectSize('XL')">XL</button>
                 <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
-    
-<!-- QUANTITY SELECTOR -->
-        <div class="selector-section">
-            <div class="selector-label">Quantity</div>
+                <button class="size-btn" data-size="3XL" onclick="selectSize('3XL')">3XL</button>
+            </div>
+
             <div class="quantity-controls">
                 <button class="qty-btn" type="button" onclick="changeQuantity(-1)">−</button>
                 <input id="quantityInput" class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" oninput="setQuantityFromInput(this.value)">
@@ -1379,18 +1349,8 @@ body > .sticky-cta {
         </div>
     </div>
 </div>
-</div>
 
-<div class="sticky-cta">
-    <div class="cta-row">
-        <button class="back-btn" id="backBtn" onclick="goBack()" disabled>
-            ←
-        </button>
-        <button class="mega-btn" id="ctaButton" onclick="handlePrimaryAction()" disabled>
-            Select a Style to Continue
-        </button>
-    </div>
-</div>
+<!-- Redundant CTA removed -->
 
 <script>
     // State management
@@ -1423,6 +1383,11 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     
     const PRODUCTS = {
         'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' }
+
+        'tee-navy-3xl': { shopifyVariantId: '46056446099606', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_navy_gpr_4-0_gildan_64000' },
+        'tee-black-3xl': { shopifyVariantId: '46056446132374', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_black_gpr_4-0_gildan_64000' },
+        'tee-gray-3xl': { shopifyVariantId: '46056446165142', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_gray_gpr_4-0_gildan_64000' },
+        'tee-white-3xl': { shopifyVariantId: '46056446197910', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_white_gpr_4-0_gildan_64000' }
     };
     
     const STYLES = {
@@ -1551,7 +1516,11 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         'tee-white-l': { shopifyVariantId: '46056445968534', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000' },
         'tee-white-xl': { shopifyVariantId: '46056446001302', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000' },
         'tee-white-2xl': { shopifyVariantId: '46056446034070', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-s': { shopifyVariantId: '46056446066838', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' }
+        'tee-white-s': { shopifyVariantId: '46056446066838', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' },
+        'tee-navy-3xl': { shopifyVariantId: '46056446099606', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_navy_gpr_4-0_gildan_64000' },
+        'tee-black-3xl': { shopifyVariantId: '46056446132374', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_black_gpr_4-0_gildan_64000' },
+        'tee-gray-3xl': { shopifyVariantId: '46056446165142', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_gray_gpr_4-0_gildan_64000' },
+        'tee-white-3xl': { shopifyVariantId: '46056446197910', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_white_gpr_4-0_gildan_64000' }
     };
     
     function getMockupUrl(style, product) {
@@ -1881,35 +1850,28 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     
         // Back/Next CTA state
     function updateCTA(text) {
-        const btn = document.getElementById('ctaButton');
-        const backBtn = document.getElementById('backBtn');
-        const btnRight = document.getElementById('ctaButtonRight');
-        const backBtnRight = document.getElementById('backBtnRight');
+        const btn = document.getElementById('ctaButtonRight');
+        const backBtn = document.getElementById('backBtnRight');
         
-        const update = (b, bb) => {
-            if (!b) return;
-            if (bb) bb.disabled = (currentStep === 1);
-            
-            if (text) {
-                b.textContent = text;
-                b.disabled = false;
-            } else if (currentStep === 1) {
-                b.textContent = selectedStyle ? 'Continue →' : 'Select a Style to Continue';
-                b.disabled = !selectedStyle;
-            } else if (currentStep === 2) {
-                b.textContent = cityText ? 'Continue →' : 'Enter Your Location';
-                b.disabled = !cityText;
-            } else if (currentStep === 3) {
-                b.textContent = groupText ? 'Continue →' : 'Enter Your Group Name';
-                b.disabled = !groupText;
-            } else if (currentStep === 4) {
-                b.textContent = 'Continue to Checkout →';
-                b.disabled = false;
-            }
-        };
-
-        update(btn, backBtn);
-        update(btnRight, backBtnRight);
+        if (!btn) return;
+        if (backBtn) backBtn.disabled = (currentStep === 1);
+        
+        if (text) {
+            btn.textContent = text;
+            btn.disabled = false;
+        } else if (currentStep === 1) {
+            btn.textContent = selectedStyle ? 'Continue →' : 'Select a Style to Continue';
+            btn.disabled = !selectedStyle;
+        } else if (currentStep === 2) {
+            btn.textContent = cityText ? 'Continue →' : 'Enter Your Location';
+            btn.disabled = !cityText;
+        } else if (currentStep === 3) {
+            btn.textContent = groupText ? 'Continue →' : 'Enter Your Group Name';
+            btn.disabled = !groupText;
+        } else if (currentStep === 4) {
+            btn.textContent = 'Continue to Checkout →';
+            btn.disabled = false;
+        }
     }
 
     // Back button behavior
@@ -2275,42 +2237,67 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
 
         
         
-        // CUMULATIVE CART FIX:
-        // We use a standard form submission to the shop's domain.
-        // To ensure it's cumulative, we MUST NOT use the /checkout or /cart/clear endpoints.
-        // The /cart/add endpoint is naturally cumulative.
         
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'https://shop.4ship.ca/cart/add';
-        
-        const addField = (name, value) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value;
-            form.appendChild(input);
-        };
+        // CUMULATIVE CART FIX (AJAX VERSION):
+        // Using AJAX to add to cart ensures the session is maintained before redirecting.
+        try {
+            const response = await fetch('https://shop.4ship.ca/cart/add.js', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    items: [{
+                        id: variant.shopifyVariantId,
+                        quantity: qty,
+                        properties: {
+                            '_design_id': designId,
+                            '_style': selectedStyle,
+                            'color': selectedColor,
+                            'size': selectedSize,
+                            'city': document.getElementById('cityInput').value || '',
+                            'group': document.getElementById('groupInput').value || '',
+                            '_design_url': designUrl,
+                            '_gelato_product': variant.gelatoUid,
+                            '_gelato_template': '45d4d937-e9bd-4ba3-83fe-1d7d965cce40'
+                        }
+                    }]
+                })
+            });
+            
+            if (response.ok) {
+                // Small delay to ensure Shopify processes the AJAX request
+                setTimeout(() => {
+                    window.location.href = 'https://shop.4ship.ca/cart';
+                }, 500);
+            } else {
+                // Fallback to form submit if AJAX fails
+                throw new Error('AJAX add failed');
+            }
+        } catch (err) {
+            console.error('Cart add error:', err);
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'https://shop.4ship.ca/cart/add';
+            const addField = (n, v) => {
+                const i = document.createElement('input');
+                i.type = 'hidden'; i.name = n; i.value = v;
+                form.appendChild(i);
+            };
+            addField('id', variant.shopifyVariantId);
+            addField('quantity', String(qty));
+            addField('properties[_design_id]', designId);
+            addField('properties[_style]', selectedStyle);
+            addField('properties[color]', selectedColor);
+            addField('properties[size]', selectedSize);
+            addField('properties[city]', document.getElementById('cityInput').value || '');
+            addField('properties[group]', document.getElementById('groupInput').value || '');
+            addField('properties[_design_url]', designUrl);
+            addField('properties[_gelato_product]', variant.gelatoUid);
+            addField('properties[_gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
+            addField('return_to', '/cart');
+            document.body.appendChild(form);
+            form.submit();
+        }
 
-        addField('id', variant.shopifyVariantId);
-        addField('quantity', String(qty));
-        
-        // Line item properties (prefixed with _ to hide from cart)
-        addField('properties[_design_id]', designId);
-        addField('properties[_style]', selectedStyle);
-        addField('properties[color]', selectedColor);
-        addField('properties[size]', selectedSize);
-        addField('properties[city]', document.getElementById('cityInput').value || '');
-        addField('properties[group]', document.getElementById('groupInput').value || '');
-        addField('properties[_design_url]', designUrl);
-        addField('properties[_gelato_product]', variant.gelatoUid);
-        addField('properties[_gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
-        
-        // Redirect to cart page after adding
-        addField('return_to', '/cart');
-
-        document.body.appendChild(form);
-        form.submit();
 
 
 
