@@ -1062,7 +1062,37 @@ Last Updated: January 1, 2026
             </div>
         </div>
         
-        <!-- STEP 2: Location -->
+        
+        </div>
+    
+    <!-- Right Panel: Preview -->
+    <div class="right-panel">
+        <div class="preview-section">
+            <div class="preview-title">Live Preview</div>
+            <div class="preview-row">
+                <div class="preview-wrapper">
+                <div class="preview-canvas" id="previewCanvas">
+                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
+                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
+                    </defs>
+                    <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
+                    <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
+                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
+                        <textPath href="#pathTop" startOffset="50%"></textPath>
+                    </text>
+                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
+                        <textPath href="#pathMid" startOffset="50%"></textPath>
+                    </text>
+                </svg>
+            </div>
+                </div>
+
+
+
+
+<!-- STEP 2: Location -->
         <div class="location-section hidden" id="step2">
             <h2 class="section-title">Your Location</h2>
             
@@ -1107,32 +1137,6 @@ Last Updated: January 1, 2026
             </div>
         </div>
         
-        </div>
-    
-    <!-- Right Panel: Preview -->
-    <div class="right-panel">
-        <div class="preview-section">
-            <div class="preview-title">Live Preview</div>
-            <div class="preview-row">
-                <div class="preview-wrapper">
-                <div class="preview-canvas" id="previewCanvas">
-                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
-                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
-                    </defs>
-                    <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
-                    <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
-                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
-                        <textPath href="#pathTop" startOffset="50%"></textPath>
-                    </text>
-                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
-                        <textPath href="#pathMid" startOffset="50%"></textPath>
-                    </text>
-                </svg>
-            </div>
-                </div>
-
 
 <!-- STEP 4: Tweak -->
         <div class="tweak-section hidden" id="step4">
@@ -1237,7 +1241,8 @@ Last Updated: January 1, 2026
             </div>
         </div>
         
-        <!-- SIZE SELECTOR -->
+        
+<!-- SIZE SELECTOR -->
         <div class="selector-section">
             <div class="selector-label">Size</div>
             <div class="size-options">
@@ -1246,12 +1251,7 @@ Last Updated: January 1, 2026
                 <button class="size-btn active" data-size="L" onclick="selectSize('L')">L</button>
                 <button class="size-btn" data-size="XL" onclick="selectSize('XL')">XL</button>
                 <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
-            </div>
-        </div>
-</div>
-    </div>
-</div>
-
+    
 <!-- QUANTITY SELECTOR -->
         <div class="selector-section">
             <div class="selector-label">Quantity</div>
@@ -1261,6 +1261,9 @@ Last Updated: January 1, 2026
                 <button class="qty-btn" type="button" onclick="changeQuantity(1)">+</button>
             </div>
         </div>
+    </div>
+</div>
+</div>
 
 <div class="sticky-cta">
     <div class="cta-row">
