@@ -1,5 +1,5 @@
 <!--
-USA250 v1.19.1 - Preview Fill / Cover Cropping
+USA250 v1.19.2 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -477,7 +477,7 @@ Last Updated: January 1, 2026
             cursor: not-allowed;
         }
 
-        /* v1.19.1 - CTA dual buttons + quantity */
+        /* v1.19.2 - CTA dual buttons + quantity */
         .cta-row{
             width: 100%;
             max-width: 520px;
@@ -950,7 +950,7 @@ Last Updated: January 1, 2026
             width: 100%;
             max-width: 520px;
             margin: 0 auto;
-            /* v1.19.1: smooth step transitions */
+            /* v1.19.2: smooth step transitions */
             opacity: 1;
             transform: translateY(0);
             transition: opacity 0.25s ease, transform 0.25s ease;
@@ -964,7 +964,7 @@ Last Updated: January 1, 2026
             pointer-events: none;
         }
 
-        /* v1.19.1: helper class toggled after transition completes */
+        /* v1.19.2: helper class toggled after transition completes */
         .step-content.display-none {
             display: none !important;
         }
@@ -979,7 +979,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.19.1</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.19.2</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1257,7 +1257,7 @@ Last Updated: January 1, 2026
         </div>
 
 
-        <!-- QUANTITY SELECTOR (v1.19.1) -->
+        <!-- QUANTITY SELECTOR (v1.19.2) -->
         <div class="selector-section">
             <div class="selector-label">Quantity</div>
             <div class="qty-row">
@@ -1630,7 +1630,7 @@ let cityText = '';
 
 
     // -------------------------
-    // v1.19.1 - Persist + DesignID
+    // v1.19.2 - Persist + DesignID
     // -------------------------
     const STORAGE_KEY = 'usa250_designer_state_v1_18_6';
 
@@ -1909,7 +1909,7 @@ function toggleTweak() {
         if (stepIndicator) stepIndicator.textContent =
             `Step ${step} of 4: ` + (step === 1 ? 'Pick Your Style' : step === 2 ? 'Enter Your Location' : step === 3 ? 'Enter Your Group' : 'Preview & Buy');
 
-        // v1.19.1: animated transitions for the existing step containers (#step1..#step4)
+        // v1.19.2: animated transitions for the existing step containers (#step1..#step4)
         const DURATION = 260; // ms (match CSS transition)
         const steps = [1,2,3,4].map(i => document.getElementById(`step${i}`)).filter(Boolean);
 
@@ -1933,17 +1933,6 @@ function toggleTweak() {
 
         try { updateProgress(); } catch(e) {}
         try { updateStepIndicator(); } catch(e) {}
-        updateCTA();
-        try { persistState(); } catch(e) {}
-    } else {
-                el.classList.add('hidden');
-                setTimeout(() => {
-                    const stillNotTarget = Number(el.getAttribute('data-step') || '0') !== currentStep;
-                    if (stillNotTarget) el.classList.add('display-none');
-                }, DURATION);
-            }
-        });
-
         updateCTA();
         try { persistState(); } catch(e) {}
     }
@@ -2115,7 +2104,7 @@ function toggleTweak() {
 
     
     // -------------------------
-    // v1.19.1 - Cloud + Cart flow
+    // v1.19.2 - Cloud + Cart flow
     // -------------------------
     const CLOUDINARY = {
         cloudName: 'dqab444bd',
@@ -2226,7 +2215,7 @@ function getVariantKey() {
         return await res.json();
     }
 
-    // v1.19.1: Store JSON as an SVG "image" in Cloudinary (works with your existing IMAGE unsigned preset),
+    // v1.19.2: Store JSON as an SVG "image" in Cloudinary (works with your existing IMAGE unsigned preset),
     // avoiding the need for a RAW unsigned preset. The JSON is base64 inside <desc id="payload">.
     async function uploadCloudinaryJsonAsSvg(jsonObj, publicId) {
         const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`;
@@ -2438,7 +2427,7 @@ function getVariantKey() {
                 edit_url: buildEditUrl(jsonUrl)
             };
 
-            // v1.19.1: If hosted off-Shopify, use cross-origin form POST to Shopify.
+            // v1.19.2: If hosted off-Shopify, use cross-origin form POST to Shopify.
             if (!isSameOriginShopify()) {
                 submitCartAddForm(variant.shopifyVariantId, selectedQty, props, '/cart');
                 return;
@@ -2494,7 +2483,7 @@ function getVariantKey() {
                 edit_url: buildEditUrl(jsonUrl)
             };
 
-            // v1.19.1: If hosted off-Shopify, use a cross-origin form POST and request checkout redirect.
+            // v1.19.2: If hosted off-Shopify, use a cross-origin form POST and request checkout redirect.
             if (!isSameOriginShopify()) {
                 submitCartAddForm(variant.shopifyVariantId, selectedQty, props, '/checkout');
                 return;
@@ -2560,7 +2549,7 @@ function getVariantKey() {
         updateStepIndicator();
         initializeMockups();
 
-        // v1.19.1: restore design from share link (design_json) or optionally resume last local state (?resume=1)
+        // v1.19.2: restore design from share link (design_json) or optionally resume last local state (?resume=1)
         const params = new URLSearchParams(window.location.search);
         const designJsonUrl = params.get('design_json');
         const resume = params.get('resume') === '1';
@@ -2719,7 +2708,7 @@ function toggleZoom() {
     }
 }
 
-    // v1.19.1: boot
+    // v1.19.2: boot
     document.addEventListener('DOMContentLoaded', () => {
         try {
             const p = init();
