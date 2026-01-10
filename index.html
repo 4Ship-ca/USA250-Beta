@@ -1,5 +1,5 @@
 <!--
-USA250 v1.21.1 - Preview Fill / Cover Cropping
+USA250 v1.20.0 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -963,34 +963,101 @@ Last Updated: January 1, 2026
 
 
 
-/* Mobile/Tablet Layout Fix: Preview on top, Panels below */
+
+/* FINAL LAYOUT FIX */
+.container {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.left-panel {
+    height: auto;
+    overflow: visible;
+}
+
+.right-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.preview-section {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 20px;
+    border: 2px solid #333;
+    margin: 0 !important;
+}
+
+.location-section, .tweak-section {
+    background: #1a1a1a;
+    padding: 25px;
+    border-radius: 20px;
+    border: 2px solid #333;
+    margin: 0 !important;
+}
+
 @media (max-width: 1024px) {
     .container {
         display: flex !important;
         flex-direction: column !important;
-        padding: 10px !important;
-    }
-    .right-panel {
-        order: 1 !important;
-        position: relative !important;
-        top: 0 !important;
-        width: 100% !important;
-        margin-bottom: 20px !important;
     }
     .left-panel {
         order: 2 !important;
-        width: 100% !important;
-        height: auto !important;
-        overflow: visible !important;
     }
-    .header {
-        text-align: center !important;
-    }
-    .preview-canvas {
-        width: 100% !important;
-        max-width: 100% !important;
+    .right-panel {
+        order: 1 !important;
     }
 }
+
+/* Hide the old sticky CTA at the bottom of the page */
+body > .sticky-cta {
+    display: none !important;
+}
+
+.sticky-cta-right {
+    display: block;
+}
+
+@media (max-width: 1024px) {
+    .sticky-cta-right {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(10, 10, 10, 0.95);
+        padding: 15px 20px;
+        border-top: 1px solid #333;
+        z-index: 1000;
+        margin-top: 0 !important;
+    }
+}
+
+
+
+
+
+.location-section, .tweak-section {
+    background: #1a1a1a;
+    padding: 25px;
+    border-radius: 20px;
+    border: 2px solid #333;
+    margin: 0 !important;
+    max-width: 100% !important;
+}
+
+@media (min-width: 768px) {
+    .container {
+        grid-template-columns: 350px 1fr; /* Narrower left panel for style selection */
+    }
+}
+
+/* Ensure hidden steps don't take space */
+.hidden { display: none !important; }
 
 </style>
 </head>
@@ -1003,7 +1070,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.21.1</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.20.0</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -1099,51 +1166,45 @@ Last Updated: January 1, 2026
         
         </div>
     
-    <!-- Right Panel: Preview -->
+        <!-- Right Panel: Preview & Steps 2-4 -->
     <div class="right-panel">
         <div class="preview-section">
             <div class="preview-title">Live Preview</div>
             <div class="preview-row">
                 <div class="preview-wrapper">
-                <div class="preview-canvas" id="previewCanvas">
-                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
-                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
-                    </defs>
-                    <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
-                    <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
-                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
-                        <textPath href="#pathTop" startOffset="50%"></textPath>
-                    </text>
-                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
-                        <textPath href="#pathMid" startOffset="50%"></textPath>
-                    </text>
-                </svg>
-            </div>
+                    <div class="preview-canvas" id="previewCanvas">
+                        <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
+                                <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
+                            </defs>
+                            <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
+                            <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
+                            <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
+                                <textPath href="#pathTop" startOffset="50%"></textPath>
+                            </text>
+                            <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
+                                <textPath href="#pathMid" startOffset="50%"></textPath>
+                            </text>
+                        </svg>
+                    </div>
                 </div>
+            </div>
+        </div>
 
-
-
-
-<!-- STEP 2: Location -->
+        <!-- STEP 2: Location -->
         <div class="location-section hidden" id="step2">
             <h2 class="section-title">Your Location</h2>
-            
             <button class="locate-btn" onclick="useGeolocation()">
                 <span>📍</span>
                 <span>Use My Location</span>
             </button>
-            
             <div class="or-divider">OR</div>
-            
             <div class="input-group">
                 <label class="input-label">City & State</label>
-                <input type="text" class="text-input" id="cityInput" maxlength="50" 
-                       placeholder="MIAMI, FLORIDA" oninput="updateCity()">
+                <input type="text" class="text-input" id="cityInput" maxlength="50" placeholder="MIAMI, FLORIDA" oninput="updateCity()">
                 <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
             </div>
-            
             <div class="suggestions">
                 <div class="suggestion-chip" onclick="useCity('MIAMI, FL')">Miami, FL</div>
                 <div class="suggestion-chip" onclick="useCity('NEW YORK, NY')">New York, NY</div>
@@ -1151,18 +1212,15 @@ Last Updated: January 1, 2026
                 <div class="suggestion-chip" onclick="useCity('CHICAGO, IL')">Chicago, IL</div>
             </div>
         </div>
-        
+
         <!-- STEP 3: Group Name -->
         <div class="location-section hidden" id="step3">
             <h2 class="section-title">Your Group</h2>
-            
             <div class="input-group">
                 <label class="input-label">Group or Family Name</label>
-                <input type="text" class="text-input" id="groupInput" maxlength="35" 
-                       placeholder="THE SMITH FAMILY" oninput="updateGroup()">
+                <input type="text" class="text-input" id="groupInput" maxlength="35" placeholder="THE SMITH FAMILY" oninput="updateGroup()">
                 <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
             </div>
-            
             <div class="suggestions">
                 <div class="suggestion-chip" onclick="useGroup('THE SMITH FAMILY')">The Smith Family</div>
                 <div class="suggestion-chip" onclick="useGroup('CLASS OF 2026')">Class of 2026</div>
@@ -1170,16 +1228,14 @@ Last Updated: January 1, 2026
                 <div class="suggestion-chip" onclick="useGroup('AMERICA 250')">America 250</div>
             </div>
         </div>
-        
 
-<!-- STEP 4: Tweak -->
+        <!-- STEP 4: Tweak -->
         <div class="tweak-section hidden" id="step4">
             <div class="tweak-toggle">
                 <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">
                     ⚙️ Fine-Tune Your Design
                 </button>
             </div>
-            
             <div class="tweak-controls" id="tweakControls">
                 <div class="control-group">
                     <div class="control-label">City Text</div>
@@ -1197,7 +1253,6 @@ Last Updated: January 1, 2026
                         <button class="tweak-btn" onclick="adjustCity('arc', 5)">⌒+</button>
                     </div>
                 </div>
-                
                 <div class="control-group">
                     <div class="control-label">Group Text</div>
                     <div class="button-labels">
@@ -1214,12 +1269,10 @@ Last Updated: January 1, 2026
                         <button class="tweak-btn" onclick="adjustGroup('arc', 5)">⌒+</button>
                     </div>
                 </div>
-                
                 <button class="toggle-btn" onclick="resetDesign()" style="width: 100%; margin-top: 15px;">
                     🔄 Reset to Auto
                 </button>
             </div>
-            
             <div class="advanced-controls hidden">
                 <div class="slider-group">
                     <div class="slider-label">
@@ -1228,7 +1281,6 @@ Last Updated: January 1, 2026
                     </div>
                     <input type="range" id="citySizeSlider" min="10" max="80" value="10" oninput="updateSlider('citySize', this.value)">
                 </div>
-                
                 <div class="slider-group">
                     <div class="slider-label">
                         <span>City Y-Position</span>
@@ -1236,7 +1288,6 @@ Last Updated: January 1, 2026
                     </div>
                     <input type="range" id="cityYSlider" min="0" max="300" value="223" oninput="updateSlider('cityY', this.value)">
                 </div>
-                
                 <div class="slider-group">
                     <div class="slider-label">
                         <span>Group Size</span>
@@ -1244,7 +1295,6 @@ Last Updated: January 1, 2026
                     </div>
                     <input type="range" id="groupSizeSlider" min="8" max="50" value="8" oninput="updateSlider('groupSize', this.value)">
                 </div>
-                
                 <div class="slider-group">
                     <div class="slider-label">
                         <span>Group Y-Position</span>
@@ -1254,6 +1304,38 @@ Last Updated: January 1, 2026
                 </div>
             </div>
         </div>
+
+        <!-- Sticky CTA for Right Panel -->
+        <div class="sticky-cta-right" style="margin-top: 20px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="flex: 0 0 60px; padding: 15px 0;">←</button>
+                <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()" style="flex: 1;">Continue →</button>
+            </div>
+        </div>
+        
+        
+
+        <!-- Sticky CTA for Right Panel -->
+        <div class="sticky-cta" style="margin-top: 20px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="toggle-btn" id="backBtn" onclick="goBack()" style="flex: 0 0 60px; padding: 15px 0;">←</button>
+                <button class="mega-btn" id="ctaButton" onclick="handlePrimaryAction()" style="flex: 1;">Continue →</button>
+            </div>
+        </div>
+        </div>
+        
+        
+            
+            <div class="suggestions">
+                <div class="suggestion-chip" onclick="useGroup('THE SMITH FAMILY')">The Smith Family</div>
+                <div class="suggestion-chip" onclick="useGroup('CLASS OF 2026')">Class of 2026</div>
+                <div class="suggestion-chip" onclick="useGroup('TEAM USA')">Team USA</div>
+                <div class="suggestion-chip" onclick="useGroup('AMERICA 250')">America 250</div>
+            </div>
+        </div>
+        
+
+
     </div>
         
         
@@ -1450,26 +1532,26 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     };
     
     const VARIANT_MAP = {
-        'Navy-M': '46056445444246',
-        'Navy-L': '46056445477014',
-        'Navy-XL': '46056445509782',
-        'Navy-2XL': '46056445542550',
-        'Navy-S': '46056445575318',
-        'Black-M': '46056445608086',
-        'Black-L': '46056445640854',
-        'Black-XL': '46056445673622',
-        'Black-2XL': '46056445706390',
-        'Black-S': '46056445739158',
-        'Gray-M': '46056445771926',
-        'Gray-L': '46056445804694',
-        'Gray-XL': '46056445837462',
-        'Gray-2XL': '46056445870230',
-        'Gray-S': '46056445902998',
-        'White-M': '46056445935766',
-        'White-L': '46056445968534',
-        'White-XL': '46056446001302',
-        'White-2XL': '46056446034070',
-        'White-S': '46056446066838'
+        'tee-navy-m': { shopifyVariantId: '46056445444246', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
+        'tee-navy-l': { shopifyVariantId: '46056445477014', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000' },
+        'tee-navy-xl': { shopifyVariantId: '46056445509782', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000' },
+        'tee-navy-2xl': { shopifyVariantId: '46056445542550', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000' },
+        'tee-navy-s': { shopifyVariantId: '46056445575318', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000' },
+        'tee-black-m': { shopifyVariantId: '46056445608086', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
+        'tee-black-l': { shopifyVariantId: '46056445640854', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000' },
+        'tee-black-xl': { shopifyVariantId: '46056445673622', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000' },
+        'tee-black-2xl': { shopifyVariantId: '46056445706390', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000' },
+        'tee-black-s': { shopifyVariantId: '46056445739158', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
+        'tee-gray-m': { shopifyVariantId: '46056445771926', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_gray_gpr_4-0_gildan_64000' },
+        'tee-gray-l': { shopifyVariantId: '46056445804694', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_gray_gpr_4-0_gildan_64000' },
+        'tee-gray-xl': { shopifyVariantId: '46056445837462', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_gray_gpr_4-0_gildan_64000' },
+        'tee-gray-2xl': { shopifyVariantId: '46056445870230', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_gray_gpr_4-0_gildan_64000' },
+        'tee-gray-s': { shopifyVariantId: '46056445902998', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_gray_gpr_4-0_gildan_64000' },
+        'tee-white-m': { shopifyVariantId: '46056445935766', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000' },
+        'tee-white-l': { shopifyVariantId: '46056445968534', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000' },
+        'tee-white-xl': { shopifyVariantId: '46056446001302', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000' },
+        'tee-white-2xl': { shopifyVariantId: '46056446034070', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000' },
+        'tee-white-s': { shopifyVariantId: '46056446066838', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' }
     };
     
     function getMockupUrl(style, product) {
@@ -1801,28 +1883,33 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     function updateCTA(text) {
         const btn = document.getElementById('ctaButton');
         const backBtn = document.getElementById('backBtn');
+        const btnRight = document.getElementById('ctaButtonRight');
+        const backBtnRight = document.getElementById('backBtnRight');
         
-        // Handle Back Button visibility/enabled state
-        if (backBtn) {
-            backBtn.disabled = (currentStep === 1);
-        }
-        
-        if (text) {
-            btn.textContent = text;
-            btn.disabled = false;
-        } else if (currentStep === 1) {
-            btn.textContent = selectedStyle ? 'Continue →' : 'Select a Style to Continue';
-            btn.disabled = !selectedStyle;
-        } else if (currentStep === 2) {
-            btn.textContent = cityText ? 'Continue →' : 'Enter Your Location';
-            btn.disabled = !cityText;
-        } else if (currentStep === 3) {
-            btn.textContent = groupText ? 'Continue →' : 'Enter Your Group Name';
-            btn.disabled = !groupText;
-        } else if (currentStep === 4) {
-            btn.textContent = 'Continue to Checkout →';
-            btn.disabled = false;
-        }
+        const update = (b, bb) => {
+            if (!b) return;
+            if (bb) bb.disabled = (currentStep === 1);
+            
+            if (text) {
+                b.textContent = text;
+                b.disabled = false;
+            } else if (currentStep === 1) {
+                b.textContent = selectedStyle ? 'Continue →' : 'Select a Style to Continue';
+                b.disabled = !selectedStyle;
+            } else if (currentStep === 2) {
+                b.textContent = cityText ? 'Continue →' : 'Enter Your Location';
+                b.disabled = !cityText;
+            } else if (currentStep === 3) {
+                b.textContent = groupText ? 'Continue →' : 'Enter Your Group Name';
+                b.disabled = !groupText;
+            } else if (currentStep === 4) {
+                b.textContent = 'Continue to Checkout →';
+                b.disabled = false;
+            }
+        };
+
+        update(btn, backBtn);
+        update(btnRight, backBtnRight);
     }
 
     // Back button behavior
@@ -2170,6 +2257,8 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         const variant = VARIANT_MAP[variantKey];
         
         if (!variant) {
+            console.error('Variant Map:', VARIANT_MAP);
+            console.error('Looking for key:', variantKey);
             throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize}`);
         }
         
@@ -2184,22 +2273,17 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
             : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
         const qty = Math.max(1, Math.min(99, parseInt(selectedQuantity || 1, 10) || 1));
 
-        // CUMULATIVE CART FIX:
-        // Instead of a direct form submit which can sometimes lose session context on cross-domain,
-        // we use a hidden iframe to perform the add-to-cart. This ensures the Shopify session
-        // cookies are handled correctly by the browser within the shop's domain context.
         
-        const iframeName = 'shopify_add_iframe_' + Date.now();
-        const iframe = document.createElement('iframe');
-        iframe.name = iframeName;
-        iframe.style.display = 'none';
-        document.body.appendChild(iframe);
-
+        
+        // CUMULATIVE CART FIX:
+        // We use a standard form submission to the shop's domain.
+        // To ensure it's cumulative, we MUST NOT use the /checkout or /cart/clear endpoints.
+        // The /cart/add endpoint is naturally cumulative.
+        
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = 'https://shop.4ship.ca/cart/add';
-        form.target = iframeName; // Submit into the hidden iframe
-
+        
         const addField = (name, value) => {
             const input = document.createElement('input');
             input.type = 'hidden';
@@ -2210,6 +2294,8 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
 
         addField('id', variant.shopifyVariantId);
         addField('quantity', String(qty));
+        
+        // Line item properties (prefixed with _ to hide from cart)
         addField('properties[_design_id]', designId);
         addField('properties[_style]', selectedStyle);
         addField('properties[color]', selectedColor);
@@ -2220,14 +2306,13 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         addField('properties[_gelato_product]', variant.gelatoUid);
         addField('properties[_gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
         
-        // After adding to cart in the iframe, we redirect the main window to the cart
-        iframe.onload = () => {
-            console.log('✓ Item added to cart via iframe');
-            window.location.href = 'https://shop.4ship.ca/cart';
-        };
+        // Redirect to cart page after adding
+        addField('return_to', '/cart');
 
         document.body.appendChild(form);
         form.submit();
+
+
 
     } catch (error) {
         console.error('✗ Checkout error:', error);
