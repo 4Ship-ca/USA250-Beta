@@ -841,7 +841,8 @@ Last Updated: January 1, 2026
 }
 
 .qty-input{
-    flex:1;
+    flex:0 0 auto;
+    max-width:80px;
     height:44px;
     background: var(--panel);
     border: 2px solid var(--border);
@@ -1106,7 +1107,34 @@ Last Updated: January 1, 2026
             </div>
         </div>
         
-        <!-- STEP 4: Tweak -->
+        </div>
+    
+    <!-- Right Panel: Preview -->
+    <div class="right-panel">
+        <div class="preview-section">
+            <div class="preview-title">Live Preview</div>
+            <div class="preview-row">
+                <div class="preview-wrapper">
+                <div class="preview-canvas" id="previewCanvas">
+                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
+                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
+                    </defs>
+                    <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
+                    <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
+                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
+                        <textPath href="#pathTop" startOffset="50%"></textPath>
+                    </text>
+                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
+                        <textPath href="#pathMid" startOffset="50%"></textPath>
+                    </text>
+                </svg>
+            </div>
+                </div>
+
+
+<!-- STEP 4: Tweak -->
         <div class="tweak-section hidden" id="step4">
             <div class="tweak-toggle">
                 <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">
@@ -1189,31 +1217,6 @@ Last Updated: January 1, 2026
             </div>
         </div>
     </div>
-    
-    <!-- Right Panel: Preview -->
-    <div class="right-panel">
-        <div class="preview-section">
-            <div class="preview-title">Live Preview</div>
-            <div class="preview-row">
-                <div class="preview-wrapper">
-                <div class="preview-canvas" id="previewCanvas">
-                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
-                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
-                    </defs>
-                    <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
-                    <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
-                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
-                        <textPath href="#pathTop" startOffset="50%"></textPath>
-                    </text>
-                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
-                        <textPath href="#pathMid" startOffset="50%"></textPath>
-                    </text>
-                </svg>
-            </div>
-                </div>
-</div>
         
         
         <!-- COLOR SELECTOR -->
@@ -2135,36 +2138,51 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         
         console.log('✓ Variant found:', variantKey);
         
-        // 8. Build Shopify URL
-        checkoutBtn.textContent = 'Redirecting to checkout...';
-        
-        const designId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
-        const qty = Math.max(1, Math.min(99, parseInt(selectedQuantity || 1, 10) || 1));
-        const shopifyUrl = new URL(`https://shop.4ship.ca/cart/${variant.shopifyVariantId}:${qty}`);
-        shopifyUrl.searchParams.append('attributes[design_url]', designUrl);
-        shopifyUrl.searchParams.append('attributes[style]', selectedStyle);
+        // 8. Add item to Shopify cart via POST
+        checkoutBtn.textContent = 'Adding to cart...';
 
-        // Line item properties (these travel with the item into the order)
-        shopifyUrl.searchParams.append('properties[design_id]', designId);
-        shopifyUrl.searchParams.append('properties[style]', selectedStyle);
-        shopifyUrl.searchParams.append('properties[color]', selectedColor);
-        shopifyUrl.searchParams.append('properties[size]', selectedSize);
-        shopifyUrl.searchParams.append('properties[quantity]', String(qty));
-        shopifyUrl.searchParams.append('properties[city]', document.getElementById('cityInput').value || '');
-        shopifyUrl.searchParams.append('properties[group]', document.getElementById('groupInput').value || '');
-        if (typeof designUrl !== 'undefined' && designUrl) {
-            shopifyUrl.searchParams.append('properties[design_url]', designUrl);
-        }
-        shopifyUrl.searchParams.append('attributes[city]', document.getElementById('cityInput').value || 'Custom Design');
-        shopifyUrl.searchParams.append('attributes[group]', document.getElementById('groupInput').value || '');
-        shopifyUrl.searchParams.append('attributes[gelato_product]', variant.gelatoUid);
-        shopifyUrl.searchParams.append('attributes[gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
-        
-        console.log('✓ Redirecting to Shopify');
-        
-        // 9. Redirect
-        window.location.href = shopifyUrl.toString();
-        
+        const designId = (window.crypto && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
+        const qty = Math.max(1, Math.min(99, parseInt(selectedQuantity || 1, 10) || 1));
+
+        // Because the designer is hosted on a different domain than the shop,
+        // we use a standard HTML form POST instead of AJAX to avoid CORS issues.
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'https://shop.4ship.ca/cart/add';
+
+        const addField = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value;
+            form.appendChild(input);
+        };
+
+        // Core Shopify fields
+        addField('id', variant.shopifyVariantId);
+        addField('quantity', String(qty));
+
+        // Line item properties
+        addField('properties[design_id]', designId);
+        addField('properties[style]', selectedStyle);
+        addField('properties[color]', selectedColor);
+        addField('properties[size]', selectedSize);
+        addField('properties[city]', document.getElementById('cityInput').value || '');
+        addField('properties[group]', document.getElementById('groupInput').value || '');
+        addField('properties[design_url]', designUrl);
+        addField('properties[gelato_product]', variant.gelatoUid);
+        addField('properties[gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
+
+        // Ensure we land on the cart after the add
+        addField('return_to', '/cart');
+
+        document.body.appendChild(form);
+
+        console.log('✓ Submitting line item to Shopify cart');
+        form.submit();
+
     } catch (error) {
         console.error('✗ Checkout error:', error);
         console.error('Stack:', error.stack);
