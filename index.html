@@ -1,5 +1,5 @@
 <!--
-USA250 v1.18.8 - Preview Fill / Cover Cropping
+USA250 v1.18.9 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -477,7 +477,7 @@ Last Updated: January 1, 2026
             cursor: not-allowed;
         }
 
-        /* v1.18.8 - CTA dual buttons + quantity */
+        /* v1.18.9 - CTA dual buttons + quantity */
         .cta-row{
             width: 100%;
             max-width: 520px;
@@ -950,7 +950,7 @@ Last Updated: January 1, 2026
             width: 100%;
             max-width: 520px;
             margin: 0 auto;
-            /* v1.18.8: smooth step transitions */
+            /* v1.18.9: smooth step transitions */
             opacity: 1;
             transform: translateY(0);
             transition: opacity 0.25s ease, transform 0.25s ease;
@@ -964,7 +964,7 @@ Last Updated: January 1, 2026
             pointer-events: none;
         }
 
-        /* v1.18.8: helper class toggled after transition completes */
+        /* v1.18.9: helper class toggled after transition completes */
         .step-content.display-none {
             display: none !important;
         }
@@ -979,7 +979,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.18.8</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.18.9</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1257,7 +1257,7 @@ Last Updated: January 1, 2026
         </div>
 
 
-        <!-- QUANTITY SELECTOR (v1.18.8) -->
+        <!-- QUANTITY SELECTOR (v1.18.9) -->
         <div class="selector-section">
             <div class="selector-label">Quantity</div>
             <div class="qty-row">
@@ -1630,7 +1630,7 @@ let cityText = '';
 
 
     // -------------------------
-    // v1.18.8 - Persist + DesignID
+    // v1.18.9 - Persist + DesignID
     // -------------------------
     const STORAGE_KEY = 'usa250_designer_state_v1_18_6';
 
@@ -1908,7 +1908,7 @@ function toggleTweak() {
         const stepIndicator = document.getElementById('stepIndicator');
         if (stepIndicator) stepIndicator.textContent = `Step ${step} of 4`;
 
-        // v1.18.8: animated step transitions
+        // v1.18.9: animated step transitions
         const steps = Array.from(document.querySelectorAll('.step-content'));
         const DURATION = 260; // ms (match CSS transition)
 
@@ -1933,13 +1933,6 @@ function toggleTweak() {
         updateCTA();
         try { persistState(); } catch(e) {}
     }
-        document.getElementById(`step${step}`)?.classList.remove('hidden');
-        updateProgress();
-        updateStepIndicator();
-        updateCTA();
-        persistAfterChange();
-    }
-    
     function updateProgress() {
         const progress = (currentStep / 4) * 100;
         document.getElementById('progressFill').style.width = progress + '%';
@@ -2108,7 +2101,7 @@ function toggleTweak() {
 
     
     // -------------------------
-    // v1.18.8 - Cloud + Cart flow
+    // v1.18.9 - Cloud + Cart flow
     // -------------------------
     const CLOUDINARY = {
         cloudName: 'dqab444bd',
@@ -2461,7 +2454,7 @@ function toggleTweak() {
         updateStepIndicator();
         initializeMockups();
 
-        // v1.18.8: restore design from share link or local storage
+        // v1.18.9: restore design from share link or local storage
         const params = new URLSearchParams(window.location.search);
         const designJsonUrl = params.get('design_json');
 
