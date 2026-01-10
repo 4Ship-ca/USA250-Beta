@@ -962,6 +962,27 @@ Last Updated: January 1, 2026
 }
 
 
+
+/* Mobile Layout Fix: Preview on top, Panels below */
+@media (max-width: 767px) {
+    .container {
+        display: flex;
+        flex-direction: column;
+    }
+    .right-panel {
+        order: 1; /* Preview on top */
+        position: relative;
+        top: 0;
+        margin-bottom: 20px;
+    }
+    .left-panel {
+        order: 2; /* Controls below */
+    }
+    .header {
+        order: 0; /* Logo stays at very top if inside container, but it's inside left-panel currently */
+    }
+}
+
 </style>
 </head>
 <body>
@@ -2146,6 +2167,8 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         console.log('✓ Variant found:', variantKey);
         
         // 8. Add item to Shopify cart via POST
+        // NOTE: Internal properties are prefixed with '_' to hide them from the standard Shopify cart view.
+        // Most Shopify themes automatically hide line item properties starting with an underscore.
         checkoutBtn.textContent = 'Adding to cart...';
 
         const designId = (window.crypto && crypto.randomUUID)
@@ -2172,17 +2195,18 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         addField('quantity', String(qty));
 
         // Line item properties
-        addField('properties[design_id]', designId);
-        addField('properties[style]', selectedStyle);
+        addField('properties[_design_id]', designId);
+        addField('properties[_style]', selectedStyle);
         addField('properties[color]', selectedColor);
         addField('properties[size]', selectedSize);
         addField('properties[city]', document.getElementById('cityInput').value || '');
         addField('properties[group]', document.getElementById('groupInput').value || '');
-        addField('properties[design_url]', designUrl);
-        addField('properties[gelato_product]', variant.gelatoUid);
-        addField('properties[gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
+        addField('properties[_design_url]', designUrl);
+        addField('properties[_gelato_product]', variant.gelatoUid);
+        addField('properties[_gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
 
         // Ensure we land on the cart after the add
+        // To land on a custom page, change '/cart' to your desired path (e.g., '/pages/custom-cart')
         addField('return_to', '/cart');
 
         document.body.appendChild(form);
