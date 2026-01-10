@@ -57,8 +57,8 @@ Last Updated: January 1, 2026
             width: 25%;
         }
         
-        .header {
-            text-align: center;
+        .header { text-align: left; padding: 20px 0; 
+            text-align: left;
             padding: 40px 20px 20px;
         }
         
@@ -83,7 +83,7 @@ Last Updated: January 1, 2026
             font-size: 18px;
             color: var(--gold);
             margin-bottom: 15px;
-            text-align: center;
+            text-align: left;
             text-transform: uppercase;
             letter-spacing: 1.5px;
         }
@@ -92,7 +92,7 @@ Last Updated: January 1, 2026
             position: relative;
             width: 100%;
             max-width: 400px;
-            margin: 0 auto;
+            margin: 0;
             height: 400px;
         }
         
@@ -132,14 +132,14 @@ Last Updated: January 1, 2026
             background: #222;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             font-size: 14px;
             color: #666;
         }
         
         .card-content {
             padding: 20px;
-            text-align: center;
+            text-align: left;
         }
         
         .card-title {
@@ -173,7 +173,7 @@ Last Updated: January 1, 2026
         
         .swipe-nav {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 10px;
             margin-top: 20px;
         }
@@ -215,7 +215,7 @@ Last Updated: January 1, 2026
             margin-bottom: 15px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 10px;
         }
         
@@ -224,7 +224,7 @@ Last Updated: January 1, 2026
         }
         
         .or-divider {
-            text-align: center;
+            text-align: left;
             color: #666;
             margin: 15px 0;
             position: relative;
@@ -312,7 +312,7 @@ Last Updated: January 1, 2026
         .preview-title {
             font-size: 16px;
             color: var(--gold);
-            text-align: center;
+            text-align: left;
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
@@ -322,13 +322,13 @@ Last Updated: January 1, 2026
             width: 100%;
             /* Mobile-first: use full available width; desktop overrides below */
             max-width: 100%;
-            margin: 0 auto;
+            margin: 0;
             aspect-ratio: 5/4;
             background: #000;
             border-radius: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             overflow: hidden;
             position: relative;
         }
@@ -353,7 +353,7 @@ Last Updated: January 1, 2026
         }
         
         .tweak-toggle {
-            text-align: center;
+            text-align: left;
             margin-bottom: 20px;
         }
         
@@ -389,7 +389,7 @@ Last Updated: January 1, 2026
         .control-label {
             font-size: 13px;
             color: #aaa;
-            text-align: center;
+            text-align: left;
             margin-bottom: 10px;
         }
         
@@ -402,7 +402,7 @@ Last Updated: January 1, 2026
             color: #888;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            text-align: center;
+            text-align: left;
         }
         
         .button-grid-extended {
@@ -422,7 +422,7 @@ Last Updated: January 1, 2026
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             font-weight: 700;
         }
         
@@ -447,7 +447,7 @@ Last Updated: January 1, 2026
     display: flex;
     gap: 15px;
     max-width: 500px;
-    margin: 0 auto;
+    margin: 0;
 }
 
 /* Back Button Styling */
@@ -464,7 +464,7 @@ Last Updated: January 1, 2026
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 }
 
 .back-btn:active {
@@ -489,7 +489,7 @@ Last Updated: January 1, 2026
         .mega-btn {
             width: 100%;
             max-width: 500px;
-            margin: 0 auto;
+            margin: 0;
             background: linear-gradient(135deg, var(--gold) 0%, #ffd700 100%);
             border: none;
             padding: 20px;
@@ -522,7 +522,7 @@ Last Updated: January 1, 2026
                 grid-template-columns: 450px 1fr;
                 gap: 30px;
                 max-width: 1400px;
-                margin: 0 auto;
+                margin: 0;
                 padding: 40px;
             }
             
@@ -550,10 +550,9 @@ Last Updated: January 1, 2026
                 gap: 24px;
             }
 
-            
-            .header {
-                padding: 0 0 30px 0;
+             .header {
                 text-align: left;
+                padding: 20px 0;
             }
             
             .logo {
@@ -810,7 +809,7 @@ Last Updated: January 1, 2026
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 0;
     flex: none;
 }
@@ -863,7 +862,7 @@ Last Updated: January 1, 2026
     color: white;
     font-weight: 800;
     font-size: 16px;
-    text-align: center;
+    text-align: left;
     outline: none;
 }
 
@@ -873,7 +872,7 @@ Last Updated: January 1, 2026
 /* Mobile responsive */
 @media (max-width: 768px) {
     .color-options {
-        justify-content: center;
+        justify-content: flex-start;
     }
     
     .size-options {
@@ -894,7 +893,7 @@ Last Updated: January 1, 2026
 .preview-row {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 12px;
     width: 100%;
     max-width: 100%;
@@ -951,7 +950,7 @@ Last Updated: January 1, 2026
     height: 44px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     cursor: pointer;
     color: var(--gold);
     transition: all 0.2s ease;
@@ -973,26 +972,21 @@ Last Updated: January 1, 2026
 
 
 
-/* FINAL LAYOUT FIX */
+
 .container {
-    display: grid;
-    grid-template-columns: 400px 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 30px;
-    max-width: 1400px;
-    margin: 0 auto;
+    max-width: 1000px;
+    margin: 0;
     padding: 20px;
 }
 
-.left-panel {
-    height: auto;
-    overflow: visible;
+.left-panel, .right-panel {
+    width: 100%;
+    max-width: 600px;
 }
 
-.right-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
 
 .preview-section {
     background: #1a1a1a;
@@ -1068,6 +1062,44 @@ body > .sticky-cta {
 /* Ensure hidden steps don't take space */
 .hidden { display: none !important; }
 
+
+.style-cards-desktop {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.style-card-desktop {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.style-card-desktop.selected {
+    border-color: var(--gold);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+.style-card-desktop .card-mockup {
+    height: 120px;
+}
+
+.style-card-desktop .card-content {
+    padding: 10px;
+}
+
+.style-card-desktop .card-title {
+    font-size: 14px;
+}
+
+.style-card-desktop .card-description {
+    font-size: 11px;
+}
+
 </style>
 </head>
 <body>
@@ -1079,7 +1111,7 @@ body > .sticky-cta {
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.20.0</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.21.4</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -1140,7 +1172,7 @@ body > .sticky-cta {
             </div>
             
             <!-- Desktop: Grid -->
-            <div class="style-cards-desktop hidden">
+            <div class="style-cards-desktop">
                 <div class="style-card-desktop" data-style="A" onclick="selectStyle('A')">
                     <div class="card-mockup"></div>
                     <div class="card-content">
@@ -1197,6 +1229,52 @@ body > .sticky-cta {
                     </div>
                 </div>
             </div>
+
+<!-- COLOR SELECTOR -->
+        <div class="selector-section color-section">
+            <div class="selector-label">Color</div>
+            <div class="color-row">
+                <div class="color-options" id="colorOptions">
+                    <!-- Populated by updateColorOptions() -->
+                </div>
+                <button class="zoom-toggle" id="zoomToggle" onclick="toggleZoom()" aria-label="Toggle 150% zoom" title="Toggle 150% zoom">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35"/>
+                                    <line x1="11" y1="8" x2="11" y2="14"/>
+                                    <line x1="8" y1="11" x2="14" y2="11"/>
+                                </svg>
+                                </button>
+            </div>
+        </div>
+<!-- SIZE SELECTOR -->
+        <div class="selector-section">
+            <div class="selector-label">Size</div>
+            
+            <div class="size-options">
+                <button class="size-btn" data-size="S" onclick="selectSize('S')">S</button>
+                <button class="size-btn" data-size="M" onclick="selectSize('M')">M</button>
+                <button class="size-btn active" data-size="L" onclick="selectSize('L')">L</button>
+                <button class="size-btn" data-size="XL" onclick="selectSize('XL')">XL</button>
+                <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
+                <button class="size-btn" data-size="3XL" onclick="selectSize('3XL')">3XL</button>
+            </div>
+
+            <div class="quantity-controls">
+                <button class="qty-btn" type="button" onclick="changeQuantity(-1)">−</button>
+                <input id="quantityInput" class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" oninput="setQuantityFromInput(this.value)">
+                <button class="qty-btn" type="button" onclick="changeQuantity(1)">+</button>
+            </div>
+        </div>
+
+<!-- Sticky CTA for Right Panel -->
+        <div class="sticky-cta-right" style="margin-top: 20px;">
+            <div style="display: flex; gap: 10px;">
+                <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="flex: 0 0 60px; padding: 15px 0;">←</button>
+                <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()" style="flex: 1;">Continue →</button>
+            </div>
+        </div>
+
         </div>
 
         <!-- STEP 2: Location -->
@@ -1300,53 +1378,13 @@ body > .sticky-cta {
             </div>
         </div>
 
-        <!-- Sticky CTA for Right Panel -->
-        <div class="sticky-cta-right" style="margin-top: 20px;">
-            <div style="display: flex; gap: 10px;">
-                <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="flex: 0 0 60px; padding: 15px 0;">←</button>
-                <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()" style="flex: 1;">Continue →</button>
-            </div>
-        </div>
+        
     </div>
     
-    <!-- COLOR SELECTOR -->
-        <div class="selector-section color-section">
-            <div class="selector-label">Color</div>
-            <div class="color-row">
-                <div class="color-options" id="colorOptions">
-                    <!-- Populated by updateColorOptions() -->
-                </div>
-                <button class="zoom-toggle" id="zoomToggle" onclick="toggleZoom()" aria-label="Toggle 150% zoom" title="Toggle 150% zoom">
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="11" cy="11" r="8"/>
-                                    <path d="M21 21l-4.35-4.35"/>
-                                    <line x1="11" y1="8" x2="11" y2="14"/>
-                                    <line x1="8" y1="11" x2="14" y2="11"/>
-                                </svg>
-                                </button>
-            </div>
-        </div>
+    
         
         
-<!-- SIZE SELECTOR -->
-        <div class="selector-section">
-            <div class="selector-label">Size</div>
-            
-            <div class="size-options">
-                <button class="size-btn" data-size="S" onclick="selectSize('S')">S</button>
-                <button class="size-btn" data-size="M" onclick="selectSize('M')">M</button>
-                <button class="size-btn active" data-size="L" onclick="selectSize('L')">L</button>
-                <button class="size-btn" data-size="XL" onclick="selectSize('XL')">XL</button>
-                <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
-                <button class="size-btn" data-size="3XL" onclick="selectSize('3XL')">3XL</button>
-            </div>
 
-            <div class="quantity-controls">
-                <button class="qty-btn" type="button" onclick="changeQuantity(-1)">−</button>
-                <input id="quantityInput" class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" oninput="setQuantityFromInput(this.value)">
-                <button class="qty-btn" type="button" onclick="changeQuantity(1)">+</button>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -1547,27 +1585,29 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         const styles = ['A', 'B', 'C', 'D'];
         
         styles.forEach(style => {
-            const mobileCard = document.querySelector(`.style-card[data-style="${style}"] .card-mockup`);
-            if (mobileCard) {
+            // Mobile cards
+            const mobileCards = document.querySelectorAll(`.style-card[data-style="${style}"] .card-mockup`);
+            mobileCards.forEach(card => {
                 const img = document.createElement('img');
                 img.style.width = '100%';
                 img.style.height = '100%';
                 img.style.objectFit = 'cover';
                 loadMockup(img, style, selectedProduct);
-                mobileCard.innerHTML = '';
-                mobileCard.appendChild(img);
-            }
+                card.innerHTML = '';
+                card.appendChild(img);
+            });
             
-            const desktopCard = document.querySelector(`.style-card-desktop[data-style="${style}"] .card-mockup`);
-            if (desktopCard) {
+            // Desktop cards
+            const desktopCards = document.querySelectorAll(`.style-card-desktop[data-style="${style}"] .card-mockup`);
+            desktopCards.forEach(card => {
                 const img = document.createElement('img');
                 img.style.width = '100%';
                 img.style.height = '100%';
                 img.style.objectFit = 'cover';
                 loadMockup(img, style, selectedProduct);
-                desktopCard.innerHTML = '';
-                desktopCard.appendChild(img);
-            }
+                card.innerHTML = '';
+                card.appendChild(img);
+            });
         });
     }
     
@@ -1833,6 +1873,13 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
             document.getElementById(`step${i}`)?.classList.add('hidden');
         }
         document.getElementById(`step${step}`)?.classList.remove('hidden');
+        
+        // Ensure the preview section and selectors are always visible
+        const rightPanel = document.querySelector('.right-panel');
+        const previewSection = document.querySelector('.preview-section');
+        if (rightPanel) rightPanel.classList.remove('hidden');
+        if (previewSection) previewSection.classList.remove('hidden');
+
         updateProgress();
         updateStepIndicator();
         updateCTA();
