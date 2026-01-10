@@ -1,5 +1,5 @@
 <!--
-USA250 v1.18.9 - Preview Fill / Cover Cropping
+USA250 v1.19.0 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -477,7 +477,7 @@ Last Updated: January 1, 2026
             cursor: not-allowed;
         }
 
-        /* v1.18.9 - CTA dual buttons + quantity */
+        /* v1.19.0 - CTA dual buttons + quantity */
         .cta-row{
             width: 100%;
             max-width: 520px;
@@ -950,7 +950,7 @@ Last Updated: January 1, 2026
             width: 100%;
             max-width: 520px;
             margin: 0 auto;
-            /* v1.18.9: smooth step transitions */
+            /* v1.19.0: smooth step transitions */
             opacity: 1;
             transform: translateY(0);
             transition: opacity 0.25s ease, transform 0.25s ease;
@@ -964,7 +964,7 @@ Last Updated: January 1, 2026
             pointer-events: none;
         }
 
-        /* v1.18.9: helper class toggled after transition completes */
+        /* v1.19.0: helper class toggled after transition completes */
         .step-content.display-none {
             display: none !important;
         }
@@ -979,7 +979,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.18.9</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.19.0</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1257,7 +1257,7 @@ Last Updated: January 1, 2026
         </div>
 
 
-        <!-- QUANTITY SELECTOR (v1.18.9) -->
+        <!-- QUANTITY SELECTOR (v1.19.0) -->
         <div class="selector-section">
             <div class="selector-label">Quantity</div>
             <div class="qty-row">
@@ -1630,7 +1630,7 @@ let cityText = '';
 
 
     // -------------------------
-    // v1.18.9 - Persist + DesignID
+    // v1.19.0 - Persist + DesignID
     // -------------------------
     const STORAGE_KEY = 'usa250_designer_state_v1_18_6';
 
@@ -1908,7 +1908,7 @@ function toggleTweak() {
         const stepIndicator = document.getElementById('stepIndicator');
         if (stepIndicator) stepIndicator.textContent = `Step ${step} of 4`;
 
-        // v1.18.9: animated step transitions
+        // v1.19.0: animated step transitions
         const steps = Array.from(document.querySelectorAll('.step-content'));
         const DURATION = 260; // ms (match CSS transition)
 
@@ -2101,7 +2101,7 @@ function toggleTweak() {
 
     
     // -------------------------
-    // v1.18.9 - Cloud + Cart flow
+    // v1.19.0 - Cloud + Cart flow
     // -------------------------
     const CLOUDINARY = {
         cloudName: 'dqab444bd',
@@ -2165,16 +2165,29 @@ function toggleTweak() {
         return await res.json();
     }
 
-    async function uploadCloudinaryRaw(jsonObj, publicId) {
-        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/raw/upload`;
-        const blob = new Blob([JSON.stringify(jsonObj)], { type: 'application/json' });
+    // v1.19.0: Store JSON as an SVG "image" in Cloudinary (works with your existing IMAGE unsigned preset),
+    // avoiding the need for a RAW unsigned preset. The JSON is base64 inside <desc id="payload">.
+    async function uploadCloudinaryJsonAsSvg(jsonObj, publicId) {
+        const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY.cloudName}/image/upload`;
+
+        const jsonStr = JSON.stringify(jsonObj);
+        const b64 = btoa(unescape(encodeURIComponent(jsonStr)));
+
+        const svg = `<?xml version="1.0" encoding="UTF-8"?>`
+            + `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1">`
+            + `<desc id="payload">B64:${b64}</desc>`
+            + `</svg>`;
+
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+
         const fd = new FormData();
-        fd.append('file', blob, `${publicId || 'design'}.json`);
-        fd.append('upload_preset', CLOUDINARY.rawUploadPreset);
+        fd.append('file', blob, `${publicId || 'design'}.svg`);
+        fd.append('upload_preset', CLOUDINARY.imageUploadPreset);
         fd.append('folder', CLOUDINARY.folderJson);
-        if (publicId) fd.append('public_id', publicId);
+        if (publicId) fd.append('public_id', `${publicId}_json`);
+
         const res = await fetch(url, { method: 'POST', body: fd });
-        if (!res.ok) throw new Error('Cloudinary JSON upload failed (check RAW upload preset)');
+        if (!res.ok) throw new Error('Cloudinary JSON(SVG) upload failed (ensure preset allows SVG uploads)');
         return await res.json();
     }
 
@@ -2285,7 +2298,7 @@ function toggleTweak() {
         const [thumbUp, printUp, jsonUp] = await Promise.all([
             uploadCloudinaryImage(thumbBlob, `${designId}_thumb`),
             uploadCloudinaryImage(printBlob, `${designId}_print`),
-            uploadCloudinaryRaw(payload, `${designId}`)
+            uploadCloudinaryJsonAsSvg(payload, `${designId}`)
         ]);
 
         return {
@@ -2454,15 +2467,29 @@ function toggleTweak() {
         updateStepIndicator();
         initializeMockups();
 
-        // v1.18.9: restore design from share link or local storage
+        // v1.19.0: restore design from share link or local storage
         const params = new URLSearchParams(window.location.search);
         const designJsonUrl = params.get('design_json');
 
         if (designJsonUrl) {
             try {
                 const res = await fetch(designJsonUrl, { cache: 'no-store' });
-                const payload = await res.json();
-                await applyDesignPayload(payload, { goToStep: 4, persist: true });
+
+// v1.19.0: design_json may be a JSON file OR an SVG wrapper containing base64 JSON
+let payload = null;
+const ct = (res.headers.get('content-type') || '').toLowerCase();
+
+if (ct.includes('application/json')) {
+    payload = await res.json();
+} else {
+    const txt = await res.text();
+    const m = txt.match(/<desc\s+id=["']payload["']>\s*B64:([A-Za-z0-9+/=]+)\s*<\/desc>/i);
+    if (!m) throw new Error('design_json payload not found in SVG');
+    const jsonStr = decodeURIComponent(escape(atob(m[1])));
+    payload = JSON.parse(jsonStr);
+}
+
+await applyDesignPayload(payload, { goToStep: 4, persist: true });
             } catch (e) {
                 console.warn('Failed to load shared design JSON:', e);
                 await restoreStateFromLocal();
