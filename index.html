@@ -1,5 +1,5 @@
 <!--
-USA250 v1.18.7 - Preview Fill / Cover Cropping
+USA250 v1.18.8 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -477,7 +477,7 @@ Last Updated: January 1, 2026
             cursor: not-allowed;
         }
 
-        /* v1.18.7 - CTA dual buttons + quantity */
+        /* v1.18.8 - CTA dual buttons + quantity */
         .cta-row{
             width: 100%;
             max-width: 520px;
@@ -945,6 +945,29 @@ Last Updated: January 1, 2026
 }
 
 
+
+.step-content {
+            width: 100%;
+            max-width: 520px;
+            margin: 0 auto;
+            /* v1.18.8: smooth step transitions */
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            will-change: opacity, transform;
+        }
+
+        /* "hidden" keeps element in flow for transition start, then we apply display-none after */
+        .step-content.hidden {
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+
+        /* v1.18.8: helper class toggled after transition completes */
+        .step-content.display-none {
+            display: none !important;
+        }
 </style>
 </head>
 <body>
@@ -956,7 +979,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.18.7</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.18.8</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1234,7 +1257,7 @@ Last Updated: January 1, 2026
         </div>
 
 
-        <!-- QUANTITY SELECTOR (v1.18.7) -->
+        <!-- QUANTITY SELECTOR (v1.18.8) -->
         <div class="selector-section">
             <div class="selector-label">Quantity</div>
             <div class="qty-row">
@@ -1607,7 +1630,7 @@ let cityText = '';
 
 
     // -------------------------
-    // v1.18.7 - Persist + DesignID
+    // v1.18.8 - Persist + DesignID
     // -------------------------
     const STORAGE_KEY = 'usa250_designer_state_v1_18_6';
 
@@ -1879,9 +1902,37 @@ function toggleTweak() {
     }
     
     function showStep(step) {
-        for (let i = 1; i <= 4; i++) {
-            document.getElementById(`step${i}`)?.classList.add('hidden');
-        }
+        currentStep = step;
+
+        // Update step indicator
+        const stepIndicator = document.getElementById('stepIndicator');
+        if (stepIndicator) stepIndicator.textContent = `Step ${step} of 4`;
+
+        // v1.18.8: animated step transitions
+        const steps = Array.from(document.querySelectorAll('.step-content'));
+        const DURATION = 260; // ms (match CSS transition)
+
+        steps.forEach((el) => {
+            const elStep = Number(el.getAttribute('data-step') || '0');
+            const isTarget = elStep === step;
+
+            if (isTarget) {
+                el.classList.remove('display-none');
+                // Force reflow so transition triggers
+                void el.offsetWidth;
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+                setTimeout(() => {
+                    const stillNotTarget = Number(el.getAttribute('data-step') || '0') !== currentStep;
+                    if (stillNotTarget) el.classList.add('display-none');
+                }, DURATION);
+            }
+        });
+
+        updateCTA();
+        try { persistState(); } catch(e) {}
+    }
         document.getElementById(`step${step}`)?.classList.remove('hidden');
         updateProgress();
         updateStepIndicator();
@@ -1951,7 +2002,10 @@ function toggleTweak() {
             canvas.width = 500 * scale;
             canvas.height = 400 * scale;
             const ctx = canvas.getContext('2d');
-            // Make sure the chosen font is ready for SVG->canvas rendering
+            
+        ctx.imageSmoothingEnabled = true;
+        try { ctx.imageSmoothingQuality = 'high'; } catch(e) {}
+// Make sure the chosen font is ready for SVG->canvas rendering
             await ensureFontsLoadedForExport();
             
             const style = STYLES[selectedStyle];
@@ -2054,7 +2108,7 @@ function toggleTweak() {
 
     
     // -------------------------
-    // v1.18.7 - Cloud + Cart flow
+    // v1.18.8 - Cloud + Cart flow
     // -------------------------
     const CLOUDINARY = {
         cloudName: 'dqab444bd',
@@ -2407,7 +2461,7 @@ function toggleTweak() {
         updateStepIndicator();
         initializeMockups();
 
-        // v1.18.7: restore design from share link or local storage
+        // v1.18.8: restore design from share link or local storage
         const params = new URLSearchParams(window.location.search);
         const designJsonUrl = params.get('design_json');
 
