@@ -1,5 +1,5 @@
 <!--
-USA250 v1.18.6 - Preview Fill / Cover Cropping
+USA250 v1.18.7 - Preview Fill / Cover Cropping
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -477,7 +477,7 @@ Last Updated: January 1, 2026
             cursor: not-allowed;
         }
 
-        /* v1.18.6 - CTA dual buttons + quantity */
+        /* v1.18.7 - CTA dual buttons + quantity */
         .cta-row{
             width: 100%;
             max-width: 520px;
@@ -956,7 +956,7 @@ Last Updated: January 1, 2026
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.18.6</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.18.7</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </div>
         
@@ -1234,7 +1234,7 @@ Last Updated: January 1, 2026
         </div>
 
 
-        <!-- QUANTITY SELECTOR (v1.18.6) -->
+        <!-- QUANTITY SELECTOR (v1.18.7) -->
         <div class="selector-section">
             <div class="selector-label">Quantity</div>
             <div class="qty-row">
@@ -1607,7 +1607,7 @@ let cityText = '';
 
 
     // -------------------------
-    // v1.18.6 - Persist + DesignID
+    // v1.18.7 - Persist + DesignID
     // -------------------------
     const STORAGE_KEY = 'usa250_designer_state_v1_18_6';
 
@@ -2054,7 +2054,7 @@ function toggleTweak() {
 
     
     // -------------------------
-    // v1.18.6 - Cloud + Cart flow
+    // v1.18.7 - Cloud + Cart flow
     // -------------------------
     const CLOUDINARY = {
         cloudName: 'dqab444bd',
@@ -2066,12 +2066,44 @@ function toggleTweak() {
     };
 
     function getVariantKey() {
-        return `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
+        // Prefer product-color-size, but support legacy color-size maps (v1.17)
+        const p = (selectedProduct || '').toString();
+        const c = (selectedColor || '').toString();
+        const s = (selectedSize || '').toString();
+        return {
+            prodKey: `${p}-${c}-${s}`.toLowerCase(),
+            prodKeyRaw: `${p}-${c}-${s}`,
+            colorSize: `${c}-${s}`,
+            colorSizeLower: `${c}-${s}`.toLowerCase()
+        };
     }
 
     function getVariant() {
-        const key = getVariantKey();
-        return VARIANT_MAP[key] || null;
+        const keys = getVariantKey();
+
+        // If VARIANT_MAP already contains rich objects, return them directly
+        const candidates = [
+            keys.prodKey,
+            keys.prodKeyRaw,
+            keys.colorSize,
+            keys.colorSizeLower
+        ];
+
+        for (const k of candidates) {
+            const v = VARIANT_MAP[k];
+            if (!v) continue;
+
+            // New-style object map support
+            if (typeof v === 'object') return v;
+
+            // Legacy string/number variant id support
+            return {
+                shopifyVariantId: String(v),
+                gelatoUid: (PRODUCTS[selectedProduct] && PRODUCTS[selectedProduct].gelatoUid) ? PRODUCTS[selectedProduct].gelatoUid : ''
+            };
+        }
+
+        return null;
     }
 
     async function uploadCloudinaryImage(blob, publicId) {
@@ -2375,7 +2407,7 @@ function toggleTweak() {
         updateStepIndicator();
         initializeMockups();
 
-        // v1.18.6: restore design from share link or local storage
+        // v1.18.7: restore design from share link or local storage
         const params = new URLSearchParams(window.location.search);
         const designJsonUrl = params.get('design_json');
 
