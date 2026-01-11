@@ -1,5 +1,5 @@
 <!--
-USA250 v1.21.6 - Fix JS syntax + restore previews + center button text
+USA250 v1.21.7 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -866,7 +866,7 @@ Last Updated: January 11, 2026
     color: white;
     font-weight: 800;
     font-size: 16px;
-    text-align: left;
+    text-align: center;
     outline: none;
 }
 
@@ -1105,6 +1105,22 @@ body > .sticky-cta {
     font-size: 11px;
 }
 
+
+/* Collapse empty left-panel height after style is selected (prevents giant blank column) */
+@media (min-width: 768px) {
+  body.after-style .left-panel {
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+/* When the CTA is fixed on mobile/tablet, keep content from hiding behind it */
+@media (max-width: 1024px) {
+  .container {
+    padding-bottom: 120px !important;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -1272,17 +1288,8 @@ body > .sticky-cta {
             </div>
         </div>
 
-<!-- Sticky CTA for Right Panel -->
-        <div class="sticky-cta-right" style="margin-top: 20px;">
-            <div style="display: flex; gap: 10px;">
-                <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="flex: 0 0 60px; padding: 15px 0;">←</button>
-                <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()" style="flex: 1;">Continue →</button>
-            </div>
-        </div>
 
-        </div>
-
-        <!-- STEP 2: Location -->
+<!-- STEP 2: Location -->
         <div class="location-section hidden" id="step2">
             <h2 class="section-title">Your Location</h2>
             <button class="locate-btn" onclick="useGeolocation()">
@@ -1390,7 +1397,16 @@ body > .sticky-cta {
         
         
 
-    </div>
+    
+        <!-- Sticky CTA for Right Panel -->
+        <div class="sticky-cta-right">
+            <div style="display: flex; gap: 10px;">
+                <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="flex: 0 0 60px; padding: 15px 0;">←</button>
+                <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()" style="flex: 1;">Continue →</button>
+            </div>
+        </div>
+
+</div>
 </div>
 
 <!-- Redundant CTA removed -->
@@ -1892,6 +1908,7 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         if (rightPanel) rightPanel.classList.remove('hidden');
         if (previewSection) previewSection.classList.remove('hidden');
 
+        document.body.classList.toggle('after-style', step !== 1);
         updateProgress();
         updateStepIndicator();
         updateCTA();
@@ -2084,10 +2101,12 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         return;
     }
     
-    const checkoutBtn = document.getElementById('ctaButton');
-    const originalText = checkoutBtn.textContent;
-    checkoutBtn.textContent = 'Preparing design...';
-    checkoutBtn.disabled = true;
+    const checkoutBtn = document.getElementById('ctaButtonRight') || document.getElementById('ctaButton');
+    const originalText = checkoutBtn ? checkoutBtn.textContent : '';
+    if (checkoutBtn) {
+        if (checkoutBtn) checkoutBtn.textContent = 'Preparing design...';
+        checkoutBtn.disabled = true;
+    }
     
     try {
         // VARIANT MAPPING
@@ -2138,8 +2157,7 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         injectFontImport(svgClone);
         
         // 2. CRITICAL FIX: Embed background image as base64
-        checkoutBtn.textContent = 'Loading design elements...';
-        
+        if (checkoutBtn) checkoutBtn.textContent = 'Loading design elements...';
         const bgImage = svgClone.querySelector('#bgImage');
         if (bgImage && bgImage.href.baseVal) {
             const imageUrl = bgImage.href.baseVal;
@@ -2187,8 +2205,7 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         await ensureFontsLoadedForExport();
         
         // 3. Convert SVG (with embedded image) to PNG
-        checkoutBtn.textContent = 'Converting design...';
-        
+        if (checkoutBtn) checkoutBtn.textContent = 'Converting design...';
         const svgData = new XMLSerializer().serializeToString(svgClone);
         const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
         const url = URL.createObjectURL(svgBlob);
@@ -2230,8 +2247,7 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         console.log('Canvas created:', canvas.width, 'x', canvas.height);
         
         // 5. Convert to blob
-        checkoutBtn.textContent = 'Generating PNG...';
-        
+        if (checkoutBtn) checkoutBtn.textContent = 'Generating PNG...';
         const blob = await new Promise((resolve, reject) => {
             canvas.toBlob((b) => {
                 if (b) resolve(b);
@@ -2247,8 +2263,7 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         }
         
         // 6. Upload to Cloudinary
-        checkoutBtn.textContent = 'Uploading design...';
-        
+        if (checkoutBtn) checkoutBtn.textContent = 'Uploading design...';
         const formData = new FormData();
         formData.append('file', blob);
         formData.append('upload_preset', 'america250');
@@ -2287,8 +2302,7 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         
         // 8. Add item to Shopify cart via POST
         // NOTE: Internal properties are prefixed with '_' to hide them from the standard Shopify cart view.
-        checkoutBtn.textContent = 'Adding to cart...';
-
+        if (checkoutBtn) checkoutBtn.textContent = 'Adding to cart...';
         const designId = (window.crypto && crypto.randomUUID)
             ? crypto.randomUUID()
             : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
@@ -2364,8 +2378,10 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         console.error('✗ Checkout error:', error);
         console.error('Stack:', error.stack);
         alert('Checkout failed: ' + error.message + '\n\nPlease try again or contact support.');
-        checkoutBtn.textContent = originalText;
-        checkoutBtn.disabled = false;
+        if (checkoutBtn) {
+            checkoutBtn.textContent = originalText;
+            checkoutBtn.disabled = false;
+        }
     }
 }
 
