@@ -1,5 +1,5 @@
 <!--
-USA250 v1.21.8 - Fix JS syntax + restore previews + center button text
+USA250 v1.21.9 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -1147,9 +1147,10 @@ body > .sticky-cta {
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.21.8</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.21.9</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
-            <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
+            <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: inline-block; margin-top: 5px;">Start Over</a>
+            <a href="https://shop.4ship.ca/cart" id="viewCartLink" style="font-size: 11px; color: #666; text-decoration: underline; display: inline-block; margin-top: 5px;; margin-left: 14px;">View Cart <span id="cartCountBadge" style="display:none; margin-left:6px; background:#d1ad3b; color:#000; border-radius:999px; padding:1px 7px; font-weight:700; font-size:12px; line-height: 18px;">0</span></a>
         </div>
         
         <!-- STEP 1: Style Selection -->
@@ -1685,6 +1686,7 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         const shapeText = product.shape === 'Sq' ? 'Square (DTG)' : 'Oval (Merch)';
         document.getElementById('shapeIndicator').textContent = shapeText;
         console.log("Initializing mockups..."); initializeMockups();
+        updateCartCount();
         if (selectedStyle) {
             loadTemplate(selectedStyle, product.shape);
         }
@@ -2339,8 +2341,6 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
                         properties: {
                             '_design_id': designId,
                             '_style': selectedStyle,
-                            'color': selectedColor,
-                            'size': selectedSize,
                             'city': document.getElementById('cityInput').value || '',
                             'group': document.getElementById('groupInput').value || '',
                             '_design_url': designUrl,
@@ -2374,9 +2374,7 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
             addField('quantity', String(qty));
             addField('properties[_design_id]', designId);
             addField('properties[_style]', selectedStyle);
-            addField('properties[color]', selectedColor);
-            addField('properties[size]', selectedSize);
-            addField('properties[city]', document.getElementById('cityInput').value || '');
+addField('properties[city]', document.getElementById('cityInput').value || '');
             addField('properties[group]', document.getElementById('groupInput').value || '');
             addField('properties[_design_url]', designUrl);
             addField('properties[_gelato_product]', variant.gelatoUid);
@@ -2406,6 +2404,7 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         updateProgress();
         updateStepIndicator();
         console.log("Initializing mockups..."); initializeMockups();
+        updateCartCount();
         
         // Always use the grid (all styles visible at once)
         const mobileCarousel = document.querySelector('.style-cards');
@@ -2423,6 +2422,52 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     }
     
     window.addEventListener('load', init);
+
+// Cart shortcut + badge (safe if blocked by CORS; badge just stays hidden)
+async function updateCartCount() {
+    const badge = document.getElementById('cartCountBadge');
+    if (!badge) return;
+    try {
+        const r = await fetch('https://shop.4ship.ca/cart.js', { credentials: 'include' });
+        if (!r.ok) throw new Error('cart.js not ok');
+        const cart = await r.json();
+        const n = Number(cart?.item_count || 0);
+        badge.textContent = String(n);
+        badge.style.display = (n > 0) ? 'inline-flex' : 'none';
+    } catch (e) {
+        badge.style.display = 'none';
+    }
+}
+
+// Fix: returning from /cart via browser Back can restore the page from BFCache with the CTA still disabled.
+function resetCtaAfterCartReturn() {
+    try {
+        updateCTA(); // recompute text + disabled state from currentStep + inputs
+        const btn = document.getElementById('ctaButtonRight') || document.getElementById('ctaButton');
+        if (btn) {
+            btn.removeAttribute('aria-busy');
+            btn.classList.remove('loading');
+        }
+    } catch (e) {
+        console.warn('CTA reset skipped:', e);
+    }
+    updateCartCount();
+}
+
+window.addEventListener('pageshow', (e) => {
+    // e.persisted is true when restored from BFCache
+    if (e.persisted) resetCtaAfterCartReturn();
+    // Some browsers report back/forward via PerformanceNavigationTiming instead
+    try {
+        const nav = performance.getEntriesByType?.('navigation')?.[0];
+        if (nav && nav.type === 'back_forward') resetCtaAfterCartReturn();
+    } catch {}
+});
+
+window.addEventListener('focus', () => {
+    // If the user pops out to cart in another tab/window, keep the UI state sane when they come back.
+    resetCtaAfterCartReturn();
+});
 
 
 // Color/Size/Zoom Functions - v1.16
