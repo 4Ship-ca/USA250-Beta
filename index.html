@@ -1,68 +1,61 @@
-<!--
-USA250 v1.22.2 - Preview Fill / Cover Cropping
-Base: Working v1.9 layout
-Added: Color/Size selectors, Zoom toggle
-Navigation: Simple 2-step flow
-Last Updated: January 1, 2026
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>America 250 - Design Your Style</title>
-    
+
     <link rel="icon" href="data:,">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         :root {
             --gold: #d4af37;
             --bg: #0a0a0a;
             --panel: #161616;
             --border: #333;
         }
-        
+
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
             background: radial-gradient(circle at top, #151515 0, #050505 40%, #000 100%);
             color: #f5f5f5;
             -webkit-font-smoothing: antialiased;
         }
-        
+
         a { color: inherit; text-decoration: none; }
-        
+
         .page {
             min-height: 100vh;
         }
-        
+
         .page-inner {
             padding: 20px 20px 80px;
         }
-        
+
         header.header {
             text-align: left;
             margin-bottom: 24px;
         }
-        
+
         .logo-row {
             display: flex;
             align-items: baseline;
             gap: 12px;
         }
-        
+
         .logo-text {
             font-size: 32px;
             font-weight: 900;
             letter-spacing: 0.12em;
             text-transform: uppercase;
         }
-        
+
         .logo-text span {
             color: var(--gold);
         }
-        
+
         .version-pill {
             font-size: 11px;
             color: #999;
@@ -72,13 +65,13 @@ Last Updated: January 1, 2026
             text-transform: uppercase;
             letter-spacing: 0.12em;
         }
-        
+
         .subtitle {
             margin-top: 6px;
             font-size: 13px;
             color: #999;
         }
-        
+
         .progress-bar {
             margin-top: 14px;
             height: 4px;
@@ -86,7 +79,7 @@ Last Updated: January 1, 2026
             border-radius: 999px;
             overflow: hidden;
         }
-        
+
         .progress-fill {
             width: 25%;
             height: 100%;
@@ -94,7 +87,7 @@ Last Updated: January 1, 2026
             border-radius: inherit;
             transition: width 220ms ease-out;
         }
-        
+
         .step-indicator {
             margin-top: 8px;
             font-size: 13px;
@@ -102,38 +95,38 @@ Last Updated: January 1, 2026
             text-transform: uppercase;
             color: #a0a0a0;
         }
-        
+
         .container {
             display: grid;
             grid-template-columns: 380px minmax(0, 1fr);
             gap: 26px;
             margin-top: 28px;
         }
-        
+
         .left-panel {
             height: 90vh;
             overflow-y: auto;
             padding-right: 16px;
         }
-        
+
         .left-panel::-webkit-scrollbar { width: 6px; }
         .left-panel::-webkit-scrollbar-thumb {
             background: #444;
             border-radius: 999px;
         }
-        
+
         .right-panel {
             height: 90vh;
             overflow-y: auto;
             padding-left: 16px;
         }
-        
+
         .right-panel::-webkit-scrollbar { width: 6px; }
         .right-panel::-webkit-scrollbar-thumb {
             background: #444;
             border-radius: 999px;
         }
-        
+
         .section-title {
             font-size: 13px;
             letter-spacing: 0.24em;
@@ -141,19 +134,19 @@ Last Updated: January 1, 2026
             color: #a0a0a0;
             margin-bottom: 4px;
         }
-        
+
         .section-subtitle {
             font-size: 14px;
             color: #f5f5f5;
             margin-bottom: 16px;
         }
-        
+
         .style-cards {
             display: flex;
             flex-direction: column;
             gap: 14px;
         }
-        
+
         .style-card {
             background: linear-gradient(135deg, #171717, #101010);
             border-radius: 18px;
@@ -166,19 +159,19 @@ Last Updated: January 1, 2026
             position: relative;
             transition: border 160ms ease, box-shadow 160ms ease, transform 120ms ease, background 160ms ease;
         }
-        
+
         .style-card:hover {
             border-color: #f5c84a;
             box-shadow: 0 0 0 1px rgba(245, 200, 74, 0.25), 0 16px 35px rgba(0,0,0,0.7);
             transform: translateY(-1px);
         }
-        
+
         .style-card.selected {
             border-color: #f5c84a;
             background: radial-gradient(circle at top left, #252018 0, #111 45%, #080808 100%);
             box-shadow: 0 0 0 1px rgba(245, 200, 74, 0.38), 0 20px 44px rgba(0,0,0,0.8);
         }
-        
+
         .card-thumb-wrap {
             width: 68px;
             height: 68px;
@@ -191,61 +184,61 @@ Last Updated: January 1, 2026
             align-items: center;
             justify-content: center;
         }
-        
+
         .card-thumb {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
-        
+
         .style-card-body {
             flex: 1;
             min-width: 0;
         }
-        
+
         .style-name-row {
             display: flex;
             align-items: baseline;
             gap: 8px;
         }
-        
+
         .style-name {
             font-size: 17px;
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
         }
-        
+
         .style-tag {
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 0.12em;
             color: #a0a0a0;
         }
-        
+
         .style-desc {
             font-size: 13px;
             color: #a0a0a0;
             margin-top: 2px;
         }
-        
+
         .style-meta {
             margin-top: 6px;
             font-size: 11px;
             color: #808080;
         }
-        
+
         .style-meta span {
             margin-right: 10px;
         }
-        
+
         .style-meta-label {
             text-transform: uppercase;
             letter-spacing: 0.14em;
             font-size: 10px;
             color: #737373;
         }
-        
+
         .style-price-pill {
             position: absolute;
             top: 10px;
@@ -257,7 +250,7 @@ Last Updated: January 1, 2026
             background: radial-gradient(circle at top, #242424 0, #141414 55%, #0b0b0b 100%);
             color: #d0d0d0;
         }
-        
+
         .preview-section {
             background: #101010;
             border-radius: 26px;
@@ -265,7 +258,7 @@ Last Updated: January 1, 2026
             padding: 20px 20px 22px;
             margin-bottom: 20px;
         }
-        
+
         .preview-title {
             font-size: 14px;
             letter-spacing: 0.24em;
@@ -273,12 +266,12 @@ Last Updated: January 1, 2026
             color: var(--gold);
             margin-bottom: 10px;
         }
-        
+
         .preview-row {
             display: flex;
             gap: 18px;
         }
-        
+
         .preview-wrapper {
             flex: 1;
             background: radial-gradient(circle at top, #1a1a1a 0, #050505 50%, #000 100%);
@@ -289,7 +282,7 @@ Last Updated: January 1, 2026
             align-items: center;
             justify-content: center;
         }
-        
+
         .preview-canvas {
             width: 100%;
             max-width: 460px;
@@ -300,14 +293,14 @@ Last Updated: January 1, 2026
             transform-origin: center center;
             transition: transform 120ms ease-out;
         }
-        
+
         .preview-sidebar {
             width: 190px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
-        
+
         .selector-section {
             margin-top: 12px;
             background: #0f0f0f;
@@ -315,7 +308,7 @@ Last Updated: January 1, 2026
             border: 1px solid #252525;
             padding: 12px 16px 14px;
         }
-        
+
         .selector-label {
             font-size: 11px;
             text-transform: uppercase;
@@ -323,20 +316,20 @@ Last Updated: January 1, 2026
             color: #a0a0a0;
             margin-bottom: 8px;
         }
-        
+
         .color-row {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
         }
-        
+
         .color-options {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
         }
-        
+
         .color-swatch {
             width: 36px;
             height: 36px;
@@ -349,20 +342,20 @@ Last Updated: January 1, 2026
             background: #111;
             transition: border 100ms ease, box-shadow 100ms ease, transform 100ms ease;
         }
-        
+
         .color-swatch-inner {
             width: 24px;
             height: 24px;
             border-radius: 999px;
             border: 2px solid rgba(0,0,0,0.4);
         }
-        
+
         .color-swatch.active {
             border-color: var(--gold);
             box-shadow: 0 0 0 1px rgba(0,0,0,0.7), 0 0 0 2px rgba(244,200,72,0.5);
             transform: translateY(-1px);
         }
-        
+
         .zoom-toggle {
             border-radius: 999px;
             border: 1px solid #333;
@@ -375,13 +368,13 @@ Last Updated: January 1, 2026
             color: #b0b0b0;
             cursor: pointer;
         }
-        
+
         .size-options {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
         }
-        
+
         .size-btn {
             min-width: 52px;
             padding: 8px 0;
@@ -394,31 +387,26 @@ Last Updated: January 1, 2026
             cursor: pointer;
             transition: background 120ms ease, border 120ms ease, transform 90ms ease;
         }
-        
+
         .size-btn.active {
             background: var(--gold);
             color: #111;
             border-color: var(--gold);
         }
-        
+
         .qty-row {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-top: 2px;
         }
-        
-        .qty-label {
-            font-size: 13px;
-            color: #a0a0a0;
-        }
-        
+
         .quantity-controls {
             display: inline-flex;
             align-items: center;
             gap: 6px;
         }
-        
+
         .qty-btn {
             width: 42px;
             height: 42px;
@@ -430,7 +418,7 @@ Last Updated: January 1, 2026
             font-weight: 700;
             cursor: pointer;
         }
-        
+
         .qty-input {
             flex: 0 0 auto;
             max-width: 80px;
@@ -444,11 +432,11 @@ Last Updated: January 1, 2026
             text-align: center;
             outline: none;
         }
-        
+
         .sticky-cta-right {
             margin-top: 20px;
         }
-        
+
         .toggle-btn {
             border-radius: 16px;
             border: 1px solid #333;
@@ -458,7 +446,7 @@ Last Updated: January 1, 2026
             font-weight: 600;
             cursor: pointer;
         }
-        
+
         .mega-btn {
             border-radius: 18px;
             border: none;
@@ -472,13 +460,13 @@ Last Updated: January 1, 2026
             box-shadow: 0 16px 36px rgba(0,0,0,0.85), 0 0 0 1px rgba(0,0,0,0.6);
             cursor: pointer;
         }
-        
+
         .mega-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
             box-shadow: none;
         }
-        
+
         .location-card {
             background: #171717;
             border-radius: 20px;
@@ -486,7 +474,7 @@ Last Updated: January 1, 2026
             padding: 18px 20px 20px;
             margin-bottom: 18px;
         }
-        
+
         .location-title {
             font-size: 14px;
             letter-spacing: 0.22em;
@@ -494,7 +482,7 @@ Last Updated: January 1, 2026
             color: #a0a0a0;
             margin-bottom: 6px;
         }
-        
+
         .location-heading {
             font-size: 24px;
             font-weight: 800;
@@ -503,19 +491,19 @@ Last Updated: January 1, 2026
             color: var(--gold);
             margin-bottom: 2px;
         }
-        
+
         .location-subtitle {
             font-size: 13px;
             color: #a0a0a0;
             margin-bottom: 12px;
         }
-        
+
         .use-location-row {
             display: flex;
             justify-content: flex-start;
             margin-bottom: 12px;
         }
-        
+
         .use-location-btn {
             border-radius: 20px;
             border: none;
@@ -530,11 +518,11 @@ Last Updated: January 1, 2026
             cursor: pointer;
             box-shadow: 0 12px 28px rgba(0,0,0,0.6);
         }
-        
+
         .use-location-btn span.emoji {
             font-size: 16px;
         }
-        
+
         .or-divider {
             margin: 14px 0;
             display: flex;
@@ -545,7 +533,7 @@ Last Updated: January 1, 2026
             text-transform: uppercase;
             letter-spacing: 0.18em;
         }
-        
+
         .or-divider::before,
         .or-divider::after {
             content: "";
@@ -553,30 +541,30 @@ Last Updated: January 1, 2026
             height: 1px;
             background: #333;
         }
-        
+
         .field-label-row {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
             gap: 8px;
         }
-        
+
         .field-label {
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.18em;
             color: #a0a0a0;
         }
-        
+
         .char-counter {
             font-size: 11px;
             color: #777;
         }
-        
+
         .text-input-wrapper {
             margin-top: 6px;
         }
-        
+
         .text-input {
             width: 100%;
             border-radius: 999px;
@@ -589,16 +577,16 @@ Last Updated: January 1, 2026
             outline: none;
             transition: border 140ms ease, box-shadow 140ms ease, background 140ms ease;
         }
-        
+
         .text-input::placeholder { color: #555; }
-        
+
         .text-input:focus {
             border-color: var(--gold);
             box-shadow: 0 0 0 1px rgba(245, 200, 74, 0.4);
         }
-        
+
         .hidden { display: none !important; }
-        
+
         @media (max-width: 900px) {
             .container {
                 display: flex;
@@ -606,20 +594,20 @@ Last Updated: January 1, 2026
                 gap: 22px;
                 margin-top: 18px;
             }
-            
+
             .page-inner {
                 padding: 18px 12px 90px;
             }
-            
+
             .preview-row {
                 flex-direction: column;
             }
-            
+
             .preview-sidebar {
                 width: 100%;
             }
         }
-        
+
         @media (min-width: 900px) {
             .page-inner {
                 padding-left: 40px;
@@ -634,7 +622,7 @@ Last Updated: January 1, 2026
         <header class="header">
             <div class="logo-row">
                 <div class="logo-text">AMERICA <span>250</span></div>
-                <div class="version-pill">v1.22.2</div>
+                <div class="version-pill">v1.22.3</div>
             </div>
             <div class="subtitle">Design your group’s commemorative tee in four quick steps.</div>
             <div class="progress-bar">
@@ -642,15 +630,18 @@ Last Updated: January 1, 2026
             </div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
         </header>
-        
+
         <main class="container">
+            <!-- LEFT: STYLE PICKER -->
             <section class="left-panel">
                 <div class="section-title">Step 1 · Pick Your Style</div>
                 <div class="section-subtitle">Choose the base artwork that best fits your group vibe.</div>
                 <div class="style-cards" id="styleCards"></div>
             </section>
-            
+
+            <!-- RIGHT: PREVIEW + STEPS -->
             <section class="right-panel">
+                <!-- LIVE PREVIEW + PRODUCT CONTROLS -->
                 <div class="preview-section">
                     <div class="preview-title">Live Preview</div>
                     <div class="preview-row">
@@ -662,19 +653,25 @@ Last Updated: January 1, 2026
                                         <path id="pathMid" d="M 20,285 A 230,65 0 0,1 480,285" />
                                     </defs>
                                     <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#111111"></rect>
-                                    <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice"></image>
-                                    <text id="cityText" text-anchor="middle" fill="#f5f5f5" font-family="Oswald, system-ui" font-weight="700" font-size="22">
+
+                                    <!-- Single style mockup (no missing art files) -->
+                                    <image id="styleMock" x="10" y="10" width="480" height="380" preserveAspectRatio="xMidYMid slice"></image>
+
+                                    <!-- City & group overlays -->
+                                    <text id="cityText" text-anchor="middle" fill="#f5f5f5"
+                                          font-family="Oswald, system-ui" font-weight="700" font-size="22">
                                         <textPath href="#pathTop" startOffset="50%"></textPath>
                                     </text>
-                                    <text id="groupText" text-anchor="middle" fill="#f5f5f5" font-family="Libre Baskerville, system-ui" font-weight="700" font-size="16">
+                                    <text id="groupText" text-anchor="middle" fill="#f5f5f5"
+                                          font-family="Libre Baskerville, system-ui" font-weight="700" font-size="16">
                                         <textPath href="#pathMid" startOffset="50%"></textPath>
                                     </text>
-                                    <image id="coreLogo" x="60" y="110" width="380" height="180" preserveAspectRatio="xMidYMid meet"></image>
                                 </svg>
                             </div>
                         </div>
                     </div>
-                    
+
+                    <!-- PRODUCT CONTROLS (COLOR/SIZE/QTY/CTA) -->
                     <div id="productSection">
                         <div class="selector-section color-section">
                             <div class="selector-label">Color</div>
@@ -690,7 +687,7 @@ Last Updated: January 1, 2026
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div class="selector-section">
                             <div class="selector-label">Size</div>
                             <div class="size-options">
@@ -702,7 +699,7 @@ Last Updated: January 1, 2026
                                 <button class="size-btn" data-size="3XL" onclick="selectSize('3XL')">3XL</button>
                             </div>
                         </div>
-                        
+
                         <div class="selector-section">
                             <div class="selector-label">Quantity</div>
                             <div class="qty-row">
@@ -713,7 +710,7 @@ Last Updated: January 1, 2026
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="sticky-cta-right">
                             <div style="display:flex; gap:10px;">
                                 <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="flex:0 0 60px; padding:15px 0;">←</button>
@@ -722,52 +719,57 @@ Last Updated: January 1, 2026
                         </div>
                     </div>
                 </div>
-                
+
+                <!-- STEP 2: CITY -->
                 <div class="location-card hidden" id="step2">
                     <div class="location-title">Step 2 · City &amp; State</div>
                     <div class="location-heading">Your Location</div>
                     <div class="location-subtitle">Where will everyone be repping this tee?</div>
-                    
+
                     <div class="use-location-row">
                         <button class="use-location-btn" type="button" onclick="useGeolocation()">
                             <span class="emoji">📍</span><span>Use My Location</span>
                         </button>
                     </div>
-                    
+
                     <div class="or-divider">or</div>
-                    
+
                     <div class="field-label-row">
                         <div class="field-label">City &amp; State</div>
                         <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
                     </div>
-                    
+
                     <div class="text-input-wrapper">
-                        <input id="cityInput" class="text-input" type="text" maxlength="50" placeholder="MIAMI, FLORIDA" oninput="updateCity()">
+                        <input id="cityInput" class="text-input" type="text" maxlength="50"
+                               placeholder="MIAMI, FLORIDA" oninput="updateCity()">
                     </div>
                 </div>
-                
+
+                <!-- STEP 3: GROUP -->
                 <div class="location-card hidden" id="step3">
                     <div class="location-title">Step 3 · Group Name</div>
                     <div class="location-heading">Your Group</div>
                     <div class="location-subtitle">Family, friends, or crew name that will appear on the shirt.</div>
-                    
+
                     <div class="field-label-row">
                         <div class="field-label">Group or Family Name</div>
                         <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
                     </div>
-                    
+
                     <div class="text-input-wrapper">
-                        <input id="groupInput" class="text-input" type="text" maxlength="35" placeholder="THE SMITH FAMILY" oninput="updateGroup()">
+                        <input id="groupInput" class="text-input" type="text" maxlength="35"
+                               placeholder="THE SMITH FAMILY" oninput="updateGroup()">
                     </div>
                 </div>
-                
+
+                <!-- STEP 4: FINE TUNE (OPTIONAL PLACEHOLDER) -->
                 <div class="location-card hidden" id="step4">
                     <div class="location-title">Step 4 · Fine-Tune</div>
                     <div class="location-heading">Fine-Tune Your Design</div>
                     <div class="location-subtitle">
                         Optional: adjust text sizing and placement if your city or group is longer.
                     </div>
-                    <!-- keep your fine-tune sliders/buttons here if you want; omitted for brevity -->
+                    <!-- Sliders / advanced controls can live here -->
                 </div>
             </section>
         </main>
@@ -798,8 +800,7 @@ const STYLES = [
         vibe: "Classic Americana",
         desc: "Bold ribbons, laurels, and a clean \"250\" core for timeless tees.",
         shape: "Sq",
-        thumb: "mockups/Style_A_Sq_tee.png",
-        baseLogo: "art/usa250_styleA_core.png"
+        thumb: "mockups/Style_A_Sq_tee.png"
     },
     {
         id: "B",
@@ -808,8 +809,7 @@ const STYLES = [
         vibe: "Dark Mode",
         desc: "Deep black background with moody gold and teal highlights.",
         shape: "Sq",
-        thumb: "mockups/Style_B_Sq_tee.png",
-        baseLogo: "art/usa250_styleB_core.png"
+        thumb: "mockups/Style_B_Sq_tee.png"
     },
     {
         id: "C",
@@ -818,8 +818,7 @@ const STYLES = [
         vibe: "Vintage Vibes",
         desc: "Sunset stripes and throwback typography with a worn-in feel.",
         shape: "Sq",
-        thumb: "mockups/Style_C_Sq_tee.png",
-        baseLogo: "art/usa250_styleC_core.png"
+        thumb: "mockups/Style_C_Sq_tee.png"
     },
     {
         id: "D",
@@ -828,8 +827,7 @@ const STYLES = [
         vibe: "National Parks",
         desc: "Earthy greens and badge styling for camps, troops, and crews.",
         shape: "Sq",
-        thumb: "mockups/Style_D_Sq_tee.png",
-        baseLogo: "art/usa250_styleD_core.png"
+        thumb: "mockups/Style_D_Sq_tee.png"
     }
 ];
 
@@ -842,7 +840,7 @@ const VARIANT_MAP = {
         shopifyVariantId: "46056445662070",
         gelatoUid: "apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000"
     }
-    // ...rest of your variant mapping...
+    // add other size/color combos here when ready
 };
 
 const COLOR_OPTIONS = [
@@ -894,17 +892,17 @@ document.addEventListener("DOMContentLoaded", () => {
 function buildStyleCards() {
     const container = document.getElementById("styleCards");
     container.innerHTML = "";
-    
+
     STYLES.forEach((style, index) => {
         const card = document.createElement("div");
         card.className = "style-card";
         card.dataset.styleId = style.id;
-        
+
         if (index === 0) {
             selectedStyle = style;
             card.classList.add("selected");
         }
-        
+
         card.innerHTML = `
             <div class="card-thumb-wrap">
                 <img src="${style.thumb}" alt="${style.name} mockup" class="card-thumb" loading="lazy">
@@ -922,14 +920,14 @@ function buildStyleCards() {
             </div>
             <div class="style-price-pill">$${PRODUCTS.tee.price.toFixed(2)} USD</div>
         `;
-        
+
         card.addEventListener("click", () => {
             selectStyle(style.id);
         });
-        
+
         container.appendChild(card);
     });
-    
+
     if (!selectedStyle && STYLES.length) {
         selectedStyle = STYLES[0];
     }
@@ -946,7 +944,7 @@ function showStep(step) {
     }
     const active = document.getElementById(`step${step}`);
     if (active) active.classList.remove("hidden");
-    
+
     const productSection = document.getElementById("productSection");
     if (productSection) {
         if (step === 4) {
@@ -955,7 +953,7 @@ function showStep(step) {
             productSection.classList.add("hidden");
         }
     }
-    
+
     currentStep = step;
     updateProgress();
     updateStepIndicator();
@@ -982,17 +980,17 @@ function updateCTA(text) {
     const btn = document.getElementById("ctaButtonRight");
     const backBtn = document.getElementById("backBtnRight");
     if (!btn) return;
-    
+
     if (backBtn) {
         backBtn.disabled = currentStep === 1;
     }
-    
+
     if (text) {
         btn.textContent = text;
         btn.disabled = false;
         return;
     }
-    
+
     if (currentStep === 1) {
         btn.textContent = selectedStyle ? "Continue →" : "Select a Style to Continue";
         btn.disabled = !selectedStyle;
@@ -1027,27 +1025,25 @@ function goBack() {
 /* -------------------------------------------------------------------------- */
 
 function initPreview() {
-    const bgImage = document.getElementById("bgImage");
-    const coreLogo = document.getElementById("coreLogo");
-    
-    if (selectedStyle) {
-        coreLogo.setAttribute("href", selectedStyle.baseLogo);
+    const styleMock = document.getElementById("styleMock");
+
+    if (selectedStyle && styleMock) {
+        styleMock.setAttribute("href", selectedStyle.thumb);
     }
-    
-    bgImage.setAttribute("href", "art/tee_texture_bg.png");
+
     updatePreview();
 }
 
 function updatePreview() {
     const cityPath = document.querySelector("#cityText textPath");
     const groupPath = document.querySelector("#groupText textPath");
-    
+
     if (cityPath) cityPath.textContent = cityText || "";
     if (groupPath) groupPath.textContent = groupText || "";
-    
+
     const shirtFill = document.getElementById("shirtFill");
     if (!shirtFill) return;
-    
+
     if (selectedColor === "white") {
         shirtFill.setAttribute("fill", "#f7f7f7");
     } else if (selectedColor === "gray") {
@@ -1062,16 +1058,18 @@ function updatePreview() {
 function selectStyle(styleId) {
     const style = STYLES.find(s => s.id === styleId);
     if (!style) return;
-    
+
     selectedStyle = style;
-    
+
     document.querySelectorAll(".style-card").forEach(card => {
         card.classList.toggle("selected", card.dataset.styleId === styleId);
     });
-    
-    const coreLogo = document.getElementById("coreLogo");
-    if (coreLogo) coreLogo.setAttribute("href", style.baseLogo);
-    
+
+    const styleMock = document.getElementById("styleMock");
+    if (styleMock) {
+        styleMock.setAttribute("href", style.thumb);
+    }
+
     updateCTA();
     updatePreview();
 }
@@ -1081,6 +1079,7 @@ function selectStyle(styleId) {
 /* -------------------------------------------------------------------------- */
 
 function useGeolocation() {
+    // placeholder for now; you can wire in a real lookup later
     const city = "BRANTFORD, ONTARIO";
     const input = document.getElementById("cityInput");
     if (input) {
@@ -1094,10 +1093,10 @@ function updateCity() {
         .toUpperCase()
         .slice(0, 50);
     document.getElementById("cityInput").value = cityText;
-    
+
     const remaining = 50 - cityText.length;
     document.getElementById("cityCounter").textContent = remaining;
-    
+
     updatePreview();
     updateCTA();
 }
@@ -1107,10 +1106,10 @@ function updateGroup() {
         .toUpperCase()
         .slice(0, 35);
     document.getElementById("groupInput").value = groupText;
-    
+
     const remaining = 35 - groupText.length;
     document.getElementById("groupCounter").textContent = remaining;
-    
+
     updatePreview();
     updateCTA();
 }
@@ -1123,7 +1122,7 @@ function updateColorOptions() {
     const container = document.getElementById("colorOptions");
     if (!container) return;
     container.innerHTML = "";
-    
+
     COLOR_OPTIONS.forEach(opt => {
         const btn = document.createElement("button");
         btn.className = "color-swatch";
@@ -1195,10 +1194,10 @@ function findVariant(product, color, size) {
 async function handleCheckout() {
     const checkoutBtn = document.getElementById("ctaButtonRight");
     if (!checkoutBtn) return;
-    
+
     checkoutBtn.disabled = true;
     checkoutBtn.textContent = "Preparing design…";
-    
+
     try {
         const designId = `dsgn_${crypto.randomUUID()}`;
         const designData = {
@@ -1213,18 +1212,18 @@ async function handleCheckout() {
             quantity,
             created_at: new Date().toISOString()
         };
-        
+
         const jsonBlob = new Blob([JSON.stringify(designData)], { type: "application/json" });
         const formData = new FormData();
         formData.append("file", jsonBlob, `${designId}.json`);
         formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
         formData.append("folder", ORDER_CLOUDINARY_FOLDER);
-        
+
         const uploadResp = await fetch(CLOUDINARY_UPLOAD_URL, {
             method: "POST",
             body: formData
         });
-        
+
         if (!uploadResp.ok) {
             const txt = await uploadResp.text();
             console.error("Cloudinary JSON upload failed:", txt);
@@ -1233,10 +1232,10 @@ async function handleCheckout() {
             updateCTA();
             return;
         }
-        
+
         const uploadJson = await uploadResp.json();
         const designUrl = uploadJson.secure_url;
-        
+
         const variant = findVariant(selectedProduct, selectedColor, selectedSize);
         if (!variant) {
             alert(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize}`);
@@ -1244,7 +1243,7 @@ async function handleCheckout() {
             updateCTA();
             return;
         }
-        
+
         const line = {
             id: variant.shopifyVariantId,
             quantity,
@@ -1257,13 +1256,13 @@ async function handleCheckout() {
                 gelato_product: variant.gelatoUid
             }
         };
-        
+
         const cartResp = await fetch(`https://${SHOPIFY_DOMAIN}/cart/add.js`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ items: [line] })
         });
-        
+
         if (!cartResp.ok) {
             const err = await cartResp.text();
             console.error("Cart add failed:", err);
@@ -1272,7 +1271,7 @@ async function handleCheckout() {
             updateCTA();
             return;
         }
-        
+
         window.location.href = `https://${SHOPIFY_DOMAIN}/cart`;
     } catch (err) {
         console.error("Checkout error:", err);
