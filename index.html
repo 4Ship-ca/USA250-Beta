@@ -1,9 +1,9 @@
 <!--
-USA250 v1.20.0 - Preview Fill / Cover Cropping
+USA250 v1.21.6 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
-Last Updated: January 1, 2026
+Last Updated: January 11, 2026
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -422,7 +422,7 @@ Last Updated: January 1, 2026
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
             font-weight: 700;
         }
         
@@ -464,7 +464,7 @@ Last Updated: January 1, 2026
     transition: all 0.2s;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .back-btn:active {
@@ -813,7 +813,7 @@ Last Updated: January 1, 2026
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     padding: 0;
     flex: none;
 }
@@ -954,7 +954,7 @@ Last Updated: January 1, 2026
     height: 44px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     cursor: pointer;
     color: var(--gold);
     transition: all 0.2s ease;
@@ -1425,7 +1425,7 @@ let cityText = '';
 let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     
     const PRODUCTS = {
-        'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' }
+        'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' },
 
         'tee-navy-3xl': { shopifyVariantId: '46056446099606', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_navy_gpr_4-0_gildan_64000' },
         'tee-black-3xl': { shopifyVariantId: '46056446132374', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_black_gpr_4-0_gildan_64000' },
@@ -1691,6 +1691,8 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
             const bgImage = document.getElementById('bgImage');
             if (bgImage) {
                 bgImage.setAttribute('href', templatePath);
+                    // Safari/older SVG engines
+                    bgImage.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', templatePath);
             }
             
             const baseline = await fetchJsonCached(jsonPath);
