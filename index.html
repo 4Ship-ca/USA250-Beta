@@ -1,5 +1,5 @@
 <!--
-USA250 v1.25.5 - Fix JS syntax + restore previews + center button text
+USA250 v1.25.6 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -1148,7 +1148,7 @@ body > .sticky-cta {
 }
 
 
-/* v1.25.5 - Variant chips + step-based variant visibility */
+/* v1.25.6 - Variant chips + step-based variant visibility */
 .preview-tools{
     display:flex;
     justify-content:flex-end;
@@ -1264,7 +1264,7 @@ body > .sticky-cta {
 
 <div class="container">
         <div class="header global-header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.25.5</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.25.6</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -2692,6 +2692,7 @@ async function generate9000pxPNG() {
         
         const cloudinaryData = await cloudinaryResponse.json();
         const designUrl = cloudinaryData.secure_url;
+        const publicId = cloudinaryData.public_id;
         
         console.log('✓ Design uploaded:', designUrl);
         console.log('✓ Public ID:', cloudinaryData.public_id);
@@ -2726,9 +2727,6 @@ async function generate9000pxPNG() {
         // this builder page stays open so the customer can create/add multiple designs, then checkout once.
         if (checkoutBtn) checkoutBtn.textContent = 'Adding to cart...';
 
-        // Open/reuse a single cart tab (so repeated adds build ONE cart)
-        try { window.open('about:blank', 'shopify_cart'); } catch (e) {}
-
         const form = document.createElement('form');
         form.method = 'POST';
         form.action = 'https://shop.4ship.ca/cart/add';
@@ -2753,10 +2751,21 @@ async function generate9000pxPNG() {
         addHidden('properties[group]', (document.getElementById('groupInput')?.value || '').trim());
         addHidden('properties[_design_url]', designUrl);
         addHidden('properties[_cloudinary_public_id]', publicId || '');
-        addHidden('properties[_builder_version]', 'v1.25.5');
+        addHidden('properties[_builder_version]', 'v1.25.6');
 
         document.body.appendChild(form);
-        form.submit();
+        // Ensure a first‑party cart session by opening/reusing the Shopify cart tab right before submit.
+        // (Cross‑domain AJAX is blocked by CORS; this keeps the builder page open while the cart accumulates.)
+        let cartWin = null;
+        try { cartWin = window.open('https://shop.4ship.ca/cart', 'shopify_cart'); } catch (e) { cartWin = null; }
+        if (!cartWin) {
+            // Popup blocked: fall back to opening in a new tab.
+            form.target = '_blank';
+        }
+
+form.submit();
+        // Try to keep focus on the builder after opening/submitting to the cart tab.
+        setTimeout(() => { try { window.focus(); } catch (e) {} }, 200);
         form.remove();
 
         onAddToCartSuccess();
