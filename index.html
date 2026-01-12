@@ -1,5 +1,5 @@
 <!--
-USA250 v1.25.0 - Fix JS syntax + restore previews + center button text
+USA250 v1.25.2 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -342,13 +342,14 @@ Last Updated: January 11, 2026
             border-radius: 10px;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: center;
             overflow: hidden;
             position: relative;
         }
         
         #previewSVG {
             display: block;
+            margin: 0 auto;
             width: 100%;
             height: 100%;
             max-width: 100%;
@@ -911,7 +912,7 @@ Last Updated: January 11, 2026
 .preview-row {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     gap: 12px;
     width: 100%;
     max-width: 100%;
@@ -1137,7 +1138,7 @@ body > .sticky-cta {
 }
 
 
-/* v1.25.0 - Variant chips + step-based variant visibility */
+/* v1.25.2 - Variant chips + step-based variant visibility */
 .preview-tools{
     display:flex;
     justify-content:flex-end;
@@ -1209,7 +1210,7 @@ body > .sticky-cta {
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.25.0</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.25.2</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -1371,6 +1372,8 @@ body > .sticky-cta {
                 <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
                 <button class="size-btn" data-size="3XL" onclick="selectSize('3XL')">3XL</button>
             </div>
+
+            <div class="selector-label" style="margin-top: 14px;">Quantity</div>
 
             <div class="quantity-controls">
                 <button class="qty-btn" type="button" onclick="changeQuantity(-1)">−</button>
@@ -1568,6 +1571,12 @@ let cityText = '';
     let _cityAdvanceTimer = null;
     let _groupAdvanceTimer = null;
 let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
+    let templateDefaults = {}; // per (style+shape) baseline values for Reset to Auto
+    function _templateKey(style = selectedStyle) {
+        const shape = (PRODUCTS[selectedProduct] && PRODUCTS[selectedProduct].shape) ? PRODUCTS[selectedProduct].shape : 'Sq';
+        return `${style || 'NA'}_${shape}`;
+    }
+
     
     const PRODUCTS = {
         'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' },
@@ -1853,6 +1862,27 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
                 baselineArch.groupArch = parseInt(s.gArch) || 64;
                 baselineArch.cityTrack = parseInt(s.cityTrack) || 0;
                 baselineArch.groupTrack = parseInt(s.gTrack) || 2;
+
+                // Sync numeric labels beside sliders (so the UI matches loaded presets)
+                if (s.cityY && document.getElementById('cityYVal')) document.getElementById('cityYVal').textContent = s.cityY;
+                if (s.citySize && document.getElementById('citySizeVal')) document.getElementById('citySizeVal').textContent = s.citySize;
+                if (s.groupY && document.getElementById('groupYVal')) document.getElementById('groupYVal').textContent = s.groupY;
+                if (s.gSize && document.getElementById('groupSizeVal')) document.getElementById('groupSizeVal').textContent = s.gSize;
+
+                // Save defaults for "Reset to Auto" (per style + shape)
+                const key = _templateKey(style);
+                templateDefaults[key] = {
+                    citySize: parseInt(s.citySize) || parseInt(document.getElementById('citySizeSlider')?.value || 10),
+                    cityY: parseInt(s.cityY) || parseInt(document.getElementById('cityYSlider')?.value || 223),
+                    groupSize: parseInt(s.gSize) || parseInt(document.getElementById('groupSizeSlider')?.value || 8),
+                    groupY: parseInt(s.groupY) || parseInt(document.getElementById('groupYSlider')?.value || 282),
+                    arch: {
+                        cityArch: parseInt(s.archIntensity) || 64,
+                        groupArch: parseInt(s.gArch) || 64,
+                        cityTrack: parseInt(s.cityTrack) || 0,
+                        groupTrack: parseInt(s.gTrack) || 2
+                    }
+                };
             }
             
             updatePreview();
@@ -1956,10 +1986,34 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     }
     
     function resetDesign() {
+        const key = _templateKey(selectedStyle);
+        const d = templateDefaults[key];
+
+        if (d && d.arch) {
+            // Restore baseline arch/track first
+            baselineArch.cityArch = d.arch.cityArch;
+            baselineArch.groupArch = d.arch.groupArch;
+            baselineArch.cityTrack = d.arch.cityTrack;
+            baselineArch.groupTrack = d.arch.groupTrack;
+
+            // Restore slider values + labels
+            updateSlider('citySize', d.citySize);
+            updateSlider('cityY', d.cityY);
+            updateSlider('groupSize', d.groupSize);
+            updateSlider('groupY', d.groupY);
+
+            // Ensure preview reflects restored arch/track as well
+            updatePreview();
+            return;
+        }
+
+        // Fallback defaults (should rarely be used)
+        baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         updateSlider('citySize', 10);
         updateSlider('cityY', 223);
         updateSlider('groupSize', 8);
         updateSlider('groupY', 282);
+        updatePreview();
     }
     
     function formatText(text, baseSize) {
@@ -2614,8 +2668,7 @@ async function generate9000pxPNG() {
             addField('quantity', String(qty));
             addField('properties[_design_id]', designId);
             addField('properties[_style]', selectedStyle);
-            addField('properties[color]', selectedColor);
-            addField('properties[size]', selectedSize);
+            // Variant already captures color/size; avoid duplicate cart labels.
             addField('properties[city]', document.getElementById('cityInput').value || '');
             addField('properties[group]', document.getElementById('groupInput').value || '');
             addField('properties[_design_url]', designUrl);
