@@ -1,5 +1,5 @@
 <!--
-USA250 v1.25.4 - Fix JS syntax + restore previews + center button text
+USA250 v1.25.5 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -1148,7 +1148,7 @@ body > .sticky-cta {
 }
 
 
-/* v1.25.4 - Variant chips + step-based variant visibility */
+/* v1.25.5 - Variant chips + step-based variant visibility */
 .preview-tools{
     display:flex;
     justify-content:flex-end;
@@ -1264,7 +1264,7 @@ body > .sticky-cta {
 
 <div class="container">
         <div class="header global-header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.25.4</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.25.5</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -2753,7 +2753,7 @@ async function generate9000pxPNG() {
         addHidden('properties[group]', (document.getElementById('groupInput')?.value || '').trim());
         addHidden('properties[_design_url]', designUrl);
         addHidden('properties[_cloudinary_public_id]', publicId || '');
-        addHidden('properties[_builder_version]', 'v1.25.4');
+        addHidden('properties[_builder_version]', 'v1.25.5');
 
         document.body.appendChild(form);
         form.submit();
@@ -2761,21 +2761,6 @@ async function generate9000pxPNG() {
 
         onAddToCartSuccess();
         return;
-;
-            addField('id', variant.shopifyVariantId);
-            addField('quantity', String(qty));
-            addField('properties[_design_id]', designId);
-            addField('properties[_style]', selectedStyle);
-            // Variant already captures color/size; avoid duplicate cart labels.
-            addField('properties[city]', document.getElementById('cityInput').value || '');
-            addField('properties[group]', document.getElementById('groupInput').value || '');
-            addField('properties[_design_url]', designUrl);
-            addField('properties[_gelato_product]', variant.gelatoUid);
-            addField('properties[_gelato_template]', '45d4d937-e9bd-4ba3-83fe-1d7d965cce40');
-            addField('return_to', '/cart');
-            document.body.appendChild(form);
-            form.submit();
-        }
 
 
 
