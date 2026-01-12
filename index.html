@@ -1,5 +1,5 @@
 <!--
-USA250 v1.25.2 - Fix JS syntax + restore previews + center button text
+USA250 v1.25.3 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -713,6 +713,8 @@ Last Updated: January 11, 2026
 /* SELECTOR SECTIONS */
 .selector-section {
     margin-bottom: 20px;
+
+    text-align: left;
 }
 
 
@@ -726,6 +728,9 @@ Last Updated: January 11, 2026
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
+    text-align: left;
+    width: 100%;
+    align-self: flex-start;
 }
 
 /* COLOR OPTIONS */
@@ -1138,7 +1143,7 @@ body > .sticky-cta {
 }
 
 
-/* v1.25.2 - Variant chips + step-based variant visibility */
+/* v1.25.3 - Variant chips + step-based variant visibility */
 .preview-tools{
     display:flex;
     justify-content:flex-end;
@@ -1199,6 +1204,51 @@ body > .sticky-cta {
     line-height: 1.4;
 }
 
+
+/* CART TOAST (post add-to-cart) */
+.cart-toast {
+    position: fixed;
+    right: 18px;
+    bottom: 92px; /* sits above mobile sticky CTA */
+    z-index: 2500;
+    background: rgba(12, 12, 12, 0.92);
+    border: 1px solid #333;
+    border-radius: 14px;
+    padding: 14px 14px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+    max-width: 320px;
+    width: calc(100% - 36px);
+}
+.cart-toast .toast-title {
+    color: var(--gold);
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    font-size: 12px;
+    margin-bottom: 8px;
+    text-align: left;
+}
+.cart-toast .toast-body {
+    color: #ddd;
+    font-size: 13px;
+    line-height: 1.35;
+    margin-bottom: 10px;
+    text-align: left;
+}
+.cart-toast .toast-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+.cart-toast .toast-actions .toggle-btn {
+    padding: 10px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+}
+@media (max-width: 1024px) {
+    .cart-toast { bottom: 98px; }
+}
+
 </style>
 </head>
 <body>
@@ -1210,7 +1260,7 @@ body > .sticky-cta {
 <div class="container">
     <div class="left-panel">
         <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.25.2</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.25.3</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -2294,6 +2344,50 @@ function showStep(step) {
         resetCtaLoadingState();
     });
 
+
+    // Cart toast helpers
+    let _cartToastTimer = null;
+
+    function showCartToast() {
+        const t = document.getElementById('cartToast');
+        if (!t) return;
+        t.classList.remove('hidden');
+        if (_cartToastTimer) clearTimeout(_cartToastTimer);
+        _cartToastTimer = setTimeout(() => {
+            hideCartToast();
+        }, 6500);
+    }
+
+    function hideCartToast() {
+        const t = document.getElementById('cartToast');
+        if (!t) return;
+        t.classList.add('hidden');
+        if (_cartToastTimer) {
+            clearTimeout(_cartToastTimer);
+            _cartToastTimer = null;
+        }
+    }
+
+    function goToCart() {
+        window.location.href = 'https://shop.4ship.ca/cart';
+    }
+
+    function onAddToCartSuccess() {
+        const btn = document.getElementById('ctaButtonRight');
+        if (btn) {
+            btn.dataset.loading = 'false';
+            btn.classList.remove('loading');
+            btn.disabled = false;
+            btn.style.pointerEvents = '';
+            btn.textContent = 'Added ✓';
+            // Restore the normal CTA label shortly after.
+            setTimeout(() => {
+                updateCTA();
+            }, 1200);
+        }
+        showCartToast();
+    }
+
 async function generate9000pxPNG() {
         try {
             const canvas = document.createElement('canvas');
@@ -2633,9 +2727,7 @@ async function generate9000pxPNG() {
                         properties: {
                             '_design_id': designId,
                             '_style': selectedStyle,
-                            '_color': selectedColor,
-                            '_size': selectedSize,
-                            'city': document.getElementById('cityInput').value || '',
+                                                        'city': document.getElementById('cityInput').value || '',
                             'group': document.getElementById('groupInput').value || '',
                             '_design_url': designUrl,
                             '_gelato_product': variant.gelatoUid,
@@ -2646,10 +2738,7 @@ async function generate9000pxPNG() {
             });
             
             if (response.ok) {
-                // Small delay to ensure Shopify processes the AJAX request
-                setTimeout(() => {
-                    window.location.href = 'https://shop.4ship.ca/cart';
-                }, 500);
+                onAddToCartSuccess();
             } else {
                 // Fallback to form submit if AJAX fails
                 throw new Error('AJAX add failed');
@@ -2832,6 +2921,17 @@ function toggleZoom() {
     }
 }
 </script>
+
+
+<!-- Cart toast (shown after successful add-to-cart) -->
+<div id="cartToast" class="cart-toast hidden" role="status" aria-live="polite">
+    <div class="toast-title">Added to cart</div>
+    <div class="toast-body">You can add another design, or open your cart when you’re ready to checkout.</div>
+    <div class="toast-actions">
+        <button type="button" class="toggle-btn" onclick="hideCartToast()">Keep Shopping</button>
+        <button type="button" class="mega-btn" style="padding:10px 16px; border-radius: 20px;" onclick="goToCart()">View Cart</button>
+    </div>
+</div>
 
 </body>
 </html>
