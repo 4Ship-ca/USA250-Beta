@@ -1,5 +1,5 @@
 <!--
-USA250 v1.26.2 - Fix JS syntax + restore previews + center button text
+USA250 v1.26.3 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -1148,7 +1148,7 @@ body > .sticky-cta {
 }
 
 
-/* v1.26.2 - Variant chips + step-based variant visibility */
+/* v1.26.3 - Variant chips + step-based variant visibility */
 .preview-tools{
     display:flex;
     justify-content:flex-end;
@@ -1264,7 +1264,7 @@ body > .sticky-cta {
 
 <div class="container">
         <div class="header global-header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.2</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.3</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -1784,14 +1784,23 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
   function uid() {
     return "r_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
   }
-
-  function openBridge() {
-    // Reuse the same window if it's already open.
+  function preopenBridge() {
+    // Must be called from a user gesture (click/tap) to avoid popup blockers.
     if (bridgeWin && !bridgeWin.closed) return bridgeWin;
 
-    // Using a stable name allows reuse across clicks (and makes popup blockers less likely).
-    bridgeWin = window.open(BRIDGE_URL, "cart_bridge", "noopener,noreferrer,width=520,height=720");
+    // Stable name allows reuse across clicks.
+    // NOTE: no 'noopener' here; we need the window handle for postMessage.
+    bridgeWin = window.open(BRIDGE_URL, "cart_bridge", "width=520,height=720");
     if (!bridgeWin) throw new Error("Popup blocked. Allow popups for 4ship.shop, then try again.");
+    return bridgeWin;
+  }
+
+  function openBridge() {
+    // Safe to call from async code: will NOT attempt to create a popup.
+    if (!bridgeWin || bridgeWin.closed) {
+      throw new Error("Cart Bridge not ready. Click 'Open Cart' (allow popups) once, then try again.");
+    }
+    try { bridgeWin.focus(); } catch (e) {}
     return bridgeWin;
   }
 
@@ -1914,12 +1923,13 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
   }
 
   function openCart() {
-    // Non-blocking; if ensureReady fails, we still try to open the bridge and let the user click "Open Cart".
+    // Must be triggered by a user gesture to avoid popup blockers.
+    preopenBridge();
     ensureReady().catch(() => {});
     try { postToBridge({ type: "OPEN_CART", token: BRIDGE_TOKEN }); } catch (e) {}
   }
 
-  return { addItems, openCart, openBridge, ensureReady };
+  return { addItems, openCart, preopenBridge, openBridge, ensureReady };
 })();
     const VARIANT_MAP = {
         'tee-navy-m': { shopifyVariantId: '46056445444246', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
@@ -2719,6 +2729,8 @@ async function generate9000pxPNG() {
     }
     
     try {
+        // Pre-open Cart Bridge BEFORE any async work (required to avoid popup blockers)
+        CartBridgeClient.preopenBridge();
         // VARIANT MAPPING
         const VARIANT_MAP = {
             'tee-black-s': { shopifyVariantId: '46057714417814', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
@@ -2934,7 +2946,7 @@ async function generate9000pxPNG() {
                 group: groupVal,
                 _design_url: designUrl,
                 _cloudinary_public_id: publicId || '',
-                _builder_version: 'v1.26.2',
+                _builder_version: 'v1.26.3',
                 _variant_key: variantKey
             }
         }]);
