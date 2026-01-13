@@ -1,5 +1,5 @@
 <!--
-USA250 v1.26.1 - Fix JS syntax + restore previews + center button text
+USA250 v1.26.2 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -1148,7 +1148,7 @@ body > .sticky-cta {
 }
 
 
-/* v1.26.1 - Variant chips + step-based variant visibility */
+/* v1.26.2 - Variant chips + step-based variant visibility */
 .preview-tools{
     display:flex;
     justify-content:flex-end;
@@ -1264,7 +1264,7 @@ body > .sticky-cta {
 
 <div class="container">
         <div class="header global-header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.1</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.2</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -1761,123 +1761,166 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     };
 
     const CartBridgeClient = (() => {
-        let bridgeWin = null;
-        let ready = false;
-        const pending = new Map();
+  // NOTE: Bridge URL includes token (?t=...). Keep this in sync with the Shopify "Cart Bridge" page.
+  const BRIDGE_URL = "https://shop.4ship.ca/pages/cart-bridge?t=mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc";
+  const BRIDGE_TOKEN = (() => {
+    try { return new URL(BRIDGE_URL).searchParams.get("t") || ""; } catch (e) { return ""; }
+  })();
 
-        function uid() {
-            return "req_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+  // Some Shopify stores may redirect/canonicalize between the custom domain and the myshopify domain.
+  // Accept BOTH so READY/ADD replies aren't dropped.
+  const BRIDGE_ALLOWED_ORIGINS = new Set([
+    new URL(BRIDGE_URL).origin,
+    "https://your4ship.myshopify.com"
+  ]);
+
+  let bridgeWin = null;
+  let ready = false;
+  let readyPromise = null;
+
+  // requestId -> { resolve, reject, timeout, type }
+  const pending = new Map();
+
+  function uid() {
+    return "r_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
+  }
+
+  function openBridge() {
+    // Reuse the same window if it's already open.
+    if (bridgeWin && !bridgeWin.closed) return bridgeWin;
+
+    // Using a stable name allows reuse across clicks (and makes popup blockers less likely).
+    bridgeWin = window.open(BRIDGE_URL, "cart_bridge", "noopener,noreferrer,width=520,height=720");
+    if (!bridgeWin) throw new Error("Popup blocked. Allow popups for 4ship.shop, then try again.");
+    return bridgeWin;
+  }
+
+  function postToBridge(payload) {
+    if (!bridgeWin || bridgeWin.closed) openBridge();
+
+    // Try explicit origins first (secure), then '*' as a last-resort to survive Shopify redirects.
+    for (const origin of BRIDGE_ALLOWED_ORIGINS) {
+      try { bridgeWin.postMessage(payload, origin); } catch (e) {}
+    }
+    try { bridgeWin.postMessage(payload, "*"); } catch (e) {}
+  }
+
+  function request(type, payload = {}, timeoutMs = 15000) {
+    const requestId = payload.requestId || uid();
+
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        pending.delete(requestId);
+        reject(new Error(`Cart Bridge timeout for ${type}.`));
+      }, timeoutMs);
+
+      pending.set(requestId, { resolve, reject, timeout, type });
+
+      postToBridge({ type, token: BRIDGE_TOKEN, requestId, ...payload });
+    });
+  }
+
+  async function ensureReady(timeoutMs = 9000) {
+    if (ready && bridgeWin && !bridgeWin.closed) return true;
+
+    openBridge();
+
+    if (readyPromise) return readyPromise;
+
+    readyPromise = new Promise((resolve, reject) => {
+      const started = Date.now();
+
+      const tick = () => {
+        if (ready) {
+          cleanup();
+          resolve(true);
+          return;
         }
-
-        function openBridge() {
-            if (bridgeWin && !bridgeWin.closed) return bridgeWin;
-            // NOTE: do NOT use 'noopener' so postMessage works reliably.
-            bridgeWin = window.open(CART_BRIDGE.bridgeUrl, CART_BRIDGE.popupName, CART_BRIDGE.popupFeatures);
-            ready = false;
-            return bridgeWin;
+        if (Date.now() - started > timeoutMs) {
+          cleanup();
+          reject(new Error("Cart Bridge not ready. Confirm the Shopify bridge page is published and the token matches."));
+          return;
         }
+        // Ping repeatedly until READY is received (bridge might still be loading).
+        try { postToBridge({ type: "PING", token: BRIDGE_TOKEN }); } catch (e) {}
+      };
 
-        function post(type, data = {}) {
-            const win = openBridge();
-            if (!win) throw new Error("Popup blocked. Please allow popups for this site, then try again.");
-            win.postMessage({ type, token: CART_BRIDGE.token, ...data }, CART_BRIDGE.bridgeOrigin);
-        }
+      const interval = setInterval(tick, 350);
 
-        function request(type, data = {}, timeoutMs = 9000) {
-            const requestId = uid();
-            return new Promise((resolve, reject) => {
-                const t = setTimeout(() => {
-                    pending.delete(requestId);
-                    reject(new Error(type + " timed out (bridge not responding)."));
-                }, timeoutMs);
+      const cleanup = () => {
+        clearInterval(interval);
+        readyPromise = null;
+      };
 
-                pending.set(requestId, (msg) => {
-                    clearTimeout(t);
-                    resolve(msg);
-                });
+      // Kick immediately.
+      tick();
+    });
 
-                post(type, { requestId, ...data });
-            });
-        }
+    return readyPromise;
+  }
 
-        async function ensureReady() {
-            if (ready) return true;
+  window.addEventListener("message", (ev) => {
+    const msg = ev && ev.data ? ev.data : null;
+    if (!msg || typeof msg !== "object") return;
 
-            // Open (or reuse) the bridge window and ping until it replies READY.
-            openBridge();
+    // Only accept messages from the bridge window.
+    if (bridgeWin && ev.source !== bridgeWin) {
+      // Sometimes browsers wrap window refs; if this blocks you, we can relax it, but keep it strict for now.
+      // return;
+    }
 
-            const handshake = "hs_" + Date.now() + "_" + Math.random().toString(16).slice(2);
-            const start = Date.now();
-            const timeoutMs = 12000;
+    // Token gate: ignore anything that doesn't have our token (READY may include token; our bridge does).
+    if (BRIDGE_TOKEN && msg.token && msg.token !== BRIDGE_TOKEN) return;
 
-            while (!ready && (Date.now() - start) < timeoutMs) {
-                try {
-                    post("PING", { handshake });
-                } catch (e) {
-                    // Popup might be blocked/closed; keep trying until timeout.
-                }
-                await new Promise(r => setTimeout(r, 250));
-            }
+    // Origin gate: accept either custom domain or myshopify domain.
+    if (ev.origin && !BRIDGE_ALLOWED_ORIGINS.has(ev.origin)) return;
 
-            if (!ready) {
-                throw new Error("Cart Bridge not ready. Confirm the Shopify bridge page is open (not blocked) and uses the matching token.");
-            }
-
-            return true;
-        }
-
-        window.addEventListener("message", (ev) => {
-    if (!ev || ev.origin !== CART_BRIDGE.bridgeOrigin) return;
-    const msg = ev.data || {};
-
-    // Token is optional in replies. If present, it must match.
-    if (msg && typeof msg === "object" && "token" in msg && msg.token !== CART_BRIDGE.token) return;
-
+    // Handshake
     if (msg.type === "READY") {
       ready = true;
       return;
     }
 
-    if (msg.requestId && responses.has(msg.requestId)) {
-      responses.get(msg.requestId)(msg);
-      responses.delete(msg.requestId);
+    // Resolve typed fallbacks if requestId isn't echoed (older bridge versions).
+    if (!msg.requestId && pending.size === 1) {
+      const [rid, p] = pending.entries().next().value;
+      clearTimeout(p.timeout);
+      pending.delete(rid);
+
+      if (msg.type === "ADD_ERR") p.reject(new Error(msg.message || "Cart add failed."));
+      else p.resolve(msg);
       return;
     }
+
+    if (!msg.requestId) return;
+
+    const p = pending.get(msg.requestId);
+    if (!p) return;
+
+    clearTimeout(p.timeout);
+    pending.delete(msg.requestId);
+
+    if (msg.type === "ADD_ERR") p.reject(new Error(msg.message || "Cart add failed."));
+    else p.resolve(msg);
   });
 
-async function addItems(items) {
-            await ensureReady();
+  async function addItems(items) {
+    await ensureReady();
+    const resp = await request("ADD_ITEMS", { items });
 
-            if (!Array.isArray(items) || items.length === 0) {
-                throw new Error("addItems: items[] is empty.");
-            }
+    // Bridge sends ADD_ERR on failure.
+    if (resp && resp.type === "ADD_ERR") throw new Error(resp.message || "Cart add failed.");
+    return resp;
+  }
 
-            // Ensure each line has a unique design id so Shopify does NOT merge lines.
-            const normalized = items.map((it) => {
-                const id = Number(it.id);
-                if (!id) throw new Error("Invalid variant id");
-                const quantity = Math.max(1, Number(it.quantity || 1));
-                const properties = Object.assign({}, it.properties || {});
-                if (!properties._design_id) {
-                    properties._design_id = "design_" + Date.now() + "_" + Math.random().toString(16).slice(2);
-                }
-                return { id, quantity, properties };
-            });
+  function openCart() {
+    // Non-blocking; if ensureReady fails, we still try to open the bridge and let the user click "Open Cart".
+    ensureReady().catch(() => {});
+    try { postToBridge({ type: "OPEN_CART", token: BRIDGE_TOKEN }); } catch (e) {}
+  }
 
-            const resp = await request("ADD_ITEMS", { items: normalized }, 15000);
-            if (resp.type === "ADD_ERR") throw new Error(resp.message || "Unknown cart bridge error.");
-            return resp; // resp includes cartItemCount
-        }
-
-        function openCart() {
-            openBridge();
-            post("OPEN_CART", { requestId: uid() });
-        }
-
-        return { addItems, openCart, openBridge };
-    })();
-
-    
+  return { addItems, openCart, openBridge, ensureReady };
+})();
     const VARIANT_MAP = {
         'tee-navy-m': { shopifyVariantId: '46056445444246', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
         'tee-navy-l': { shopifyVariantId: '46056445477014', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000' },
@@ -2891,7 +2934,7 @@ async function generate9000pxPNG() {
                 group: groupVal,
                 _design_url: designUrl,
                 _cloudinary_public_id: publicId || '',
-                _builder_version: 'v1.26.1',
+                _builder_version: 'v1.26.2',
                 _variant_key: variantKey
             }
         }]);
