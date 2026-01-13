@@ -1922,12 +1922,19 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
 
   function postToBridge(payload) {
     if (!bridgeWin || bridgeWin.closed) openBridge();
+    const type = payload && payload.type;
 
-    // Try explicit origins first (secure), then '*' as a last-resort to survive Shopify redirects.
-    for (const origin of BRIDGE_ALLOWED_ORIGINS) {
-      try { bridgeWin.postMessage(payload, origin); } catch (e) {}
+    // For initial handshake, allow a wildcard fallback (some Shopify setups can redirect),
+    // but only for PING so we never duplicate cart adds.
+    if (type === "PING") {
+      try { bridgeWin.postMessage(payload, BRIDGE_ORIGIN); } catch (e) {}
+      try { bridgeWin.postMessage(payload, "*"); } catch (e) {}
+      return;
     }
-    try { bridgeWin.postMessage(payload, "*"); } catch (e) {}
+
+    // Once READY is received, we lock onto the bridge's actual origin.
+    const target = bridgeTargetOrigin || BRIDGE_ORIGIN;
+    try { bridgeWin.postMessage(payload, target); } catch (e) {}
   }
 
   function request(type, payload = {}, timeoutMs = 15000) {
@@ -2003,7 +2010,9 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     // Handshake
     if (msg.type === "READY") {
       ready = true;
-      return;
+      
+      bridgeTargetOrigin = ev.origin;
+return;
     }
 
     // Resolve typed fallbacks if requestId isn't echoed (older bridge versions).
