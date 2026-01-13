@@ -1,5 +1,5 @@
 <!--
-USA250 v1.25.6 - Fix JS syntax + restore previews + center button text
+USA250 v1.26.0 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -1148,7 +1148,7 @@ body > .sticky-cta {
 }
 
 
-/* v1.25.6 - Variant chips + step-based variant visibility */
+/* v1.26.0 - Variant chips + step-based variant visibility */
 .preview-tools{
     display:flex;
     justify-content:flex-end;
@@ -1264,7 +1264,7 @@ body > .sticky-cta {
 
 <div class="container">
         <div class="header global-header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.25.6</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.0</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -1747,6 +1747,121 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         backendUrl: 'https://usa250-backend.vercel.app/api/create-draft-order',
         productId: '8581802721430'
     };
+    // ------------------------------------------------------------
+    // Shopify Cart Bridge (cumulative cart, token + postMessage)
+    // ------------------------------------------------------------
+    const CART_BRIDGE = {
+        // Bridge page on Shopify (keep Visible, but don't link it in navigation)
+        // Token is used BOTH in URL (?t=...) and in postMessage payload for compatibility.
+        token: "mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc",
+        bridgeOrigin: "https://shop.4ship.ca",
+        bridgeUrl: "https://shop.4ship.ca/pages/cart-bridge?t=mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc",
+        popupName: "shopify_cart",
+        popupFeatures: "width=460,height=720,menubar=0,toolbar=0,location=0,status=0,scrollbars=1,resizable=1"
+    };
+
+    const CartBridgeClient = (() => {
+        let bridgeWin = null;
+        let ready = false;
+        const pending = new Map();
+
+        function uid() {
+            return "req_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+        }
+
+        function openBridge() {
+            if (bridgeWin && !bridgeWin.closed) return bridgeWin;
+            // NOTE: do NOT use 'noopener' so postMessage works reliably.
+            bridgeWin = window.open(CART_BRIDGE.bridgeUrl, CART_BRIDGE.popupName, CART_BRIDGE.popupFeatures);
+            ready = false;
+            return bridgeWin;
+        }
+
+        function post(type, data = {}) {
+            const win = openBridge();
+            if (!win) throw new Error("Popup blocked. Please allow popups for this site, then try again.");
+            win.postMessage({ type, token: CART_BRIDGE.token, ...data }, CART_BRIDGE.bridgeOrigin);
+        }
+
+        function request(type, data = {}, timeoutMs = 9000) {
+            const requestId = uid();
+            return new Promise((resolve, reject) => {
+                const t = setTimeout(() => {
+                    pending.delete(requestId);
+                    reject(new Error(type + " timed out (bridge not responding)."));
+                }, timeoutMs);
+
+                pending.set(requestId, (msg) => {
+                    clearTimeout(t);
+                    resolve(msg);
+                });
+
+                post(type, { requestId, ...data });
+            });
+        }
+
+        async function ensureReady() {
+            if (ready) return true;
+            openBridge();
+
+            const start = Date.now();
+            while (!ready && (Date.now() - start) < 5500) {
+                post("PING", { requestId: uid() });
+                await new Promise(r => setTimeout(r, 250));
+            }
+            if (!ready) throw new Error("Cart Bridge not ready. Confirm the Shopify bridge page is published and uses the matching token.");
+            return true;
+        }
+
+        window.addEventListener("message", (ev) => {
+            if (ev.origin !== CART_BRIDGE.bridgeOrigin) return;
+            const msg = ev.data || {};
+            if (msg.token !== CART_BRIDGE.token) return;
+
+            if (msg.type === "READY") {
+                ready = true;
+                return;
+            }
+
+            if (msg.requestId && pending.has(msg.requestId)) {
+                const cb = pending.get(msg.requestId);
+                pending.delete(msg.requestId);
+                cb(msg);
+            }
+        });
+
+        async function addItems(items) {
+            await ensureReady();
+
+            if (!Array.isArray(items) || items.length === 0) {
+                throw new Error("addItems: items[] is empty.");
+            }
+
+            // Ensure each line has a unique design id so Shopify does NOT merge lines.
+            const normalized = items.map((it) => {
+                const id = Number(it.id);
+                if (!id) throw new Error("Invalid variant id");
+                const quantity = Math.max(1, Number(it.quantity || 1));
+                const properties = Object.assign({}, it.properties || {});
+                if (!properties._design_id) {
+                    properties._design_id = "design_" + Date.now() + "_" + Math.random().toString(16).slice(2);
+                }
+                return { id, quantity, properties };
+            });
+
+            const resp = await request("ADD_ITEMS", { items: normalized }, 15000);
+            if (resp.type === "ADD_ERR") throw new Error(resp.message || "Unknown cart bridge error.");
+            return resp; // resp includes cartItemCount
+        }
+
+        function openCart() {
+            openBridge();
+            post("OPEN_CART", { requestId: uid() });
+        }
+
+        return { addItems, openCart, openBridge };
+    })();
+
     
     const VARIANT_MAP = {
         'tee-navy-m': { shopifyVariantId: '46056445444246', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
@@ -2353,9 +2468,31 @@ function showStep(step) {
     // Cart toast helpers
     let _cartToastTimer = null;
 
-    function showCartToast() {
+    function showCartToast(cartItemCount) {
         const t = document.getElementById('cartToast');
         if (!t) return;
+
+        // Remember the default copy once.
+        if (!t.dataset.defaultTitle) {
+            const titleEl0 = t.querySelector('.toast-title');
+            const bodyEl0 = t.querySelector('.toast-body');
+            t.dataset.defaultTitle = titleEl0 ? titleEl0.textContent : 'Added to cart';
+            t.dataset.defaultBody = bodyEl0 ? bodyEl0.textContent : '';
+        }
+
+        const titleEl = t.querySelector('.toast-title');
+        const bodyEl = t.querySelector('.toast-body');
+
+        if (typeof cartItemCount === 'number') {
+            if (titleEl) titleEl.textContent = 'Added to cart (' + cartItemCount + ')';
+            if (bodyEl) bodyEl.textContent =
+                'Cart now has ' + cartItemCount + ' item' + (cartItemCount === 1 ? '' : 's') +
+                '. You can add another design, or open your cart when you’re ready to checkout.';
+        } else {
+            if (titleEl) titleEl.textContent = t.dataset.defaultTitle;
+            if (bodyEl) bodyEl.textContent = t.dataset.defaultBody;
+        }
+
         t.classList.remove('hidden');
         if (_cartToastTimer) clearTimeout(_cartToastTimer);
         _cartToastTimer = setTimeout(() => {
@@ -2374,10 +2511,17 @@ function showStep(step) {
     }
 
     function goToCart() {
+        try {
+            if (typeof CartBridgeClient !== 'undefined' && CartBridgeClient.openCart) {
+                CartBridgeClient.openCart();
+                return;
+            }
+        } catch (e) {}
+        // Fallback
         window.open('https://shop.4ship.ca/cart', 'shopify_cart');
     }
 
-    function onAddToCartSuccess() {
+    function onAddToCartSuccess(cartItemCount) {
         const btn = document.getElementById('ctaButtonRight');
         if (btn) {
             btn.dataset.loading = 'false';
@@ -2390,7 +2534,7 @@ function showStep(step) {
                 updateCTA();
             }, 1200);
         }
-        showCartToast();
+        showCartToast(cartItemCount);
     }
 
 async function generate9000pxPNG() {
@@ -2709,67 +2853,37 @@ async function generate9000pxPNG() {
         
         console.log('✓ Variant found:', variantKey);
         
-        // 8. Add item to Shopify cart via POST
-        // NOTE: Internal properties are prefixed with '_' to hide them from the standard Shopify cart view.
+        
+        // 8. Add item to Shopify cart via Cart Bridge (cumulative)
+        // NOTE: Do NOT add Color/Size as line-item properties (Shopify already shows them from the variant).
         if (checkoutBtn) checkoutBtn.textContent = 'Adding to cart...';
+
         const designId = (window.crypto && crypto.randomUUID)
             ? crypto.randomUUID()
             : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
+
         const qty = Math.max(1, Math.min(99, parseInt(selectedQuantity || 1, 10) || 1));
+        const cityVal = (document.getElementById('cityInput')?.value || '').trim();
+        const groupVal = (document.getElementById('groupInput')?.value || '').trim();
 
-        
-        
-        
-        
-        // CUMULATIVE CART (KEEP BUILDER OPEN):
-        // Cross-domain AJAX to Shopify is blocked by browsers (CORS/SameSite). Instead we submit a normal
-        // Shopify /cart/add POST into a single named tab. That tab holds the Shopify cart session while
-        // this builder page stays open so the customer can create/add multiple designs, then checkout once.
-        if (checkoutBtn) checkoutBtn.textContent = 'Adding to cart...';
+        const resp = await CartBridgeClient.addItems([{
+            id: variant.shopifyVariantId,
+            quantity: qty,
+            properties: {
+                _design_id: designId,
+                _style: selectedStyle,
+                city: cityVal,
+                group: groupVal,
+                _design_url: designUrl,
+                _cloudinary_public_id: publicId || '',
+                _builder_version: 'v1.26.0',
+                _variant_key: variantKey
+            }
+        }]);
 
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = 'https://shop.4ship.ca/cart/add';
-        form.target = 'shopify_cart';
-
-        const addHidden = (name, value) => {
-            const input = document.createElement('input');
-            input.type = 'hidden';
-            input.name = name;
-            input.value = value == null ? '' : String(value);
-            form.appendChild(input);
-        };
-
-        addHidden('id', variant.shopifyVariantId);
-        addHidden('quantity', qty);
-        addHidden('return_to', '/cart');
-
-        // Line-item properties (DO NOT add "color" / "size" here or Shopify will show duplicates)
-        addHidden('properties[_design_id]', designId);
-        addHidden('properties[_style]', selectedStyle);
-        addHidden('properties[city]', (document.getElementById('cityInput')?.value || '').trim());
-        addHidden('properties[group]', (document.getElementById('groupInput')?.value || '').trim());
-        addHidden('properties[_design_url]', designUrl);
-        addHidden('properties[_cloudinary_public_id]', publicId || '');
-        addHidden('properties[_builder_version]', 'v1.25.6');
-
-        document.body.appendChild(form);
-        // Ensure a first‑party cart session by opening/reusing the Shopify cart tab right before submit.
-        // (Cross‑domain AJAX is blocked by CORS; this keeps the builder page open while the cart accumulates.)
-        let cartWin = null;
-        try { cartWin = window.open('https://shop.4ship.ca/cart', 'shopify_cart'); } catch (e) { cartWin = null; }
-        if (!cartWin) {
-            // Popup blocked: fall back to opening in a new tab.
-            form.target = '_blank';
-        }
-
-form.submit();
-        // Try to keep focus on the builder after opening/submitting to the cart tab.
-        setTimeout(() => { try { window.focus(); } catch (e) {} }, 200);
-        form.remove();
-
-        onAddToCartSuccess();
+        onAddToCartSuccess(resp && typeof resp.cartItemCount === 'number' ? resp.cartItemCount : null);
         return;
+
 
 
 
