@@ -1,5 +1,5 @@
 <!--
-USA250 v1.26.0 - Fix JS syntax + restore previews + center button text
+USA250 v1.26.1 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -1148,7 +1148,7 @@ body > .sticky-cta {
 }
 
 
-/* v1.26.0 - Variant chips + step-based variant visibility */
+/* v1.26.1 - Variant chips + step-based variant visibility */
 .preview-tools{
     display:flex;
     justify-content:flex-end;
@@ -1264,7 +1264,7 @@ body > .sticky-cta {
 
 <div class="container">
         <div class="header global-header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.0</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.1</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -1802,35 +1802,50 @@ let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
 
         async function ensureReady() {
             if (ready) return true;
+
+            // Open (or reuse) the bridge window and ping until it replies READY.
             openBridge();
 
+            const handshake = "hs_" + Date.now() + "_" + Math.random().toString(16).slice(2);
             const start = Date.now();
-            while (!ready && (Date.now() - start) < 5500) {
-                post("PING", { requestId: uid() });
+            const timeoutMs = 12000;
+
+            while (!ready && (Date.now() - start) < timeoutMs) {
+                try {
+                    post("PING", { handshake });
+                } catch (e) {
+                    // Popup might be blocked/closed; keep trying until timeout.
+                }
                 await new Promise(r => setTimeout(r, 250));
             }
-            if (!ready) throw new Error("Cart Bridge not ready. Confirm the Shopify bridge page is published and uses the matching token.");
+
+            if (!ready) {
+                throw new Error("Cart Bridge not ready. Confirm the Shopify bridge page is open (not blocked) and uses the matching token.");
+            }
+
             return true;
         }
 
         window.addEventListener("message", (ev) => {
-            if (ev.origin !== CART_BRIDGE.bridgeOrigin) return;
-            const msg = ev.data || {};
-            if (msg.token !== CART_BRIDGE.token) return;
+    if (!ev || ev.origin !== CART_BRIDGE.bridgeOrigin) return;
+    const msg = ev.data || {};
 
-            if (msg.type === "READY") {
-                ready = true;
-                return;
-            }
+    // Token is optional in replies. If present, it must match.
+    if (msg && typeof msg === "object" && "token" in msg && msg.token !== CART_BRIDGE.token) return;
 
-            if (msg.requestId && pending.has(msg.requestId)) {
-                const cb = pending.get(msg.requestId);
-                pending.delete(msg.requestId);
-                cb(msg);
-            }
-        });
+    if (msg.type === "READY") {
+      ready = true;
+      return;
+    }
 
-        async function addItems(items) {
+    if (msg.requestId && responses.has(msg.requestId)) {
+      responses.get(msg.requestId)(msg);
+      responses.delete(msg.requestId);
+      return;
+    }
+  });
+
+async function addItems(items) {
             await ensureReady();
 
             if (!Array.isArray(items) || items.length === 0) {
@@ -2876,7 +2891,7 @@ async function generate9000pxPNG() {
                 group: groupVal,
                 _design_url: designUrl,
                 _cloudinary_public_id: publicId || '',
-                _builder_version: 'v1.26.0',
+                _builder_version: 'v1.26.1',
                 _variant_key: variantKey
             }
         }]);
