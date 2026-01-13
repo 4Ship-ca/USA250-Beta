@@ -1,5 +1,5 @@
 <!--
-USA250 v1.26.3 - Fix JS syntax + restore previews + center button text
+USA250 v1.26.4 - Fix JS syntax + restore previews + center button text
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Simple 2-step flow
@@ -1148,7 +1148,7 @@ body > .sticky-cta {
 }
 
 
-/* v1.26.3 - Variant chips + step-based variant visibility */
+/* v1.26.4 - Variant chips + step-based variant visibility */
 .preview-tools{
     display:flex;
     justify-content:flex-end;
@@ -1254,6 +1254,80 @@ body > .sticky-cta {
     .cart-toast { bottom: 98px; }
 }
 
+
+
+/* --- Cart + CTA split buttons --- */
+.cta-row{
+  display:flex;
+  gap:10px;
+  align-items:stretch;
+  flex-wrap:nowrap;
+}
+.cta-split{
+  display:flex;
+  gap:10px;
+  flex:1 1 auto;
+  min-width:0;
+}
+.cta-split #ctaButtonRight{
+  flex:0 0 60%;
+  min-width:0;
+}
+.cta-split #viewCartBtn{
+  flex:0 0 40%;
+  min-width:0;
+}
+
+.cart-btn{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border-radius:18px;
+  border:2px solid rgba(255,255,255,0.18);
+  background:rgba(255,255,255,0.08);
+  color:rgba(255,255,255,0.92);
+  font-weight:900;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+  box-shadow:0 10px 30px rgba(0,0,0,0.45);
+  padding:18px 22px;
+  cursor:pointer;
+}
+
+.cart-btn[disabled],
+.cart-btn[aria-disabled="true"]{
+  opacity:0.42;
+  cursor:not-allowed;
+  filter:saturate(0.6);
+  box-shadow:none;
+}
+
+.cart-badge{
+  position:absolute;
+  top:-10px;
+  right:-10px;
+  min-width:26px;
+  height:26px;
+  padding:0 8px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  background:rgba(0,0,0,0.92);
+  border:2px solid rgba(255,255,255,0.25);
+  color:#fff;
+  font-size:12px;
+  font-weight:900;
+}
+
+@media (max-width: 520px){
+  .cta-split #ctaButtonRight{ flex:0 0 55%; }
+  .cta-split #viewCartBtn{ flex:0 0 45%; }
+  .cart-btn{ padding:16px 14px; font-size:14px; }
+}
+
 </style>
 </head>
 <body>
@@ -1264,7 +1338,7 @@ body > .sticky-cta {
 
 <div class="container">
         <div class="header global-header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.3</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.4</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -1587,9 +1661,17 @@ body > .sticky-cta {
 
 <!-- Sticky CTA for Right Panel -->
         <div class="sticky-cta-right">
-            <div style="display: flex; gap: 10px;">
-                <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="flex: 0 0 60px; padding: 15px 0;">←</button>
-                <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()" style="flex: 1;">Continue →</button>
+            <div class="cta-row">
+                <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="display:none;width:60px;flex:0 0 60px;">←</button>
+
+                <div class="cta-split">
+                    <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()">Continue →</button>
+
+                    <button class="cart-btn" id="viewCartBtn" onclick="handleViewCart()" disabled aria-disabled="true">
+                        <span>View Cart</span>
+                        <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -1601,6 +1683,40 @@ body > .sticky-cta {
 <script>
     // State management
     let currentStep = 1;
+
+let cartItemCount = 0;
+
+function setCartCount(n){
+    cartItemCount = Math.max(0, Number(n) || 0);
+    const btn = document.getElementById("viewCartBtn");
+    const badge = document.getElementById("cartBadge");
+
+    const isEmpty = cartItemCount <= 0;
+
+    if (btn){
+        btn.disabled = isEmpty;
+        btn.setAttribute("aria-disabled", isEmpty ? "true" : "false");
+    }
+    if (badge){
+        if (!isEmpty){
+            badge.style.display = "flex";
+            badge.textContent = String(cartItemCount);
+        } else {
+            badge.style.display = "none";
+            badge.textContent = "0";
+        }
+    }
+}
+
+async function handleViewCart(){
+    try{
+        // User-initiated click => popup allowed; CartBridge will open/focus the bridge tab as needed.
+        await CartBridgeClient.openCart();
+    }catch(e){
+        try{ window.open(BRIDGE_URL, "_blank", "noopener"); }catch(_){}
+    }
+}
+
     
 
     function hardReset() {
@@ -2602,7 +2718,7 @@ function showStep(step) {
                 updateCTA();
             }, 1200);
         }
-        showCartToast(cartItemCount);
+        setCartCount(cartItemCount);
     }
 
 async function generate9000pxPNG() {
@@ -2946,7 +3062,7 @@ async function generate9000pxPNG() {
                 group: groupVal,
                 _design_url: designUrl,
                 _cloudinary_public_id: publicId || '',
-                _builder_version: 'v1.26.3',
+                _builder_version: 'v1.26.4',
                 _variant_key: variantKey
             }
         }]);
@@ -3107,18 +3223,12 @@ function toggleZoom() {
         `;
     }
 }
+
+
 </script>
 
 
-<!-- Cart toast (shown after successful add-to-cart) -->
-<div id="cartToast" class="cart-toast hidden" role="status" aria-live="polite">
-    <div class="toast-title">Added to cart</div>
-    <div class="toast-body">You can add another design, or open your cart when you’re ready to checkout.</div>
-    <div class="toast-actions">
-        <button type="button" class="toggle-btn" onclick="hideCartToast()">Keep Shopping</button>
-        <button type="button" class="mega-btn" style="padding:10px 16px; border-radius: 20px;" onclick="goToCart()">View Cart</button>
-    </div>
-</div>
+
 
 </body>
 </html>
