@@ -2704,14 +2704,8 @@ function showStep(step) {
     }
 
     function goToCart() {
-        try {
-            if (typeof CartBridgeClient !== 'undefined' && CartBridgeClient.openCart) {
-                CartBridgeClient.openCart();
-                return;
-            }
-        } catch (e) {}
-        // Fallback
-        window.open('https://shop.4ship.ca/cart', 'shopify_cart');
+        // Always navigate to the Shopify cart in the same tab
+        window.location.href = 'https://shop.4ship.ca/cart';
     }
 
     function onAddToCartSuccess(cartItemCount) {
