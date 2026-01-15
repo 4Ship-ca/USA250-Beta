@@ -1,9 +1,9 @@
 <!--
-USA250 v1.26.4 - Fix JS syntax + restore previews + center button text
+USA250 v1.27.1 - Cart bridge stable + same-tab cart navigation
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
-Navigation: Simple 2-step flow
-Last Updated: January 11, 2026
+Navigation: Guided multi-step flow
+Last Updated: January 15, 2026
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -1709,11 +1709,32 @@ function setCartCount(n){
 }
 
 async function handleViewCart(){
+    // Navigate to Shopify USA250 cart in the same tab, preserving where the shopper came from.
+    let current = window.location.href;
+    let lastUrl = current;
     try{
-        // User-initiated click => popup allowed; CartBridge will open/focus the bridge tab as needed.
-        await CartBridgeClient.openCart();
+        if (window.localStorage){
+            const key = "usa250_last_builder_url";
+            // store current
+            localStorage.setItem(key, current);
+            const stored = localStorage.getItem(key);
+            if (stored && /^https?:\/\//i.test(stored)){
+                lastUrl = stored;
+            }
+        }
+    }catch(e){}
+
+    const baseCart = "https://shop.4ship.ca/cart";
+    const params = new URLSearchParams();
+    params.set("view", "usa250");
+    params.set("return_to", lastUrl);
+    const target = baseCart + "?" + params.toString();
+
+    try{
+        window.location.href = target;
     }catch(e){
-        try{ window.open(BRIDGE_URL, "_blank", "noopener"); }catch(_){}
+        // Fallback: plain cart
+        window.location.href = baseCart;
     }
 }
 
