@@ -1,5 +1,5 @@
 <!--
-USA250 v1.27.1 - Cart bridge stable + same-tab cart navigation
+USA250 v1.27.2 - Cart bridge stable + same-tab cart navigation + expose Style in cart
 Base: Working v1.9 layout
 Added: Color/Size selectors, Zoom toggle
 Navigation: Guided multi-step flow
@@ -1338,7 +1338,7 @@ body > .sticky-cta {
 
 <div class="container">
         <div class="header global-header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.27.1</span></div>
+            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.4</span></div>
             <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
             <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
         </div>
@@ -3054,6 +3054,9 @@ async function generate9000pxPNG() {
         // 7. Map variant
         const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
         const variant = VARIANT_MAP[variantKey];
+        // Resolve human-friendly style label for cart display
+        const styleObj = STYLES[selectedStyle] || null;
+        const styleName = styleObj ? styleObj.name : (selectedStyle || '');
         
         if (!variant) {
             console.error('Variant Map:', VARIANT_MAP);
@@ -3081,12 +3084,14 @@ async function generate9000pxPNG() {
             quantity: qty,
             properties: {
                 _design_id: designId,
+                // Visible Style label for Shopify cart
+                style: styleName,
                 _style: selectedStyle,
                 city: cityVal,
                 group: groupVal,
                 _design_url: designUrl,
                 _cloudinary_public_id: publicId || '',
-                _builder_version: 'v1.26.4',
+                _builder_version: 'v1.27.2',
                 _variant_key: variantKey
             }
         }]);
