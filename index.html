@@ -2118,6 +2118,30 @@
         updatePreview();
     }
 
+    function hardReset() {
+        // Reset to initial state
+        currentStep = 1;
+        selectedStyle = null;
+        selectedProduct = 'tee';
+        selectedColor = 'Black';
+        selectedSize = 'L';
+        selectedQuantity = 1;
+        cityText = '';
+        groupText = '';
+
+        // Clear inputs
+        const cityInput = document.getElementById('cityInput');
+        const groupInput = document.getElementById('groupInput');
+        if (cityInput) cityInput.value = '';
+        if (groupInput) groupInput.value = '';
+
+        // Reset design
+        resetDesign();
+
+        // Return to step 1
+        showStep(1);
+    }
+
     function formatText(text, baseSize) {
         if (!text) return '';
         const words = String(text).split(/\s+/).filter(w => w.length > 0);
@@ -2428,8 +2452,6 @@
 
             const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
             const variant = VARIANT_MAP[variantKey];
-            const styleObj = STYLES[selectedStyle] || null;
-            const styleName = styleObj ? styleObj.name : (selectedStyle || '');
 
             console.log('[USA250] Variant lookup', { variantKey, variant });
 
