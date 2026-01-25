@@ -1694,6 +1694,14 @@
         D: { font: "Cinzel", color: "#0F2A1B", weight: "700", name: "Outdoors" }
     };
 
+    // Variant mapping for checkout
+    const VARIANT_MAP = {
+        'tee-navy-3xl': { shopifyVariantId: '46056446099606', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_navy_gpr_4-0_gildan_64000' },
+        'tee-black-3xl': { shopifyVariantId: '46056446132374', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_black_gpr_4-0_gildan_64000' },
+        'tee-gray-3xl': { shopifyVariantId: '46056446165142', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_gray_gpr_4-0_gildan_64000' },
+        'tee-white-3xl': { shopifyVariantId: '46056446197910', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_white_gpr_4-0_gildan_64000' }
+    };
+
     // Font / asset helpers
     const EXPORT_FONT_IMPORT_URL = 'https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Cinzel:wght@700;900&family=Oswald:wght@700&display=swap';
 
@@ -2238,9 +2246,212 @@
     }
 
     async function handleCheckout() {
-        // Initiate the checkout process
-        console.log('Initiating checkout...');
-        // Actual checkout logic is handled in handleCTA/handlePrimaryAction flow
+        const checkoutBtn = document.getElementById('ctaButtonRight');
+        const originalText = checkoutBtn ? checkoutBtn.textContent : '';
+
+        if (checkoutBtn) {
+            checkoutBtn.textContent = 'Preparing design...';
+            checkoutBtn.disabled = true;
+            checkoutBtn.dataset.loading = 'true';
+            checkoutBtn.classList.add('loading');
+            checkoutBtn.style.pointerEvents = 'none';
+        }
+
+        try {
+            CartBridgeClient.preopenBridge();
+
+            console.log('[USA250] Checkout start', {
+                style: selectedStyle,
+                product: selectedProduct,
+                color: selectedColor,
+                size: selectedSize,
+                qty: selectedQuantity
+            });
+
+            const svg = document.getElementById('previewSVG');
+            if (!svg) {
+                throw new Error('Design preview not found');
+            }
+
+            const svgClone = svg.cloneNode(true);
+
+            const _exportMockup = svgClone.querySelector('#mockupImage');
+            if (_exportMockup) _exportMockup.remove();
+            const _exportShirt = svgClone.querySelector('#shirtFill');
+            if (_exportShirt) {
+                _exportShirt.setAttribute('fill', 'none');
+                _exportShirt.setAttribute('fill-opacity', '0');
+            }
+
+            injectFontImport(svgClone);
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Loading design elements...';
+
+            const bgImage = svgClone.querySelector('#bgImage');
+            if (bgImage && bgImage.href.baseVal) {
+                const imageUrl = bgImage.href.baseVal;
+
+                const base64 = await (async () => {
+                    if (_assetCache.bgBase64.has(imageUrl)) return _assetCache.bgBase64.get(imageUrl);
+
+                    const p = new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+
+                        img.onload = function() {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+                                const dataUrl = canvas.toDataURL('image/png');
+                                resolve(dataUrl);
+                            } catch (err) {
+                                reject(err);
+                            }
+                        };
+
+                        img.onerror = () => reject(new Error('Failed to load background image'));
+                        img.src = imageUrl;
+                        setTimeout(() => reject(new Error('Background image load timeout')), 10000);
+                    });
+
+                    _assetCache.bgBase64.set(imageUrl, p);
+                    return p;
+                })();
+
+                bgImage.setAttribute('href', base64);
+            }
+
+            await ensureFontsLoadedForExport();
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Converting design...';
+
+            const svgData = new XMLSerializer().serializeToString(svgClone);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(svgBlob);
+
+            const img = new Image();
+            const imageLoadPromise = new Promise((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('Failed to convert SVG'));
+                setTimeout(() => reject(new Error('SVG conversion timeout')), 10000);
+            });
+
+            img.src = url;
+            await imageLoadPromise;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 9000;
+            canvas.height = 7200;
+            const ctx = canvas.getContext('2d');
+
+            const svgWidth = 500;
+            const svgHeight = 400;
+            const scale = Math.min(9000 / svgWidth, 7200 / svgHeight);
+            const scaledWidth = svgWidth * scale;
+            const scaledHeight = svgHeight * scale;
+            const offsetX = (9000 - scaledWidth) / 2;
+            const offsetY = (7200 - scaledHeight) / 2;
+
+            ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+            URL.revokeObjectURL(url);
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Generating PNG...';
+
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob((b) => {
+                    if (b) resolve(b);
+                    else reject(new Error('Failed to create PNG'));
+                }, 'image/png', 1.0);
+            });
+
+            const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
+            if (blob.size < 10000) {
+                throw new Error('PNG file too small (' + sizeMB + 'MB) - design may not have rendered correctly');
+            }
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Uploading design...';
+
+            const formData = new FormData();
+            formData.append('file', blob);
+            formData.append('upload_preset', 'america250');
+            formData.append('folder', 'usa250-orders');
+
+            const cloudinaryResponse = await fetch(
+                'https://api.cloudinary.com/v1_1/dqab444bd/image/upload',
+                { method: 'POST', body: formData }
+            );
+
+            if (!cloudinaryResponse.ok) {
+                const errorText = await cloudinaryResponse.text();
+                throw new Error(`Upload failed: ${errorText}`);
+            }
+
+            const cloudinaryData = await cloudinaryResponse.json();
+            const designUrl = cloudinaryData.secure_url;
+            const publicId = cloudinaryData.public_id;
+
+            console.log('✓ Design uploaded:', designUrl);
+
+            const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
+            const variant = VARIANT_MAP[variantKey];
+            const styleObj = STYLES[selectedStyle] || null;
+            const styleName = styleObj ? styleObj.name : (selectedStyle || '');
+
+            console.log('[USA250] Variant lookup', { variantKey, variant });
+
+            if (!variant) {
+                throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize} (key: ${variantKey})`);
+            }
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Adding to cart...';
+
+            const designId = (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
+
+            const qty = Math.max(1, Math.min(99, parseInt(selectedQuantity || 1, 10) || 1));
+            const cityVal = (document.getElementById('cityInput')?.value || '').trim();
+            const groupVal = (document.getElementById('groupInput')?.value || '').trim();
+
+            const itemsPayload = [{
+                id: variant.shopifyVariantId,
+                quantity: qty,
+                properties: {
+                    _design_id: designId,
+                    style: styleName,
+                    _style: selectedStyle,
+                    city: cityVal,
+                    group: groupVal,
+                    _design_url: designUrl,
+                    _cloudinary_public_id: publicId || '',
+                    _builder_version: 'v1.30.0',
+                    _variant_key: variantKey
+                }
+            }];
+
+            console.log('[USA250] CartBridge addItems payload', itemsPayload);
+
+            const resp = await CartBridgeClient.addItems(itemsPayload);
+
+            console.log('[USA250] CartBridge response', resp);
+
+            onAddToCartSuccess(resp && typeof resp.cartItemCount === 'number' ? resp.cartItemCount : null);
+            return;
+
+        } catch (error) {
+            console.error('✗ Checkout error:', error);
+            alert('Checkout failed: ' + (error && error.message ? error.message : error) + '\n\nPlease try again or contact support.');
+            if (checkoutBtn) {
+                checkoutBtn.textContent = originalText || 'Add to Cart →';
+                checkoutBtn.disabled = false;
+                checkoutBtn.dataset.loading = 'false';
+                checkoutBtn.classList.remove('loading');
+                checkoutBtn.style.pointerEvents = '';
+            }
+        }
     }
 
     function handlePrimaryAction() {
