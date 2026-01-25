@@ -2862,8 +2862,6 @@
             // Variant mapping using global VARIANT_MAP
             const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
             const variant = VARIANT_MAP[variantKey];
-            const styleObj = STYLES[selectedStyle] || null;
-            const styleName = styleObj ? styleObj.name : (selectedStyle || '');
 
             console.log('[USA250] Variant lookup', { variantKey, variant });
 
