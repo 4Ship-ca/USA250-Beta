@@ -1727,6 +1727,26 @@
 
     // Mockups load on-demand with automatic fallback - no pre-checking needed
 
+    // JSON cache for template data
+    const jsonCache = {};
+
+    // Fetch JSON with caching
+    async function fetchJsonCached(path) {
+        if (jsonCache[path]) {
+            return jsonCache[path];
+        }
+        try {
+            const response = await fetch(path);
+            if (response.ok) {
+                const data = await response.json();
+                jsonCache[path] = data;
+                return data;
+            }
+        } catch (error) {
+            console.warn(`Failed to load JSON from ${path}:`, error);
+        }
+        return null;
+    }
     // Skip detection - just load mockups and handle errors gracefully
     async function detectAvailableMockups() {
         console.log('Mockups will load on-demand with fallback to placeholder');
