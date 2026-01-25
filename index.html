@@ -4,17 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>America 250 - Design Your Style</title>
+
+    <link rel="icon" href="data:,">
     <link href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Cinzel:wght@700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        
+
         :root {
             --gold: #d4af37;
             --bg: #0a0a0a;
             --panel: #161616;
             --border: #333;
         }
-        
+
         body {
             background: var(--bg);
             color: white;
@@ -22,19 +25,15 @@
             overflow-x: hidden;
             -webkit-tap-highlight-color: transparent;
         }
-        
-        /* ===========================================
-           MOBILE-FIRST DESIGN (Default)
-           =========================================== */
-        
+
+        /* Mobile-first design */
         .container {
             width: 100%;
             min-height: 100vh;
             padding: 20px;
-            padding-bottom: 100px; /* Space for sticky button */
+            padding-bottom: 100px;
         }
-        
-        /* Progress Bar */
+
         .progress-bar {
             position: fixed;
             top: 0;
@@ -44,55 +43,67 @@
             background: #222;
             z-index: 1000;
         }
-        
+
         .progress-fill {
             height: 100%;
             background: linear-gradient(90deg, var(--gold), #ffd700);
             transition: width 0.3s ease;
             width: 25%;
         }
-        
-        /* Header */
+
         .header {
-            text-align: center;
+            text-align: left;
             padding: 40px 20px 20px;
         }
-        
+
         .logo {
             font-size: 28px;
             font-weight: 900;
             color: var(--gold);
             letter-spacing: 2px;
         }
-        
+
         .step-indicator {
             margin-top: 10px;
             font-size: 14px;
             color: #888;
         }
-        
-        /* Style Cards (Tinder-style swipeable) */
+
         .style-section {
             margin: 30px 0;
         }
-        
+
         .section-title {
             font-size: 18px;
             color: var(--gold);
             margin-bottom: 15px;
-            text-align: center;
+            text-align: left;
             text-transform: uppercase;
             letter-spacing: 1.5px;
         }
-        
+
         .style-cards {
             position: relative;
             width: 100%;
             max-width: 400px;
-            margin: 0 auto;
+            margin: 0;
             height: 400px;
         }
-        
+
+        /* Unified style selection: use the card grid everywhere (no swipe/carousel) */
+        .style-cards, .swipe-nav { display: none !important; }
+
+        /* Mobile-friendly grid sizing */
+        @media (max-width: 767px) {
+            .style-cards-desktop {
+                grid-template-columns: repeat(2, minmax(150px, 1fr));
+                gap: 14px;
+            }
+            .style-card-desktop .card-mockup { height: 150px; }
+            .style-card-desktop .card-title { font-size: 15px; }
+            .style-card-desktop .card-description { font-size: 11px; }
+        }
+
         .style-card {
             position: absolute;
             width: 100%;
@@ -104,54 +115,54 @@
             transition: transform 0.3s ease, opacity 0.3s ease;
             cursor: pointer;
         }
-        
+
         .style-card.active {
             transform: scale(1);
             opacity: 1;
             z-index: 10;
         }
-        
+
         .style-card.prev {
             transform: translateX(-20px) scale(0.95);
             opacity: 0.5;
             z-index: 5;
         }
-        
+
         .style-card.next {
             transform: translateX(20px) scale(0.95);
             opacity: 0.5;
             z-index: 5;
         }
-        
+
         .card-mockup {
             width: 100%;
             height: 250px;
             background: #222;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             font-size: 14px;
             color: #666;
         }
-        
+
         .card-content {
             padding: 20px;
-            text-align: center;
+            text-align: left;
         }
-        
+
         .card-title {
             font-size: 22px;
             font-weight: 900;
             color: var(--gold);
             margin-bottom: 8px;
         }
-        
+
         .card-description {
             font-size: 14px;
             color: #aaa;
             margin-bottom: 15px;
         }
-        
+
         .card-select-btn {
             background: var(--gold);
             color: black;
@@ -163,19 +174,18 @@
             cursor: pointer;
             transition: transform 0.2s;
         }
-        
+
         .card-select-btn:active {
             transform: scale(0.95);
         }
-        
-        /* Swipe Navigation */
+
         .swipe-nav {
             display: flex;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 10px;
             margin-top: 20px;
         }
-        
+
         .swipe-nav button {
             background: #333;
             border: none;
@@ -187,20 +197,19 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        
+
         .swipe-nav button:active {
             background: var(--gold);
             color: black;
         }
-        
-        /* Location Input */
+
         .location-section {
             margin: 30px 0;
             max-width: 400px;
             margin-left: auto;
             margin-right: auto;
         }
-        
+
         .locate-btn {
             width: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -214,21 +223,21 @@
             margin-bottom: 15px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             gap: 10px;
         }
-        
+
         .locate-btn:active {
             transform: scale(0.98);
         }
-        
+
         .or-divider {
-            text-align: center;
+            text-align: left;
             color: #666;
             margin: 15px 0;
             position: relative;
         }
-        
+
         .or-divider::before,
         .or-divider::after {
             content: '';
@@ -238,14 +247,14 @@
             height: 1px;
             background: #333;
         }
-        
+
         .or-divider::before { left: 0; }
         .or-divider::after { right: 0; }
-        
+
         .input-group {
             margin-bottom: 20px;
         }
-        
+
         .input-label {
             font-size: 12px;
             color: var(--gold);
@@ -254,7 +263,7 @@
             margin-bottom: 8px;
             display: block;
         }
-        
+
         .text-input {
             width: 100%;
             background: #1a1a1a;
@@ -265,26 +274,25 @@
             font-size: 16px;
             outline: none;
         }
-        
+
         .text-input:focus {
             border-color: var(--gold);
         }
-        
+
         .char-counter {
             font-size: 11px;
             color: #666;
             text-align: right;
             margin-top: 5px;
         }
-        
-        /* Suggested Options */
+
         .suggestions {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             margin-top: 10px;
         }
-        
+
         .suggestion-chip {
             background: #222;
             border: 1px solid #444;
@@ -294,14 +302,13 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .suggestion-chip:active {
             background: var(--gold);
             color: black;
             border-color: var(--gold);
         }
-        
-        /* Preview Section */
+
         .preview-section {
             margin: 30px 0;
             background: #1a1a1a;
@@ -309,47 +316,55 @@
             border-radius: 20px;
             border: 2px solid #333;
         }
-        
+
         .preview-title {
             font-size: 16px;
             color: var(--gold);
-            text-align: center;
+            text-align: left;
             margin-bottom: 15px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
         }
-        
+
         .preview-canvas {
             width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
             aspect-ratio: 5/4;
             background: #000;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            position: relative;
         }
-        
+
         #previewSVG {
+            display: block;
+            margin: 0 auto;
             width: 100%;
-            height: auto;
+            height: 100%;
             max-width: 100%;
+            transition: transform 0.3s ease;
+            transform: scale(1);
+            transform-origin: center center;
+            transform-box: fill-box;
+            transform-box: view-box;
         }
-        
-        /* Tweak Controls */
+
         .tweak-section {
             margin: 20px 0;
             max-width: 400px;
             margin-left: auto;
             margin-right: auto;
         }
-        
+
         .tweak-toggle {
-            text-align: center;
+            text-align: left;
             margin-bottom: 20px;
         }
-        
+
         .toggle-btn {
             background: transparent;
             border: 2px solid #444;
@@ -360,32 +375,32 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-        
+
         .toggle-btn.active {
             background: var(--gold);
             color: black;
             border-color: var(--gold);
         }
-        
+
         .tweak-controls {
             display: none;
         }
-        
+
         .tweak-controls.active {
             display: block;
         }
-        
+
         .control-group {
             margin-bottom: 25px;
         }
-        
+
         .control-label {
             font-size: 13px;
             color: #aaa;
-            text-align: center;
+            text-align: left;
             margin-bottom: 10px;
         }
-        
+
         .button-labels {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -395,21 +410,15 @@
             color: #888;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            text-align: center;
+            text-align: left;
         }
-        
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-        }
-        
+
         .button-grid-extended {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 8px;
         }
-        
+
         .tweak-btn {
             aspect-ratio: 1;
             background: #222;
@@ -424,15 +433,14 @@
             justify-content: center;
             font-weight: 700;
         }
-        
+
         .tweak-btn:active {
             background: var(--gold);
             color: black;
             border-color: var(--gold);
             transform: scale(0.95);
         }
-        
-        /* Sticky Bottom CTA */
+
         .sticky-cta {
             position: fixed;
             bottom: 0;
@@ -442,11 +450,53 @@
             padding: 20px;
             z-index: 100;
         }
-        
+
+        /* New Container for Side-by-Side buttons */
+        .cta-row {
+            display: flex;
+            gap: 15px;
+            max-width: 500px;
+            margin: 0;
+        }
+
+        /* Back Button Styling */
+        .back-btn {
+            width: 60px;
+            flex-shrink: 0;
+            background: #333;
+            border: 2px solid #444;
+            border-radius: 15px;
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+            background: var(--gold);
+            color: black;
+            border-color: var(--gold);
+        }
+
+        .back-btn:disabled {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .mega-btn {
+            flex-grow: 1;
+            margin: 0;
+        }
+
         .mega-btn {
             width: 100%;
             max-width: 500px;
-            margin: 0 auto;
+            margin: 0;
             background: linear-gradient(135deg, var(--gold) 0%, #ffd700 100%);
             border: none;
             padding: 20px;
@@ -461,76 +511,82 @@
             transition: transform 0.2s;
             display: block;
         }
-        
+
         .mega-btn:active {
             transform: scale(0.98);
         }
-        
+
         .mega-btn:disabled {
             background: #444;
             color: #888;
             cursor: not-allowed;
         }
-        
-        /* ===========================================
-           DESKTOP DESIGN (min-width: 768px)
-           =========================================== */
-        
+
+        /* Desktop styles */
         @media (min-width: 768px) {
             .container {
                 display: grid;
                 grid-template-columns: 450px 1fr;
                 gap: 30px;
                 max-width: 1400px;
-                margin: 0 auto;
+                margin: 0;
                 padding: 40px;
             }
-            
+
+            .header.global-header {
+                grid-column: 1 / -1;
+                width: 100%;
+            }
+
             .left-panel {
                 height: 90vh;
                 overflow-y: auto;
                 padding-right: 15px;
             }
-            
+
             .left-panel::-webkit-scrollbar {
                 width: 6px;
             }
-            
+
             .left-panel::-webkit-scrollbar-thumb {
                 background: var(--gold);
                 border-radius: 10px;
             }
-            
+
             .right-panel {
                 position: sticky;
                 top: 40px;
                 height: fit-content;
+                display: flex;
+                flex-direction: column;
+                gap: 24px;
             }
-            
+
             .header {
-                padding: 0 0 30px 0;
                 text-align: left;
+                padding: 20px 0;
             }
-            
+
             .logo {
                 font-size: 32px;
             }
-            
-            /* Desktop: Show all styles in grid instead of cards */
+
             .style-cards-desktop {
                 display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+                width: 100%;
             }
-            
+
             .style-cards {
-                display: none; /* Hide mobile swipe cards */
+                display: none;
             }
-            
+
             .swipe-nav {
                 display: none;
             }
-            
+
             .style-card-desktop {
                 background: var(--panel);
                 border: 2px solid var(--border);
@@ -539,47 +595,47 @@
                 cursor: pointer;
                 transition: all 0.2s;
             }
-            
+
             .style-card-desktop:hover {
                 border-color: var(--gold);
                 transform: translateY(-5px);
             }
-            
+
             .style-card-desktop.selected {
                 border-color: var(--gold);
                 box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
             }
-            
+
             .card-mockup {
                 height: 180px;
             }
-            
+
             .card-content {
                 padding: 15px;
             }
-            
+
             .card-title {
                 font-size: 18px;
             }
-            
+
             .card-description {
                 font-size: 13px;
             }
-            
+
             .card-select-btn {
                 padding: 10px 25px;
                 font-size: 14px;
             }
-            
+
             .preview-section {
                 padding: 30px;
             }
-            
+
             .preview-canvas {
-                max-width: 600px;
+                width: 75%;
+                max-width: 980px;
             }
-            
-            /* Desktop: Show advanced slider controls */
+
             .advanced-controls {
                 display: block;
                 margin-top: 20px;
@@ -587,11 +643,11 @@
                 background: #1a1a1a;
                 border-radius: 15px;
             }
-            
+
             .slider-group {
                 margin-bottom: 15px;
             }
-            
+
             .slider-label {
                 display: flex;
                 justify-content: space-between;
@@ -601,12 +657,12 @@
                 text-transform: uppercase;
                 letter-spacing: 1px;
             }
-            
+
             .slider-value {
                 color: var(--gold);
                 font-family: monospace;
             }
-            
+
             input[type="range"] {
                 width: 100%;
                 height: 6px;
@@ -615,7 +671,7 @@
                 outline: none;
                 -webkit-appearance: none;
             }
-            
+
             input[type="range"]::-webkit-slider-thumb {
                 -webkit-appearance: none;
                 width: 20px;
@@ -624,7 +680,7 @@
                 border-radius: 50%;
                 cursor: pointer;
             }
-            
+
             input[type="range"]::-moz-range-thumb {
                 width: 20px;
                 height: 20px;
@@ -633,66 +689,638 @@
                 cursor: pointer;
                 border: none;
             }
-            
+
             .sticky-cta {
                 position: static;
                 background: transparent;
                 padding: 20px 0;
             }
         }
-        
-        /* Hidden utility */
+
         .hidden { display: none !important; }
-        
-        /* Loading states */
-        .loading {
-            opacity: 0.5;
-            pointer-events: none;
+        .loading { opacity: 0.5; pointer-events: none; }
+
+        .product-selector {
+            margin-bottom: 20px;
+        }
+
+        /* SELECTOR SECTIONS */
+        .selector-section {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .selector-section.color-section {
+            margin-bottom: 32px;
+        }
+
+        .selector-label {
+            font-size: 14px;
+            color: var(--gold);
+            margin-bottom: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: left;
+            width: 100%;
+            align-self: flex-start;
+        }
+
+        /* COLOR OPTIONS */
+        .color-row {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .color-row .color-options {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .color-row .zoom-toggle {
+            margin-left: auto;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            min-height: 50px;
+        }
+
+        .color-options:empty::after {
+            content: 'Select a style to see available colors';
+            color: #666;
+            font-size: 13px;
+            font-style: italic;
+        }
+
+        .color-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid var(--border);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: var(--panel);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--gold);
+        }
+
+        .color-btn.active {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+        }
+
+        .color-btn::before {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+        }
+
+        .color-btn[data-color="Black"]::before { background: #000; }
+        .color-btn[data-color="White"]::before { background: #fff; border: 1px solid #ddd; }
+        .color-btn[data-color="Navy"]::before { background: #001f3f; }
+        .color-btn[data-color="Gray"]::before { background: #808080; }
+
+        .color-btn .color-name {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: #888;
+            white-space: nowrap;
+        }
+
+        .color-btn.active .color-name {
+            color: var(--gold);
+            font-weight: 700;
+        }
+
+        /* Size buttons */
+        .size-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .size-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 3px solid var(--border);
+            background: var(--panel);
+            color: white;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            flex: none;
+        }
+
+        .size-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--gold);
+        }
+
+        .size-btn.active {
+            border-color: var(--gold);
+            background: var(--gold);
+            color: black;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+        }
+
+        .quantity-controls{
+            display:flex;
+            gap:10px;
+            align-items:center;
+        }
+
+        .qty-btn{
+            width:48px;
+            height:44px;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-weight: 900;
+            font-size: 20px;
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .qty-btn:hover{
+            border-color: var(--gold);
+        }
+
+        .qty-input{
+            flex:0 0 auto;
+            max-width:80px;
+            height:44px;
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            color: white;
+            font-weight: 800;
+            font-size: 16px;
+            text-align: center;
+            outline: none;
+        }
+
+        .qty-input:focus{
+            border-color: var(--gold);
+        }
+
+        @media (max-width: 768px) {
+            .color-options {
+                justify-content: flex-start;
+            }
+
+            .size-options {
+                flex-wrap: wrap;
+            }
+
+            .size-btn {
+                flex: 1 0 70px;
+                min-width: 70px;
+            }
+
+            .preview-canvas {
+                border: 2px solid rgba(255, 255, 255, 0.14);
+            }
+        }
+
+        .preview-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto 20px;
+        }
+
+        @media (max-width: 520px) {
+            .preview-row {
+                gap: 10px;
+            }
+
+            .color-row {
+                flex-wrap: wrap;
+            }
+
+            .color-row .zoom-toggle {
+                margin-left: auto;
+            }
+
+            .preview-wrapper {
+                width: 100%;
+                min-width: 0;
+                max-width: 100%;
+            }
+        }
+
+        .preview-wrapper {
+            position: relative;
+            background: #111;
+            border-radius: 15px;
+            padding: 20px;
+            width: 88%;
+            min-width: 75%;
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 0;
+            overflow: hidden;
+        }
+
+        .preview-canvas.zoomed #previewSVG {
+            transform: scale(1.5);
+        }
+
+        .zoom-toggle {
+            flex: 0 0 auto;
+            position: relative;
+            background: rgba(0, 0, 0, 0.65);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--gold);
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .zoom-toggle:hover {
+            background: rgba(0, 0, 0, 0.85);
+            border-color: var(--gold);
+            transform: scale(1.06);
+        }
+
+        .zoom-toggle.active {
+            background: transparent;
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .left-panel, .right-panel {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .preview-section {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px solid #333;
+            margin: 0 !important;
+        }
+
+        .location-section, .tweak-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 20px;
+            border: 2px solid #333;
+            margin: 0 !important;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                display: flex !important;
+                flex-direction: column !important;
+            }
+            body:not(.after-style) .left-panel { order: 1 !important; }
+            body:not(.after-style) .right-panel { order: 2 !important; }
+            body.after-style .left-panel { order: 2 !important; }
+            body.after-style .right-panel { order: 1 !important; }
+        }
+
+        body > .sticky-cta {
+            display: none !important;
+        }
+
+        .sticky-cta-right {
+            display: block;
+        }
+
+        @media (max-width: 1024px) {
+            .sticky-cta-right {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: rgba(10, 10, 10, 0.95);
+                padding: 15px 20px;
+                border-top: 1px solid #333;
+                z-index: 1000;
+                margin-top: 0 !important;
+            }
+        }
+
+        .location-section, .tweak-section {
+            background: #1a1a1a;
+            padding: 25px;
+            border-radius: 20px;
+            border: 2px solid #333;
+            margin: 0 !important;
+            max-width: 100% !important;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                grid-template-columns: 350px 1fr;
+            }
+        }
+
+        .style-cards-desktop {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        .style-card-desktop {
+            background: var(--panel);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .style-card-desktop.selected {
+            border-color: var(--gold);
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+        }
+
+        .style-card-desktop .card-mockup {
+            height: 120px;
+        }
+
+        .style-card-desktop .card-content {
+            padding: 10px;
+        }
+
+        .style-card-desktop .card-title {
+            font-size: 14px;
+        }
+
+        .style-card-desktop .card-description {
+            font-size: 11px;
+        }
+
+        @media (min-width: 768px) {
+            body.after-style .left-panel {
+                height: auto !important;
+                overflow: visible !important;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                padding-bottom: 120px !important;
+            }
+        }
+
+        /* Variant chips + step-based visibility */
+        .preview-tools{
+            display:flex;
+            justify-content:flex-end;
+            margin-top: 10px;
+        }
+
+        .variant-chips{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap: 12px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-top: 10px;
+        }
+
+        .chip-row{
+            display:flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chip{
+            display:inline-flex;
+            align-items:center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(0,0,0,0.25);
+            color: rgba(255,255,255,0.9);
+            font-weight: 700;
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .chip-change{
+            flex: 0 0 auto;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(212,175,55,0.5);
+            background: transparent;
+            color: var(--gold);
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        .chip-change:hover{
+            background: rgba(212,175,55,0.12);
+        }
+
+        .helper-text{
+            margin-top: 8px;
+            color: rgba(255,255,255,0.65);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Cart toast */
+        .cart-toast {
+            position: fixed;
+            right: 18px;
+            bottom: 92px;
+            z-index: 2500;
+            background: rgba(12, 12, 12, 0.92);
+            border: 1px solid #333;
+            border-radius: 14px;
+            padding: 14px 14px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+            max-width: 320px;
+            width: calc(100% - 36px);
+        }
+        .cart-toast .toast-title {
+            color: var(--gold);
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-align: left;
+        }
+        .cart-toast .toast-body {
+            color: #ddd;
+            font-size: 13px;
+            line-height: 1.35;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+        .cart-toast .toast-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .cart-toast .toast-actions .toggle-btn {
+            padding: 10px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+        @media (max-width: 1024px) {
+            .cart-toast { bottom: 98px; }
+        }
+
+        /* Cart + CTA split buttons */
+        .cta-row{
+            display:flex;
+            gap:10px;
+            align-items:stretch;
+            flex-wrap:nowrap;
+        }
+        .cta-split{
+            display:flex;
+            gap:10px;
+            flex:1 1 auto;
+            min-width:0;
+        }
+        .cta-split #ctaButtonRight{
+            flex:0 0 60%;
+            min-width:0;
+        }
+        .cta-split #viewCartBtn{
+            flex:0 0 40%;
+            min-width:0;
+        }
+
+        .cart-btn{
+            position:relative;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            border-radius:18px;
+            border:2px solid rgba(255,255,255,0.18);
+            background:rgba(255,255,255,0.08);
+            color:rgba(255,255,255,0.92);
+            font-weight:900;
+            letter-spacing:0.05em;
+            text-transform:uppercase;
+            box-shadow:0 10px 30px rgba(0,0,0,0.45);
+            padding:18px 22px;
+            cursor:pointer;
+        }
+
+        .cart-btn[disabled],
+        .cart-btn[aria-disabled="true"]{
+            opacity:0.42;
+            cursor:not-allowed;
+            filter:saturate(0.6);
+            box-shadow:none;
+        }
+
+        .cart-badge{
+            position:absolute;
+            top:-10px;
+            right:-10px;
+            min-width:26px;
+            height:26px;
+            padding:0 8px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:999px;
+            background:rgba(0,0,0,0.92);
+            border:2px solid rgba(255,255,255,0.25);
+            color:#fff;
+            font-size:12px;
+            font-weight:900;
+        }
+
+        @media (max-width: 520px){
+            .cta-split #ctaButtonRight{ flex:0 0 55%; }
+            .cta-split #viewCartBtn{ flex:0 0 45%; }
+            .cart-btn{ padding:16px 14px; font-size:14px; }
         }
     </style>
 </head>
 <body>
 
-<!-- Progress Bar -->
 <div class="progress-bar">
     <div class="progress-fill" id="progressFill"></div>
 </div>
 
 <div class="container">
-    <div class="left-panel">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.9</span></div>
-            <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
+    <div class="header global-header">
+        <div class="logo">
+            AMERICA 250
+            <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.30.0</span>
         </div>
-        
+        <div class="step-indicator" id="stepIndicator">Step 1 of 6: Pick Your Style</div>
+        <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
+    </div>
+
+    <div class="left-panel">
         <!-- STEP 1: Style Selection -->
         <div class="style-section" id="step1">
             <h2 class="section-title">Choose Your Style</h2>
-            
-            <!-- Product Selector (shows available products) -->
-            <div class="product-selector" style="margin-bottom: 20px;">
+
+            <div class="product-selector">
                 <label class="input-label">Product Type</label>
                 <select id="productSelect" onchange="changeProduct(this.value)" style="width: 100%; background: #1a1a1a; border: 2px solid #333; padding: 12px; border-radius: 10px; color: white; font-size: 14px;">
                     <option value="tee">👕 T-Shirt - $24.99</option>
-                    <option value="hoodie">🧥 Hoodie - $44.99</option>
-                    <option value="sweatshirt">👔 Sweatshirt - $39.99</option>
-                    <option value="longsleeve">👕 Long Sleeve - $29.99</option>
-                    <option value="tank">🎽 Tank Top - $22.99</option>
-                    <option value="mug">☕ Mug - $14.99</option>
-                    <option value="sticker">⭐ Sticker - $3.99</option>
-                    <option value="poster">🖼️ Poster - $19.99</option>
-                    <option value="phone">📱 Phone Case - $16.99</option>
-                    <option value="tote">👜 Tote Bag - $18.99</option>
-                    <option value="pillow">🛋️ Pillow - $24.99</option>
-                    <option value="hat">🧢 Baseball Cap - $24.99</option>
                 </select>
                 <p style="font-size: 11px; color: #666; margin-top: 5px;">
                     Shape: <span id="shapeIndicator">Square (DTG)</span>
                 </p>
             </div>
-            
-            <!-- Mobile: Swipeable Cards -->
+
+            <!-- Mobile cards (hidden in v1.30.0; grid used instead) -->
             <div class="style-cards">
                 <div class="style-card active" data-style="A">
                     <div class="card-mockup"></div>
@@ -727,14 +1355,14 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="swipe-nav">
                 <button onclick="previousCard()">←</button>
                 <button onclick="nextCard()">→</button>
             </div>
-            
-            <!-- Desktop: Grid of All Styles -->
-            <div class="style-cards-desktop hidden">
+
+            <!-- Desktop / unified grid -->
+            <div class="style-cards-desktop">
                 <div class="style-card-desktop" data-style="A" onclick="selectStyle('A')">
                     <div class="card-mockup"></div>
                     <div class="card-content">
@@ -765,231 +1393,310 @@
                 </div>
             </div>
         </div>
-        
-        <!-- STEP 2: Location -->
-        <div class="location-section hidden" id="step2">
-            <h2 class="section-title">Your Location</h2>
-            
-            <button class="locate-btn" onclick="useGeolocation()">
-                <span>📍</span>
-                <span>Use My Location</span>
-            </button>
-            
-            <div class="or-divider">OR</div>
-            
-            <div class="input-group">
-                <label class="input-label">City & State</label>
-                <input type="text" class="text-input" id="cityInput" maxlength="50" 
-                       placeholder="MIAMI, FLORIDA" oninput="updateCity()">
-                <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
-            </div>
-            
-            <div class="suggestions">
-                <div class="suggestion-chip" onclick="useCity('MIAMI, FL')">Miami, FL</div>
-                <div class="suggestion-chip" onclick="useCity('NEW YORK, NY')">New York, NY</div>
-                <div class="suggestion-chip" onclick="useCity('LOS ANGELES, CA')">Los Angeles, CA</div>
-                <div class="suggestion-chip" onclick="useCity('CHICAGO, IL')">Chicago, IL</div>
-            </div>
-        </div>
-        
-        <!-- STEP 3: Group Name -->
-        <div class="location-section hidden" id="step3">
-            <h2 class="section-title">Your Group</h2>
-            
-            <div class="input-group">
-                <label class="input-label">Group or Family Name</label>
-                <input type="text" class="text-input" id="groupInput" maxlength="35" 
-                       placeholder="THE SMITH FAMILY" oninput="updateGroup()">
-                <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
-            </div>
-            
-            <div class="suggestions">
-                <div class="suggestion-chip" onclick="useGroup('THE SMITH FAMILY')">The Smith Family</div>
-                <div class="suggestion-chip" onclick="useGroup('CLASS OF 2026')">Class of 2026</div>
-                <div class="suggestion-chip" onclick="useGroup('TEAM USA')">Team USA</div>
-                <div class="suggestion-chip" onclick="useGroup('AMERICA 250')">America 250</div>
-            </div>
-        </div>
-        
-        <!-- STEP 4: Tweak (Optional) -->
-        <div class="tweak-section hidden" id="step4">
-            <div class="tweak-toggle">
-                <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">
-                    ⚙️ Fine-Tune Your Design
-                </button>
-            </div>
-            
-            <div class="tweak-controls" id="tweakControls">
-                <!-- City Controls -->
-                <div class="control-group">
-                    <div class="control-label">City Text</div>
-                    <div class="button-labels">
-                        <span>Size</span>
-                        <span>Position</span>
-                        <span>Arc</span>
-                    </div>
-                    <div class="button-grid-extended">
-                        <button class="tweak-btn size-minus" onclick="adjustCity('size', -1)">A-</button>
-                        <button class="tweak-btn size-plus" onclick="adjustCity('size', 1)">A+</button>
-                        <button class="tweak-btn pos-up" onclick="adjustCity('y', -1)">↑</button>
-                        <button class="tweak-btn pos-down" onclick="adjustCity('y', 1)">↓</button>
-                        <button class="tweak-btn arc-less" onclick="adjustCity('arc', -5)">⌒-</button>
-                        <button class="tweak-btn arc-more" onclick="adjustCity('arc', 5)">⌒+</button>
-                    </div>
-                </div>
-                
-                <!-- Group Controls -->
-                <div class="control-group">
-                    <div class="control-label">Group Text</div>
-                    <div class="button-labels">
-                        <span>Size</span>
-                        <span>Position</span>
-                        <span>Arc</span>
-                    </div>
-                    <div class="button-grid-extended">
-                        <button class="tweak-btn size-minus" onclick="adjustGroup('size', -1)">A-</button>
-                        <button class="tweak-btn size-plus" onclick="adjustGroup('size', 1)">A+</button>
-                        <button class="tweak-btn pos-up" onclick="adjustGroup('y', -1)">↑</button>
-                        <button class="tweak-btn pos-down" onclick="adjustGroup('y', 1)">↓</button>
-                        <button class="tweak-btn arc-less" onclick="adjustGroup('arc', -5)">⌒-</button>
-                        <button class="tweak-btn arc-more" onclick="adjustGroup('arc', 5)">⌒+</button>
-                    </div>
-                </div>
-                
-                <button class="toggle-btn" onclick="resetDesign()" style="width: 100%; margin-top: 15px;">
-                    🔄 Reset to Auto
-                </button>
-            </div>
-            
-            <!-- Desktop: Advanced Sliders (hidden on mobile) -->
-            <div class="advanced-controls hidden">
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>City Size</span>
-                        <span class="slider-value" id="citySizeVal">10</span>
-                    </div>
-                    <input type="range" id="citySizeSlider" min="10" max="80" value="10" oninput="updateSlider('citySize', this.value)">
-                </div>
-                
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>City Y-Position</span>
-                        <span class="slider-value" id="cityYVal">223</span>
-                    </div>
-                    <input type="range" id="cityYSlider" min="0" max="300" value="223" oninput="updateSlider('cityY', this.value)">
-                </div>
-                
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Group Size</span>
-                        <span class="slider-value" id="groupSizeVal">8</span>
-                    </div>
-                    <input type="range" id="groupSizeSlider" min="8" max="50" value="8" oninput="updateSlider('groupSize', this.value)">
-                </div>
-                
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Group Y-Position</span>
-                        <span class="slider-value" id="groupYVal">282</span>
-                    </div>
-                    <input type="range" id="groupYSlider" min="50" max="400" value="282" oninput="updateSlider('groupY', this.value)">
-                </div>
-            </div>
-        </div>
     </div>
-    
-    <!-- Right Panel: Preview -->
+
+    <!-- Right Panel -->
     <div class="right-panel">
         <div class="preview-section">
             <div class="preview-title">Live Preview</div>
-            <div class="preview-canvas">
-                <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
-                        <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
-                    </defs>
-                    <image id="bgImage" x="0" y="0" width="500" height="400" preserveAspectRatio="xMidYMid meet" />
-                    <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
-                        <textPath href="#pathTop" startOffset="50%"></textPath>
-                    </text>
-                    <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
-                        <textPath href="#pathMid" startOffset="50%"></textPath>
-                    </text>
-                </svg>
+
+            <div class="preview-row">
+                <div class="preview-wrapper">
+                    <div class="preview-canvas" id="previewCanvas">
+                        <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                            <defs>
+                                <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
+                                <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
+                            </defs>
+                            <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
+                            <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
+                            <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
+                                <textPath href="#pathTop" startOffset="50%"></textPath>
+                            </text>
+                            <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
+                                <textPath href="#pathMid" startOffset="50%"></textPath>
+                            </text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-tools">
+                <button class="zoom-toggle" id="zoomToggle" onclick="toggleZoom()" aria-label="Toggle 150% zoom" title="Toggle 150% zoom">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                        <line x1="11" y1="8" x2="11" y2="14"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </button>
+            </div>
+
+            <div id="variantChips" class="variant-chips hidden">
+                <div class="chip-row">
+                    <span class="chip" id="chipStyle"></span>
+                    <span class="chip" id="chipColor"></span>
+                    <span class="chip" id="chipSize"></span>
+                    <span class="chip" id="chipQty"></span>
+                </div>
+                <button class="chip-change" type="button" onclick="jumpToVariants()">Change</button>
+            </div>
+
+            <div id="variantControls">
+                <!-- COLOR SELECTOR -->
+                <div class="selector-section color-section">
+                    <div class="selector-label">Color</div>
+                    <div class="color-row">
+                        <div class="color-options" id="colorOptions"></div>
+                    </div>
+                </div>
+
+                <!-- SIZE + QTY -->
+                <div class="selector-section">
+                    <div class="selector-label">Size</div>
+
+                    <div class="size-options">
+                        <button class="size-btn" data-size="S" onclick="selectSize('S')">S</button>
+                        <button class="size-btn" data-size="M" onclick="selectSize('M')">M</button>
+                        <button class="size-btn active" data-size="L" onclick="selectSize('L')">L</button>
+                        <button class="size-btn" data-size="XL" onclick="selectSize('XL')">XL</button>
+                        <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
+                        <button class="size-btn" data-size="3XL" onclick="selectSize('3XL')">3XL</button>
+                    </div>
+
+                    <div class="selector-label" style="margin-top: 14px;">Quantity</div>
+
+                    <div class="quantity-controls">
+                        <button class="qty-btn" type="button" onclick="changeQuantity(-1)">−</button>
+                        <input id="quantityInput" class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" oninput="setQuantityFromInput(this.value)">
+                        <button class="qty-btn" type="button" onclick="changeQuantity(1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STEP 2: Info helper -->
+            <div class="location-section hidden" id="step2">
+                <div class="section-title">Choose Color, Size & Quantity</div>
+                <div class="helper-text">Pick your options here. During City/Group/Refine we’ll hide these controls to reduce scrolling, but you can change them again on Confirm.</div>
+            </div>
+
+            <!-- STEP 3: Location -->
+            <div class="location-section hidden" id="step3">
+                <h2 class="section-title">Your Location</h2>
+                <button class="locate-btn" onclick="useGeolocation()">
+                    <span>📍</span>
+                    <span>Use My Location</span>
+                </button>
+                <div class="or-divider">OR</div>
+                <div class="input-group">
+                    <label class="input-label">City & State</label>
+                    <input type="text" class="text-input" id="cityInput" maxlength="50" placeholder="MIAMI, FLORIDA" oninput="updateCity()">
+                    <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
+                </div>
+            </div>
+
+            <!-- STEP 4: Group Name -->
+            <div class="location-section hidden" id="step4">
+                <h2 class="section-title">Your Group</h2>
+                <div class="input-group">
+                    <label class="input-label">Group or Family Name</label>
+                    <input type="text" class="text-input" id="groupInput" maxlength="35" placeholder="THE SMITH FAMILY" oninput="updateGroup()">
+                    <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
+                </div>
+            </div>
+
+            <!-- STEP 5: Refine Design -->
+            <div class="tweak-section hidden" id="step5">
+                <div class="tweak-toggle">
+                    <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">
+                        ⚙️ Fine-Tune Your Design
+                    </button>
+                </div>
+                <div class="tweak-controls" id="tweakControls">
+                    <div class="control-group">
+                        <div class="control-label">City Text</div>
+                        <div class="button-labels">
+                            <span>Size</span>
+                            <span>Position</span>
+                            <span>Arc</span>
+                        </div>
+                        <div class="button-grid-extended">
+                            <button class="tweak-btn" onclick="adjustCity('size', -1)">A-</button>
+                            <button class="tweak-btn" onclick="adjustCity('size', 1)">A+</button>
+                            <button class="tweak-btn" onclick="adjustCity('y', -1)">↑</button>
+                            <button class="tweak-btn" onclick="adjustCity('y', 1)">↓</button>
+                            <button class="tweak-btn" onclick="adjustCity('arc', -5)">⌒-</button>
+                            <button class="tweak-btn" onclick="adjustCity('arc', 5)">⌒+</button>
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">Group Text</div>
+                        <div class="button-labels">
+                            <span>Size</span>
+                            <span>Position</span>
+                            <span>Arc</span>
+                        </div>
+                        <div class="button-grid-extended">
+                            <button class="tweak-btn" onclick="adjustGroup('size', -1)">A-</button>
+                            <button class="tweak-btn" onclick="adjustGroup('size', 1)">A+</button>
+                            <button class="tweak-btn" onclick="adjustGroup('y', -1)">↑</button>
+                            <button class="tweak-btn" onclick="adjustGroup('y', 1)">↓</button>
+                            <button class="tweak-btn" onclick="adjustGroup('arc', -5)">⌒-</button>
+                            <button class="tweak-btn" onclick="adjustGroup('arc', 5)">⌒+</button>
+                        </div>
+                    </div>
+                    <button class="toggle-btn" onclick="resetDesign()" style="width: 100%; margin-top: 15px;">
+                        🔄 Reset to Auto
+                    </button>
+                </div>
+
+                <!-- Desktop slider panel -->
+                <div class="advanced-controls hidden">
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>City Size</span>
+                            <span class="slider-value" id="citySizeVal">10</span>
+                        </div>
+                        <input type="range" id="citySizeSlider" min="10" max="80" value="10" oninput="updateSlider('citySize', this.value)">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>City Y-Position</span>
+                            <span class="slider-value" id="cityYVal">223</span>
+                        </div>
+                        <input type="range" id="cityYSlider" min="0" max="300" value="223" oninput="updateSlider('cityY', this.value)">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Group Size</span>
+                            <span class="slider-value" id="groupSizeVal">8</span>
+                        </div>
+                        <input type="range" id="groupSizeSlider" min="8" max="50" value="8" oninput="updateSlider('groupSize', this.value)">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-label">
+                            <span>Group Y-Position</span>
+                            <span class="slider-value" id="groupYVal">282</span>
+                        </div>
+                        <input type="range" id="groupYSlider" min="50" max="400" value="282" oninput="updateSlider('groupY', this.value)">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 6: Confirm -->
+        <div class="location-section hidden" id="step6">
+            <div class="section-title">Confirm</div>
+            <div class="helper-text">
+                Review your design and options. If you want to change Color/Size/Qty, tap “Change” on the chips above or use the controls shown in this step.
+            </div>
+
+            <div class="summary-grid" style="margin-top:14px; display:grid; gap:10px;">
+                <div style="display:flex; justify-content:space-between; gap:10px;">
+                    <span style="opacity:.75;">City</span>
+                    <strong id="confirmCity" style="text-align:right;"></strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; gap:10px;">
+                    <span style="opacity:.75;">Group</span>
+                    <strong id="confirmGroup" style="text-align:right;"></strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; gap:10px;">
+                    <span style="opacity:.75;">Style</span>
+                    <strong id="confirmStyle" style="text-align:right;"></strong>
+                </div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:14px; flex-wrap:wrap;">
+                <button class="toggle-btn" type="button" onclick="startAnotherDesign()">Start Another Design</button>
+                <button class="toggle-btn" type="button" onclick="jumpToStyle()">Change Style</button>
+            </div>
+        </div>
+
+        <!-- Sticky CTA -->
+        <div class="sticky-cta-right">
+            <div class="cta-row">
+                <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="display:none;width:60px;flex:0 0 60px;">←</button>
+
+                <div class="cta-split">
+                    <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()">Continue →</button>
+
+                    <button class="cart-btn" id="viewCartBtn" onclick="handleViewCart()" disabled aria-disabled="true">
+                        <span>View Cart</span>
+                        <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Sticky CTA -->
-<div class="sticky-cta">
-    <button class="mega-btn" id="ctaButton" onclick="handleCTA()" disabled>
-        Select a Style to Continue
-    </button>
+<!-- Cart toast (hidden by default; you can add it to the DOM if you want the toast UX) -->
+<div id="cartToast" class="cart-toast hidden">
+    <div class="toast-title">Added to cart</div>
+    <div class="toast-body">Your design was added to the cart. You can keep designing or go to your cart to checkout.</div>
+    <div class="toast-actions">
+        <button class="toggle-btn" type="button" onclick="hideCartToast()">Dismiss</button>
+        <button class="toggle-btn" type="button" onclick="goToCart()">Go to Cart</button>
+    </div>
 </div>
 
 <script>
-    // State management
+    // -------- Global state --------
     let currentStep = 1;
+    let cartItemCount = 0;
+
     let currentCardIndex = 0;
     let selectedStyle = null;
-    let selectedProduct = 'tee'; // Default product
-    let selectedColor = 'White'; // Default color
-    let selectedSize = 'L'; // Default size
+    let selectedProduct = 'tee';
+    let selectedColor = null;
+    let selectedSize = 'L';
+    let selectedQuantity = 1;
     let cityText = '';
     let groupText = '';
-    let availableMockups = {}; // Auto-detected mockups
-    
-    // POD Product Catalog
+
+    let _cityAdvanceTimer = null;
+    let _groupAdvanceTimer = null;
+
+    let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
+    let templateDefaults = {};
+
+    function _templateKey(style = selectedStyle) {
+        const shape = (PRODUCTS[selectedProduct] && PRODUCTS[selectedProduct].shape) ? PRODUCTS[selectedProduct].shape : 'Sq';
+        return `${style || 'NA'}_${shape}`;
+    }
+
     const PRODUCTS = {
-        // DTG/Apparel (Square shape - transparent backgrounds)
         'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' },
-        'hoodie': { shape: 'Sq', name: 'Hoodie', price: 44.99, category: 'Apparel' },
-        'zip_hoodie': { shape: 'Sq', name: 'Zip Hoodie', price: 49.99, category: 'Apparel' },
-        'sweatshirt': { shape: 'Sq', name: 'Sweatshirt', price: 39.99, category: 'Apparel' },
-        'longsleeve': { shape: 'Sq', name: 'Long Sleeve', price: 29.99, category: 'Apparel' },
-        'tank': { shape: 'Sq', name: 'Tank Top', price: 22.99, category: 'Apparel' },
-        'youth_tee': { shape: 'Sq', name: 'Youth Tee', price: 19.99, category: 'Apparel' },
-        'polo': { shape: 'Sq', name: 'Polo Shirt', price: 34.99, category: 'Apparel' },
-        
-        // Drinkware (Oval shape - styled backgrounds)
-        'mug': { shape: 'Ov', name: 'Mug (11oz)', price: 14.99, category: 'Drinkware' },
-        'mug_travel': { shape: 'Ov', name: 'Travel Mug', price: 19.99, category: 'Drinkware' },
-        
-        // Stickers & Prints (Oval shape)
-        'sticker': { shape: 'Ov', name: 'Sticker', price: 3.99, category: 'Stickers' },
-        'sticker_sheet': { shape: 'Ov', name: 'Sticker Sheet', price: 8.99, category: 'Stickers' },
-        'poster': { shape: 'Ov', name: 'Poster', price: 19.99, category: 'Prints' },
-        'canvas': { shape: 'Ov', name: 'Canvas Print', price: 39.99, category: 'Prints' },
-        
-        // Accessories (Oval shape)
-        'phone': { shape: 'Ov', name: 'Phone Case', price: 16.99, category: 'Accessories' },
-        'tote': { shape: 'Ov', name: 'Tote Bag', price: 18.99, category: 'Accessories' },
-        'pillow': { shape: 'Ov', name: 'Throw Pillow', price: 24.99, category: 'Home' },
-        'coaster': { shape: 'Ov', name: 'Coaster Set', price: 12.99, category: 'Home' },
-        'magnet': { shape: 'Ov', name: 'Magnet', price: 4.99, category: 'Accessories' },
-        'ornament': { shape: 'Ov', name: 'Ornament', price: 14.99, category: 'Seasonal' },
-        'hat': { shape: 'Ov', name: 'Baseball Cap', price: 24.99, category: 'Accessories' },
-        'patch': { shape: 'Ov', name: 'Patch', price: 7.99, category: 'Accessories' },
-        'flag': { shape: 'Ov', name: 'Garden Flag', price: 22.99, category: 'Home' },
-        'doormat': { shape: 'Ov', name: 'Doormat', price: 34.99, category: 'Home' },
-        'blanket': { shape: 'Ov', name: 'Fleece Blanket', price: 44.99, category: 'Home' },
-        'towel': { shape: 'Ov', name: 'Beach Towel', price: 29.99, category: 'Home' },
-        'notebook': { shape: 'Ov', name: 'Notebook', price: 11.99, category: 'Stationery' },
-        'mousepad': { shape: 'Ov', name: 'Mouse Pad', price: 12.99, category: 'Accessories' }
+
+        'tee-navy-3xl': { shopifyVariantId: '46056446099606', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_navy_gpr_4-0_gildan_64000' },
+        'tee-black-3xl': { shopifyVariantId: '46056446132374', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_black_gpr_4-0_gildan_64000' },
+        'tee-gray-3xl': { shopifyVariantId: '46056446165142', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_gray_gpr_4-0_gildan_64000' },
+        'tee-white-3xl': { shopifyVariantId: '46056446197910', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_white_gpr_4-0_gildan_64000' }
     };
-    
+
     const STYLES = {
         A: { font: "Libre Baskerville", color: "#F2E8C9", weight: "700", name: "Heritage" },
         B: { font: "Anton", color: "#E6DCC8", weight: "400", name: "Midnight" },
         C: { font: "Oswald", color: "#A61A26", weight: "700", name: "Retro" },
         D: { font: "Cinzel", color: "#0F2A1B", weight: "700", name: "Outdoors" }
     };
-    
-    // Generate mockup URL based on naming convention
-    function getMockupUrl(style, product) {
-        const shape = PRODUCTS[product].shape;
-        return `mockups/Style_${style}_${shape}_${product}.png`;
+
+    // Font / asset helpers
+    const EXPORT_FONT_IMPORT_URL = 'https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Cinzel:wght@700;900&family=Oswald:wght@700&display=swap';
+
+    const _assetCache = {
+        images: new Map(),
+        json: new Map(),
+        bgBase64: new Map()
+    };
+
+    function escapeXml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
     
     // Load mockup image with fallback
@@ -1015,27 +1722,59 @@
         console.log('Mockups will load on-demand with fallback to placeholder');
         // No detection needed - just try to load and fallback if missing
     }
-    
-    // Initialize
-    function init() {
-        updateProgress();
-        updateStepIndicator();
-        
-        // Skip mockup detection - they'll load on-demand
-        detectAvailableMockups();
-        
-        // Populate product selector
-        populateProductSelector();
-        
-        // Initialize mockups for all styles
-        initializeMockups();
-        
-        // Show desktop grid on larger screens
-        if (window.innerWidth >= 768) {
-            document.querySelector('.style-cards').classList.add('hidden');
-            document.querySelector('.style-cards-desktop').classList.remove('hidden');
-            document.querySelector('.advanced-controls').classList.remove('hidden');
-        }
+
+    function injectFontImport(svgEl) {
+        try {
+            if (!svgEl || !svgEl.querySelector) return;
+            if (svgEl.querySelector('style[data-export-fonts="1"]')) return;
+
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const styleEl = document.createElementNS(svgNS, 'style');
+            styleEl.setAttribute('data-export-fonts', '1');
+            styleEl.textContent = `@import url("${EXPORT_FONT_IMPORT_URL}");`;
+
+            const firstChild = svgEl.firstChild;
+            if (firstChild) svgEl.insertBefore(styleEl, firstChild);
+            else svgEl.appendChild(styleEl);
+        } catch (e) {}
+    }
+
+    async function ensureFontsLoadedForExport() {
+        try {
+            if (!document.fonts || typeof document.fonts.load !== 'function') return;
+
+            const style = (selectedStyle && STYLES[selectedStyle]) ? STYLES[selectedStyle] : null;
+            const activeFont = (style && style.font) ? style.font : 'Montserrat';
+            const activeWeight = (style && style.weight) ? String(style.weight) : '400';
+
+            const fontsToLoad = new Set([
+                activeFont,
+                'Libre Baskerville',
+                'Montserrat',
+                'Anton',
+                'Cinzel',
+                'Oswald'
+            ]);
+
+            const weightsToLoad = new Set([activeWeight, '400', '700', '900']);
+            const loads = [];
+
+            fontsToLoad.forEach((f) => {
+                weightsToLoad.forEach((w) => {
+                    loads.push(document.fonts.load(`${w} 16px "${f}"`));
+                });
+            });
+
+            await Promise.race([
+                Promise.all(loads),
+                new Promise(resolve => setTimeout(resolve, 2000))
+            ]);
+
+            await Promise.race([
+                document.fonts.ready,
+                new Promise(resolve => setTimeout(resolve, 2000))
+            ]);
+        } catch (e) {}
     }
     
     // Populate product selector with available products
@@ -1047,224 +1786,196 @@
     // Initialize mockups for all style cards
     function initializeMockups() {
         const styles = ['A', 'B', 'C', 'D'];
-        
         styles.forEach(style => {
-            const mockupUrl = getMockupUrl(style, selectedProduct);
-            
-            // Update mobile cards
-            const mobileCard = document.querySelector(`.style-card[data-style="${style}"] .card-mockup`);
-            if (mobileCard) {
-                const img = document.createElement('img');
+            const mobileCards = document.querySelectorAll(`.style-card[data-style="${style}"] .card-mockup`);
+            mobileCards.forEach(card => {
+                const img = new Image();
                 img.style.width = '100%';
                 img.style.height = '100%';
                 img.style.objectFit = 'cover';
+                img.onload = () => {
+                    card.innerHTML = '';
+                    card.appendChild(img);
+                };
                 loadMockup(img, style, selectedProduct);
-                mobileCard.innerHTML = '';
-                mobileCard.appendChild(img);
-            }
-            
-            // Update desktop cards
-            const desktopCard = document.querySelector(`.style-card-desktop[data-style="${style}"] .card-mockup`);
-            if (desktopCard) {
-                const img = document.createElement('img');
+            });
+
+            const desktopCards = document.querySelectorAll(`.style-card-desktop[data-style="${style}"] .card-mockup`);
+            desktopCards.forEach(card => {
+                const img = new Image();
                 img.style.width = '100%';
                 img.style.height = '100%';
                 img.style.objectFit = 'cover';
+                img.onload = () => {
+                    card.innerHTML = '';
+                    card.appendChild(img);
+                };
                 loadMockup(img, style, selectedProduct);
-                desktopCard.innerHTML = '';
-                desktopCard.appendChild(img);
-            }
+            });
         });
     }
-    
-    // Card navigation (mobile)
+
     function nextCard() {
         const cards = document.querySelectorAll('.style-card');
         cards[currentCardIndex].classList.remove('active');
         cards[currentCardIndex].classList.add('prev');
-        
+
         currentCardIndex = (currentCardIndex + 1) % cards.length;
-        
+
         cards[currentCardIndex].classList.remove('prev', 'next');
         cards[currentCardIndex].classList.add('active');
-        
+
         if (currentCardIndex < cards.length - 1) {
             cards[currentCardIndex + 1].classList.remove('prev');
             cards[currentCardIndex + 1].classList.add('next');
         }
     }
-    
+
     function previousCard() {
         const cards = document.querySelectorAll('.style-card');
         cards[currentCardIndex].classList.remove('active');
         cards[currentCardIndex].classList.add('next');
-        
+
         currentCardIndex = (currentCardIndex - 1 + cards.length) % cards.length;
-        
+
         cards[currentCardIndex].classList.remove('prev', 'next');
         cards[currentCardIndex].classList.add('active');
     }
-    
-    // Change product (updates mockups and template)
+
     function changeProduct(productKey) {
         selectedProduct = productKey;
         const product = PRODUCTS[productKey];
-        
-        // Update shape indicator
         const shapeText = product.shape === 'Sq' ? 'Square (DTG)' : 'Oval (Merch)';
         document.getElementById('shapeIndicator').textContent = shapeText;
-        
-        // Reload mockups for all styles
         initializeMockups();
-        
-        // If style already selected, reload template for new shape
         if (selectedStyle) {
             loadTemplate(selectedStyle, product.shape);
         }
     }
-    
-    // Step 1: Select Style
+
     function selectStyle(style) {
         selectedStyle = style;
-        
-        // Visual feedback
+
         document.querySelectorAll('.style-card-desktop').forEach(card => {
             card.classList.remove('selected');
         });
-        document.querySelector(`[data-style="${style}"]`)?.classList.add('selected');
-        
-        // Update SVG style
+        document.querySelector(`.style-card-desktop[data-style="${style}"]`)?.classList.add('selected');
+
         const styleConfig = STYLES[style];
         document.getElementById('cityText').setAttribute('fill', styleConfig.color);
         document.getElementById('cityText').setAttribute('font-family', styleConfig.font);
         document.getElementById('groupText').setAttribute('fill', styleConfig.color);
         document.getElementById('groupText').setAttribute('font-family', styleConfig.font);
-        
-        // Load template for current product's shape
+
         const shape = PRODUCTS[selectedProduct].shape;
         loadTemplate(style, shape);
-        
-        // Move to step 2
+
+        updateColorOptions();
+
         currentStep = 2;
         showStep(2);
     }
-    
-    // Load template (SVG + JSON) for style/shape combo
-    // Store baseline values globally
-    let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
-    
+
     async function loadTemplate(style, shape) {
         try {
-            console.log(`Loading template: Style_${style}_${shape}`);
-            
             const templatePath = `templates/Style_${style}_${shape}.svg`;
             const jsonPath = `templates/Style_${style}_${shape}.json`;
-            
-            // Load template as background image
+
             const bgImage = document.getElementById('bgImage');
             if (bgImage) {
                 bgImage.setAttribute('href', templatePath);
+                bgImage.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', templatePath);
             }
-            
-            // Load JSON baseline
-            const jsonResponse = await fetch(jsonPath);
-            let baseline = null;
-            if (jsonResponse.ok) {
-                baseline = await jsonResponse.json();
-                console.log(`✓ Loaded baseline:`, baseline);
-            }
-            
-            // Apply baseline slider values DIRECTLY (no scaling!)
+
+            const baseline = await fetchJsonCached(jsonPath);
+
             if (baseline && baseline.sliders) {
                 const s = baseline.sliders;
                 if (s.cityY) document.getElementById('cityYSlider').value = s.cityY;
                 if (s.citySize) document.getElementById('citySizeSlider').value = s.citySize;
                 if (s.groupY) document.getElementById('groupYSlider').value = s.groupY;
                 if (s.gSize) document.getElementById('groupSizeSlider').value = s.gSize;
-                
-                // Store arch and tracking values
+
                 baselineArch.cityArch = parseInt(s.archIntensity) || 64;
                 baselineArch.groupArch = parseInt(s.gArch) || 64;
                 baselineArch.cityTrack = parseInt(s.cityTrack) || 0;
                 baselineArch.groupTrack = parseInt(s.gTrack) || 2;
-                
-                console.log(`✓ Applied baseline values directly (no scaling)`);
+
+                if (s.cityY && document.getElementById('cityYVal')) document.getElementById('cityYVal').textContent = s.cityY;
+                if (s.citySize && document.getElementById('citySizeVal')) document.getElementById('citySizeVal').textContent = s.citySize;
+                if (s.groupY && document.getElementById('groupYVal')) document.getElementById('groupYVal').textContent = s.groupY;
+                if (s.gSize && document.getElementById('groupSizeVal')) document.getElementById('groupSizeVal').textContent = s.gSize;
+
+                const key = _templateKey(style);
+                templateDefaults[key] = {
+                    citySize: parseInt(s.citySize) || parseInt(document.getElementById('citySizeSlider')?.value || 10),
+                    cityY: parseInt(s.cityY) || parseInt(document.getElementById('cityYSlider')?.value || 223),
+                    groupSize: parseInt(s.gSize) || parseInt(document.getElementById('groupSizeSlider')?.value || 8),
+                    groupY: parseInt(s.groupY) || parseInt(document.getElementById('groupYSlider')?.value || 282),
+                    arch: {
+                        cityArch: parseInt(s.archIntensity) || 64,
+                        groupArch: parseInt(s.gArch) || 64,
+                        cityTrack: parseInt(s.cityTrack) || 0,
+                        groupTrack: parseInt(s.gTrack) || 2
+                    }
+                };
             }
-            
-            // Update preview
+
             updatePreview();
-            
-            console.log(`✓ Template loaded: ${style}_${shape}`);
-            
         } catch (error) {
             console.error('Template load failed:', error);
             updatePreview();
         }
     }
-    
-    // Step 2: Location
+
     function useGeolocation() {
-        // Simulate geolocation (would use real API in production)
         useCity('BRANTFORD, ONTARIO');
     }
-    
+
     function useCity(city) {
         document.getElementById('cityInput').value = city;
         updateCity();
-        
-        // Auto-advance after short delay
         setTimeout(() => {
             currentStep = 3;
             showStep(3);
         }, 300);
     }
-    
+
     function updateCity() {
-        cityText = document.getElementById('cityInput').value.toUpperCase();
+        cityText = (document.getElementById('cityInput').value || '').toUpperCase().slice(0, 50);
+        document.getElementById('cityInput').value = cityText;
+
         const remaining = 50 - cityText.length;
         document.getElementById('cityCounter').textContent = remaining;
-        
+
         updatePreview();
-        
-        if (cityText.length > 0 && currentStep === 2) {
-            updateCTA('Continue →');
-        }
+        updateCTA();
     }
-    
-    // Step 3: Group
+
     function useGroup(group) {
         document.getElementById('groupInput').value = group;
         updateGroup();
-        
-        // Auto-advance to tweak/checkout
-        setTimeout(() => {
-            currentStep = 4;
-            showStep(4);
-        }, 300);
     }
-    
+
     function updateGroup() {
-        groupText = document.getElementById('groupInput').value.toUpperCase();
+        groupText = (document.getElementById('groupInput').value || '').toUpperCase().slice(0, 35);
+        document.getElementById('groupInput').value = groupText;
+
         const remaining = 35 - groupText.length;
         document.getElementById('groupCounter').textContent = remaining;
-        
+
         updatePreview();
-        
-        if (groupText.length > 0 && currentStep === 3) {
-            updateCTA('Continue →');
-        }
+        updateCTA();
     }
-    
-    // Step 4: Tweak
+
     function toggleTweak() {
         const controls = document.getElementById('tweakControls');
         const btn = document.getElementById('tweakToggle');
         controls.classList.toggle('active');
         btn.classList.toggle('active');
     }
-    
+
     function adjustCity(property, delta) {
-        // Simple nudge adjustments
         if (property === 'size') {
             let current = parseInt(document.getElementById('citySizeSlider')?.value || 10);
             current = Math.max(10, Math.min(80, current + delta));
@@ -1278,7 +1989,7 @@
             updatePreview();
         }
     }
-    
+
     function adjustGroup(property, delta) {
         if (property === 'size') {
             let current = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
@@ -1293,60 +2004,76 @@
             updatePreview();
         }
     }
-    
+
     function updateSlider(property, value) {
-        // Update slider and value display
         const slider = document.getElementById(property + 'Slider');
         const valueDisplay = document.getElementById(property + 'Val');
-        
         if (slider) slider.value = value;
         if (valueDisplay) valueDisplay.textContent = value;
-        
         updatePreview();
     }
-    
+
     function resetDesign() {
-        // Reset to defaults
+        const key = _templateKey(selectedStyle);
+        const d = templateDefaults[key];
+
+        if (d && d.arch) {
+            baselineArch.cityArch = d.arch.cityArch;
+            baselineArch.groupArch = d.arch.groupArch;
+            baselineArch.cityTrack = d.arch.cityTrack;
+            baselineArch.groupTrack = d.arch.groupTrack;
+
+            updateSlider('citySize', d.citySize);
+            updateSlider('cityY', d.cityY);
+            updateSlider('groupSize', d.groupSize);
+            updateSlider('groupY', d.groupY);
+
+            updatePreview();
+            return;
+        }
+
+        baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
         updateSlider('citySize', 10);
         updateSlider('cityY', 223);
         updateSlider('groupSize', 8);
         updateSlider('groupY', 282);
+        updatePreview();
     }
-    
-    // Preview update
+
     function formatText(text, baseSize) {
         if (!text) return '';
-        const words = text.split(/\s+/).filter(w => w.length > 0);
+        const words = String(text).split(/\s+/).filter(w => w.length > 0);
         return words.map((word, i) => {
             const dx = i > 0 ? `dx="${baseSize * 0.45}"` : '';
+
             if (/^\d+$/.test(word)) {
-                return `<tspan ${dx} font-size="${baseSize * 1.35}">${word}</tspan>`;
+                return `<tspan ${dx} font-size="${baseSize * 1.35}">${escapeXml(word)}</tspan>`;
             } else {
-                return `<tspan ${dx} font-size="${baseSize * 1.35}">${word[0]}</tspan><tspan font-size="${baseSize}">${word.slice(1)}</tspan>`;
+                const first = escapeXml(word[0] || '');
+                const rest = escapeXml(word.slice(1) || '');
+                return `<tspan ${dx} font-size="${baseSize * 1.35}">${first}</tspan><tspan font-size="${baseSize}">${rest}</tspan>`;
             }
         }).join('');
     }
-    
+
     function updatePreview() {
         const style = STYLES[selectedStyle];
         const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
         const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
         const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
         const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
-        
-        // Update paths with admin's EXACT formula
+
         const pathTop = document.getElementById('pathTop');
         const pathMid = document.getElementById('pathMid');
-        
+
         if (pathTop && pathMid) {
             pathTop.setAttribute('d', `M 20,${cityY} A 230,${baselineArch.cityArch} 0 0,1 480,${cityY}`);
             pathMid.setAttribute('d', `M 20,${groupY} A 230,${baselineArch.groupArch} 0 0,1 480,${groupY}`);
         }
-        
-        // Update text content and styling
+
         const cityContainer = document.querySelector('#cityText');
         const groupContainer = document.querySelector('#groupText');
-        
+
         if (cityContainer && style) {
             cityContainer.setAttribute('fill', style.color);
             cityContainer.setAttribute('font-family', `"${style.font}"`);
@@ -1354,13 +2081,13 @@
             cityContainer.style.fontFamily = `"${style.font}", sans-serif`;
             cityContainer.style.letterSpacing = baselineArch.cityTrack + "px";
             cityContainer.setAttribute('font-size', citySize);
-            
+
             const cityTextPath = cityContainer.querySelector('textPath');
             if (cityTextPath) {
                 cityTextPath.innerHTML = formatText(cityText, citySize);
             }
         }
-        
+
         if (groupContainer && style) {
             groupContainer.setAttribute('fill', style.color);
             groupContainer.setAttribute('font-family', `"${style.font}"`);
@@ -1368,175 +2095,293 @@
             groupContainer.style.fontFamily = `"${style.font}", sans-serif`;
             groupContainer.style.letterSpacing = baselineArch.groupTrack + "px";
             groupContainer.setAttribute('font-size', groupSize);
-            
+
             const groupTextPath = groupContainer.querySelector('textPath');
             if (groupTextPath) {
                 groupTextPath.innerHTML = formatText(groupText, groupSize);
             }
         }
-        
-        console.log(`✓ Preview updated: cityY=${cityY}, groupY=${groupY}`);
     }
-    
-    // Navigation
+
     function showStep(step) {
-        // Hide all steps
-        for (let i = 1; i <= 4; i++) {
-            document.getElementById(`step${i}`)?.classList.add('hidden');
+        const TOTAL_STEPS = 6;
+        currentStep = Math.max(1, Math.min(TOTAL_STEPS, step));
+
+        for (let i = 1; i <= TOTAL_STEPS; i++) {
+            const stepEl = document.getElementById(`step${i}`);
+            if (!stepEl) continue;
+            if (i === currentStep) stepEl.classList.remove('hidden');
+            else stepEl.classList.add('hidden');
         }
-        
-        // Show current step
-        document.getElementById(`step${step}`)?.classList.remove('hidden');
-        
+
+        document.body.classList.toggle('after-style', currentStep !== 1);
+
+        updateVariantVisibility();
         updateProgress();
         updateStepIndicator();
         updateCTA();
+
+        if (currentStep === 6) {
+            updateConfirmSummary();
+        }
+
+        if (window.innerWidth <= 768) {
+            document.getElementById(`step${currentStep}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
     }
-    
+
     function updateProgress() {
-        const progress = (currentStep / 4) * 100;
-        document.getElementById('progressFill').style.width = progress + '%';
+        const TOTAL_STEPS = 6;
+        const progress = (currentStep / TOTAL_STEPS) * 100;
+        const fill = document.getElementById('progressFill');
+        if (fill) fill.style.width = `${progress}%`;
     }
-    
+
     function updateStepIndicator() {
-        const steps = [
+        const labels = [
             'Pick Your Style',
-            'Your Location',
-            'Your Group',
-            'Review & Checkout'
+            'Choose Color/Size/Qty',
+            'Enter City',
+            'Enter Group',
+            'Refine Design',
+            'Confirm'
         ];
-        document.getElementById('stepIndicator').textContent = `Step ${currentStep} of 4: ${steps[currentStep - 1]}`;
+        const indicator = document.getElementById('stepIndicator');
+        if (!indicator) return;
+        indicator.textContent = `Step ${currentStep} of 6: ${labels[currentStep - 1] || ''}`;
     }
-    
-    function updateCTA(text) {
-        const btn = document.getElementById('ctaButton');
-        
-        if (text) {
-            btn.textContent = text;
-            btn.disabled = false;
-        } else if (currentStep === 1) {
-            btn.textContent = selectedStyle ? 'Continue →' : 'Select a Style to Continue';
-            btn.disabled = !selectedStyle;
+
+    function updateCTA() {
+        const btn = document.getElementById('ctaButtonRight');
+        const backBtn = document.getElementById('backBtnRight');
+        if (!btn) return;
+
+        if (btn.dataset.loading === 'true') return;
+
+        if (backBtn) {
+            backBtn.disabled = (currentStep === 1);
+        }
+
+        let label = 'Continue →';
+        let enabled = true;
+
+        if (currentStep === 1) {
+            enabled = !!selectedStyle;
+            label = enabled ? 'Continue →' : 'Select a Style';
         } else if (currentStep === 2) {
-            btn.textContent = cityText ? 'Continue →' : 'Enter Your Location';
-            btn.disabled = !cityText;
+            enabled = !!selectedColor && !!selectedSize && (selectedQuantity >= 1);
         } else if (currentStep === 3) {
-            btn.textContent = groupText ? 'Continue →' : 'Enter Your Group Name';
-            btn.disabled = !groupText;
+            enabled = (cityText || '').trim().length > 0;
         } else if (currentStep === 4) {
-            btn.textContent = 'Add to Cart - $29.99 ✨';
+            enabled = (groupText || '').trim().length > 0;
+        } else if (currentStep === 5) {
+            enabled = true;
+        } else if (currentStep === 6) {
+            enabled = !!selectedStyle && !!selectedColor && !!selectedSize && (selectedQuantity >= 1)
+                      && (cityText || '').trim().length > 0
+                      && (groupText || '').trim().length > 0;
+            label = 'Add to Cart →';
+        }
+
+        btn.textContent = label;
+        btn.disabled = !enabled;
+        btn.style.opacity = enabled ? '1' : '0.55';
+        btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+    }
+
+    function goBack() {
+        if (currentStep <= 1) return;
+        showStep(currentStep - 1);
+    }
+
+    function handlePrimaryAction() {
+        const btn = document.getElementById('ctaButtonRight');
+        if (btn?.disabled) return;
+
+        if (currentStep === 6) {
+            handleCheckout();
+            return;
+        }
+
+        showStep(currentStep + 1);
+    }
+
+    function updateVariantVisibility() {
+        const vc = document.getElementById('variantControls');
+        const chips = document.getElementById('variantChips');
+
+        const showFull = (currentStep === 2 || currentStep === 6);
+
+        if (vc) vc.style.display = showFull ? '' : 'none';
+
+        if (chips) {
+            const showChips = (!showFull && currentStep !== 1);
+            chips.classList.toggle('hidden', !showChips);
+        }
+
+        updateVariantChips();
+    }
+
+    function updateVariantChips() {
+        const styleName = selectedStyle ? (STYLES[selectedStyle]?.name || selectedStyle) : '';
+        const c = selectedColor || '';
+        const s = selectedSize || '';
+        const q = selectedQuantity || 1;
+
+        const chipStyle = document.getElementById('chipStyle');
+        const chipColor = document.getElementById('chipColor');
+        const chipSize  = document.getElementById('chipSize');
+        const chipQty   = document.getElementById('chipQty');
+
+        if (chipStyle) chipStyle.textContent = styleName ? `STYLE: ${styleName}` : 'STYLE: —';
+        if (chipColor) chipColor.textContent = c ? `COLOR: ${c}` : 'COLOR: —';
+        if (chipSize)  chipSize.textContent  = s ? `SIZE: ${s}` : 'SIZE: —';
+        if (chipQty)   chipQty.textContent   = `QTY: ${q}`;
+    }
+
+    function updateConfirmSummary() {
+        const styleName = selectedStyle ? (STYLES[selectedStyle]?.name || selectedStyle) : '—';
+        const cc = document.getElementById('confirmCity');
+        const cg = document.getElementById('confirmGroup');
+        const cs = document.getElementById('confirmStyle');
+
+        if (cc) cc.textContent = (cityText || '—');
+        if (cg) cg.textContent = (groupText || '—');
+        if (cs) cs.textContent = styleName;
+
+        updateVariantVisibility();
+    }
+
+    function jumpToVariants() {
+        showStep(2);
+    }
+
+    function jumpToStyle() {
+        showStep(1);
+    }
+
+    function startAnotherDesign() {
+        cityText = '';
+        groupText = '';
+
+        const cityInput = document.getElementById('cityInput');
+        const groupInput = document.getElementById('groupInput');
+        if (cityInput) cityInput.value = '';
+        if (groupInput) groupInput.value = '';
+
+        resetDesign();
+        updatePreview();
+        showStep(3);
+    }
+
+    function resetCtaLoadingState() {
+        const btn = document.getElementById('ctaButtonRight');
+        if (!btn) return;
+        if (btn.dataset.loading === 'true') {
+            btn.dataset.loading = 'false';
+        }
+        btn.classList.remove('loading');
+        btn.style.pointerEvents = '';
+        updateCTA();
+    }
+
+    window.addEventListener('pageshow', () => {
+        resetCtaLoadingState();
+    });
+    window.addEventListener('focus', () => {
+        resetCtaLoadingState();
+    });
+
+    let _cartToastTimer = null;
+
+    function showCartToast(count) {
+        const t = document.getElementById('cartToast');
+        if (!t) return;
+
+        if (!t.dataset.defaultTitle) {
+            const titleEl0 = t.querySelector('.toast-title');
+            const bodyEl0 = t.querySelector('.toast-body');
+            t.dataset.defaultTitle = titleEl0 ? titleEl0.textContent : 'Added to cart';
+            t.dataset.defaultBody = bodyEl0 ? bodyEl0.textContent : '';
+        }
+
+        const titleEl = t.querySelector('.toast-title');
+        const bodyEl = t.querySelector('.toast-body');
+
+        if (typeof count === 'number') {
+            if (titleEl) titleEl.textContent = 'Added to cart (' + count + ')';
+            if (bodyEl) bodyEl.textContent =
+                'Cart now has ' + count + ' item' + (count === 1 ? '' : 's') +
+                '. You can add another design, or open your cart when you’re ready to checkout.';
+        } else {
+            if (titleEl) titleEl.textContent = t.dataset.defaultTitle;
+            if (bodyEl) bodyEl.textContent = t.dataset.defaultBody;
+        }
+
+        t.classList.remove('hidden');
+        if (_cartToastTimer) clearTimeout(_cartToastTimer);
+        _cartToastTimer = setTimeout(() => {
+            hideCartToast();
+        }, 6500);
+    }
+
+    function hideCartToast() {
+        const t = document.getElementById('cartToast');
+        if (!t) return;
+        t.classList.add('hidden');
+        if (_cartToastTimer) {
+            clearTimeout(_cartToastTimer);
+            _cartToastTimer = null;
+        }
+    }
+
+    function goToCart() {
+        window.location.href = 'https://shop.4ship.ca/cart';
+    }
+
+    function onAddToCartSuccess(cartCount) {
+        const btn = document.getElementById('ctaButtonRight');
+        if (btn) {
+            btn.dataset.loading = 'false';
+            btn.classList.remove('loading');
             btn.disabled = false;
+            btn.style.pointerEvents = '';
+            btn.textContent = 'Added ✓';
+            setTimeout(() => {
+                updateCTA();
+            }, 1200);
+        }
+        if (typeof cartCount === 'number') {
+            setCartCount(cartCount);
+            showCartToast(cartCount);
         }
     }
-    
-    async function generate9000pxPNG() {
-        try {
-            // Show loading
-            const ctaBtn = document.getElementById('ctaButton');
-            ctaBtn.disabled = true;
-            ctaBtn.textContent = 'Generating High-Res PNG...';
-            
-            // Create high-res canvas
-            const canvas = document.createElement('canvas');
-            const scale = 18;  // 500×400 → 9000×7200
-            canvas.width = 500 * scale;   // 9000px
-            canvas.height = 400 * scale;  // 7200px
-            const ctx = canvas.getContext('2d');
-            
-            // Get current design values
-            const style = STYLES[selectedStyle];
-            const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
-            const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
-            const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
-            const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
-            
-            // Load template as background
-            const templatePath = `templates/Style_${selectedStyle}_${selectedProduct === 'tee' ? 'Sq' : 'Ov'}.svg`;
-            const bgImage = await loadImage(templatePath);
-            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-            
-            // Create high-res SVG for text overlay
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const svg = document.createElementNS(svgNS, 'svg');
-            svg.setAttribute('width', canvas.width);
-            svg.setAttribute('height', canvas.height);
-            svg.setAttribute('viewBox', `0 0 ${canvas.width} ${canvas.height}`);
-            
-            // Add defs with paths
-            const defs = document.createElementNS(svgNS, 'defs');
-            const cityPath = document.createElementNS(svgNS, 'path');
-            cityPath.setAttribute('id', 'exportCityPath');
-            cityPath.setAttribute('d', `M ${20*scale},${cityY*scale} A ${230*scale},${baselineArch.cityArch*scale} 0 0,1 ${480*scale},${cityY*scale}`);
-            const groupPath = document.createElementNS(svgNS, 'path');
-            groupPath.setAttribute('id', 'exportGroupPath');
-            groupPath.setAttribute('d', `M ${20*scale},${groupY*scale} A ${230*scale},${baselineArch.groupArch*scale} 0 0,1 ${480*scale},${groupY*scale}`);
-            defs.appendChild(cityPath);
-            defs.appendChild(groupPath);
-            svg.appendChild(defs);
-            
-            // Add city text
-            const cityTextEl = document.createElementNS(svgNS, 'text');
-            cityTextEl.setAttribute('text-anchor', 'middle');
-            cityTextEl.setAttribute('fill', style.color);
-            cityTextEl.setAttribute('font-family', style.font);
-            cityTextEl.setAttribute('font-weight', style.weight);
-            cityTextEl.setAttribute('font-size', citySize * scale);
-            cityTextEl.style.letterSpacing = (baselineArch.cityTrack * scale) + 'px';
-            const cityTextPath = document.createElementNS(svgNS, 'textPath');
-            cityTextPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#exportCityPath');
-            cityTextPath.setAttribute('startOffset', '50%');
-            cityTextPath.innerHTML = formatText(cityText, citySize * scale);
-            cityTextEl.appendChild(cityTextPath);
-            svg.appendChild(cityTextEl);
-            
-            // Add group text
-            const groupTextEl = document.createElementNS(svgNS, 'text');
-            groupTextEl.setAttribute('text-anchor', 'middle');
-            groupTextEl.setAttribute('fill', style.color);
-            groupTextEl.setAttribute('font-family', style.font);
-            groupTextEl.setAttribute('font-weight', style.weight);
-            groupTextEl.setAttribute('font-size', groupSize * scale);
-            groupTextEl.style.letterSpacing = (baselineArch.groupTrack * scale) + 'px';
-            const groupTextPath = document.createElementNS(svgNS, 'textPath');
-            groupTextPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '#exportGroupPath');
-            groupTextPath.setAttribute('startOffset', '50%');
-            groupTextPath.innerHTML = formatText(groupText, groupSize * scale);
-            groupTextEl.appendChild(groupTextPath);
-            svg.appendChild(groupTextEl);
-            
-            // Convert SVG to image and overlay on canvas
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
-            const svgUrl = URL.createObjectURL(svgBlob);
-            const textImage = await loadImage(svgUrl);
-            ctx.drawImage(textImage, 0, 0);
-            URL.revokeObjectURL(svgUrl);
-            
-            // Convert to PNG blob
-            return new Promise((resolve) => {
-                canvas.toBlob((blob) => {
-                    ctaBtn.textContent = 'Preparing Checkout...';
-                    resolve(blob);
-                }, 'image/png', 0.95);
-            });
-            
-        } catch (error) {
-            console.error('PNG generation failed:', error);
-            alert('Failed to generate design. Please try again.');
-            const ctaBtn = document.getElementById('ctaButton');
-            ctaBtn.disabled = false;
-            ctaBtn.textContent = 'Continue to Checkout →';
-            return null;
-        }
-    }
-    
+
     function loadImage(src) {
-        return new Promise((resolve, reject) => {
+        if (!src) return Promise.reject(new Error('Missing image src'));
+
+        const isString = typeof src === 'string';
+        const cacheable = isString && !src.startsWith('blob:') && !src.startsWith('data:');
+
+        if (cacheable && _assetCache.images.has(src)) {
+            return _assetCache.images.get(src);
+        }
+
+        const p = new Promise((resolve, reject) => {
             const img = new Image();
+            img.decoding = 'async';
+
+            if (isString && /^https?:\/\//i.test(src)) {
+                img.crossOrigin = 'anonymous';
+            }
+
             img.onload = () => resolve(img);
-            img.onerror = reject;
+            img.onerror = () => reject(new Error('Failed to load image: ' + src));
             img.src = src;
         });
+
+        if (cacheable) _assetCache.images.set(src, p);
+        return p;
     }
     
     async function handleCTA() {
@@ -1547,128 +2392,348 @@
             // At step 4, proceed to Shopify checkout
             await handleCheckout();
         }
-    }
-    
-    // Initialize on load
-    window.addEventListener('load', init);
-    // ============================================
-// SHOPIFY INTEGRATION
-// ============================================
 
-const SHOPIFY_CONFIG = {
-    backendUrl: 'https://usa250-backend.vercel.app/api/create-draft-order',
-    productId: '8581802721430'
-};
+        const checkoutBtn = document.getElementById('ctaButtonRight');
+        const originalText = checkoutBtn ? checkoutBtn.textContent : '';
 
-// Variant ID mapping (Color + Size → Shopify Variant ID)
-const VARIANT_MAP = {
-    'Navy-M': '46056445444246',
-    'Navy-L': '46056445477014',
-    'Navy-XL': '46056445509782',
-    'Navy-2XL': '46056445542550',
-    'Navy-S': '46056445575318',
-    'Black-M': '46056445608086',
-    'Black-L': '46056445640854',
-    'Black-XL': '46056445673622',
-    'Black-2XL': '46056445706390',
-    'Black-S': '46056445739158',
-    'Gray-M': '46056445771926',
-    'Gray-L': '46056445804694',
-    'Gray-XL': '46056445837462',
-    'Gray-2XL': '46056445870230',
-    'Gray-S': '46056445902998',
-    'White-M': '46056445935766',
-    'White-L': '46056445968534',
-    'White-XL': '46056446001302',
-    'White-2XL': '46056446034070',
-    'White-S': '46056446066838'
-};
+        if (checkoutBtn) {
+            checkoutBtn.textContent = 'Preparing design...';
+            checkoutBtn.disabled = true;
+            checkoutBtn.dataset.loading = 'true';
+            checkoutBtn.classList.add('loading');
+            checkoutBtn.style.pointerEvents = 'none';
+        }
 
-// Update handleCheckout function
-async function handleCheckout() {
-    if (currentStep < 4) {
-        currentStep++;
-        showStep(currentStep);
-    } else {
         try {
-            const ctaBtn = document.getElementById('ctaButton');
-            ctaBtn.disabled = true;
-            ctaBtn.textContent = 'Generating design...';
-            
-            // 1. Generate PNG
-            const pngBlob = await generate9000pxPNG();
-            
-            // 2. Upload to Cloudinary
-            ctaBtn.textContent = 'Uploading design...';
-            const timestamp = Date.now();
-            const filename = `USA250_TEMP_${selectedStyle}_${timestamp}`;
-            
-            const formData = new FormData();
-            formData.append('file', pngBlob);
-            formData.append('upload_preset', 'america250');
-            formData.append('folder', 'america250');
-            formData.append('public_id', filename);
-            
-            const cloudinaryResponse = await fetch(
-                `https://api.cloudinary.com/v1_1/dqab444bd/image/upload`,
-                {
-                    method: 'POST',
-                    body: formData
-                }
-            );
-            
-            if (!cloudinaryResponse.ok) {
-                throw new Error('Cloudinary upload failed');
+            CartBridgeClient.preopenBridge();
+
+            console.log('[USA250] Checkout start', {
+                style: selectedStyle,
+                product: selectedProduct,
+                color: selectedColor,
+                size: selectedSize,
+                qty: selectedQuantity
+            });
+
+            const svg = document.getElementById('previewSVG');
+            if (!svg) {
+                throw new Error('Design preview not found');
             }
-            
+
+            const svgClone = svg.cloneNode(true);
+
+            const _exportMockup = svgClone.querySelector('#mockupImage');
+            if (_exportMockup) _exportMockup.remove();
+            const _exportShirt = svgClone.querySelector('#shirtFill');
+            if (_exportShirt) {
+                _exportShirt.setAttribute('fill', 'none');
+                _exportShirt.setAttribute('fill-opacity', '0');
+            }
+
+            injectFontImport(svgClone);
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Loading design elements...';
+
+            const bgImage = svgClone.querySelector('#bgImage');
+            if (bgImage && bgImage.href.baseVal) {
+                const imageUrl = bgImage.href.baseVal;
+
+                const base64 = await (async () => {
+                    if (_assetCache.bgBase64.has(imageUrl)) return _assetCache.bgBase64.get(imageUrl);
+
+                    const p = new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+
+                        img.onload = function() {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                canvas.width = img.width;
+                                canvas.height = img.height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0);
+                                const dataUrl = canvas.toDataURL('image/png');
+                                resolve(dataUrl);
+                            } catch (err) {
+                                reject(err);
+                            }
+                        };
+
+                        img.onerror = () => reject(new Error('Failed to load background image'));
+                        img.src = imageUrl;
+                        setTimeout(() => reject(new Error('Background image load timeout')), 10000);
+                    });
+
+                    _assetCache.bgBase64.set(imageUrl, p);
+                    return p;
+                })();
+
+                bgImage.setAttribute('href', base64);
+            }
+
+            await ensureFontsLoadedForExport();
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Converting design...';
+
+            const svgData = new XMLSerializer().serializeToString(svgClone);
+            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+            const url = URL.createObjectURL(svgBlob);
+
+            const img = new Image();
+            const imageLoadPromise = new Promise((resolve, reject) => {
+                img.onload = () => resolve();
+                img.onerror = () => reject(new Error('Failed to convert SVG'));
+                setTimeout(() => reject(new Error('SVG conversion timeout')), 10000);
+            });
+
+            img.src = url;
+            await imageLoadPromise;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 9000;
+            canvas.height = 7200;
+            const ctx = canvas.getContext('2d');
+
+            const svgWidth = 500;
+            const svgHeight = 400;
+            const scale = Math.min(9000 / svgWidth, 7200 / svgHeight);
+            const scaledWidth = svgWidth * scale;
+            const scaledHeight = svgHeight * scale;
+            const offsetX = (9000 - scaledWidth) / 2;
+            const offsetY = (7200 - scaledHeight) / 2;
+
+            ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
+            URL.revokeObjectURL(url);
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Generating PNG...';
+
+            const blob = await new Promise((resolve, reject) => {
+                canvas.toBlob((b) => {
+                    if (b) resolve(b);
+                    else reject(new Error('Failed to create PNG'));
+                }, 'image/png', 1.0);
+            });
+
+            const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
+            if (blob.size < 10000) {
+                throw new Error('PNG file too small (' + sizeMB + 'MB) - design may not have rendered correctly');
+            }
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Uploading design...';
+
+            const formData = new FormData();
+            formData.append('file', blob);
+            formData.append('upload_preset', 'america250');
+            formData.append('folder', 'usa250-orders');
+
+            const cloudinaryResponse = await fetch(
+                'https://api.cloudinary.com/v1_1/dqab444bd/image/upload',
+                { method: 'POST', body: formData }
+            );
+
+            if (!cloudinaryResponse.ok) {
+                const errorText = await cloudinaryResponse.text();
+                throw new Error(`Upload failed: ${errorText}`);
+            }
+
             const cloudinaryData = await cloudinaryResponse.json();
             const designUrl = cloudinaryData.secure_url;
-            
-            // 3. Create Shopify draft order
-            ctaBtn.textContent = 'Creating order...';
-            
-            const variantKey = `${selectedColor}-${selectedSize}`;
-            const variantId = VARIANT_MAP[variantKey];
-            
-            if (!variantId) {
-                throw new Error(`No variant found for ${variantKey}`);
+            const publicId = cloudinaryData.public_id;
+
+            console.log('✓ Design uploaded:', designUrl);
+
+            // Variant mapping using global VARIANT_MAP
+            const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
+            const variant = VARIANT_MAP[variantKey];
+            const styleObj = STYLES[selectedStyle] || null;
+            const styleName = styleObj ? styleObj.name : (selectedStyle || '');
+
+            console.log('[USA250] Variant lookup', { variantKey, variant });
+
+            if (!variant) {
+                throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize} (key: ${variantKey})`);
             }
-            
-            const orderResponse = await fetch(SHOPIFY_CONFIG.backendUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    designUrl: designUrl,
-                    style: selectedStyle,
-                    cityText: cityText,
-                    groupText: groupText,
-                    color: selectedColor,
-                    size: selectedSize,
-                    variantId: variantId
-                })
-            });
-            
-            const orderData = await orderResponse.json();
-            
-            if (orderData.success) {
-                // Redirect to Shopify checkout
-                window.location.href = orderData.checkoutUrl;
-            } else {
-                throw new Error(orderData.error || 'Failed to create order');
-            }
-            
+
+            if (checkoutBtn) checkoutBtn.textContent = 'Adding to cart...';
+
+            const designId = (window.crypto && crypto.randomUUID)
+                ? crypto.randomUUID()
+                : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
+
+            const qty = Math.max(1, Math.min(99, parseInt(selectedQuantity || 1, 10) || 1));
+            const cityVal = (document.getElementById('cityInput')?.value || '').trim();
+            const groupVal = (document.getElementById('groupInput')?.value || '').trim();
+
+            const itemsPayload = [{
+                id: variant.shopifyVariantId,
+                quantity: qty,
+                properties: {
+                    _design_id: designId,
+                    style: styleName,
+                    _style: selectedStyle,
+                    city: cityVal,
+                    group: groupVal,
+                    _design_url: designUrl,
+                    _cloudinary_public_id: publicId || '',
+                    _builder_version: 'v1.30.0',
+                    _variant_key: variantKey
+                }
+            }];
+
+            console.log('[USA250] CartBridge addItems payload', itemsPayload);
+
+            const resp = await CartBridgeClient.addItems(itemsPayload);
+
+            console.log('[USA250] CartBridge response', resp);
+
+            onAddToCartSuccess(resp && typeof resp.cartItemCount === 'number' ? resp.cartItemCount : null);
+            return;
+
         } catch (error) {
-            console.error('Checkout error:', error);
-            alert('Something went wrong. Please try again.');
-            
-            const ctaBtn = document.getElementById('ctaButton');
-            ctaBtn.disabled = false;
-            ctaBtn.textContent = 'Continue to Checkout →';
+            console.error('✗ Checkout error:', error);
+            alert('Checkout failed: ' + (error && error.message ? error.message : error) + '\n\nPlease try again or contact support.');
+            if (checkoutBtn) {
+                checkoutBtn.textContent = originalText || 'Add to Cart →';
+                checkoutBtn.disabled = false;
+                checkoutBtn.dataset.loading = 'false';
+                checkoutBtn.classList.remove('loading');
+                checkoutBtn.style.pointerEvents = '';
+            }
         }
     }
-}
+
+    const STYLE_COLORS = {
+        'A': ['Black', 'Navy'],
+        'B': ['Black', 'Navy'],
+        'C': ['Black', 'Navy', 'White', 'Gray'],
+        'D': ['Gray', 'White']
+    };
+
+    function updateColorOptions() {
+        const colorOptions = document.getElementById('colorOptions');
+        if (!colorOptions || !selectedStyle) return;
+
+        const availableColors = STYLE_COLORS[selectedStyle] || ['Black', 'White', 'Navy', 'Gray'];
+        colorOptions.innerHTML = '';
+
+        availableColors.forEach(color => {
+            const btn = document.createElement('button');
+            btn.className = 'color-btn';
+            btn.setAttribute('data-color', color);
+            btn.onclick = () => selectColor(color);
+
+            const label = document.createElement('span');
+            label.className = 'color-name';
+            label.textContent = color;
+            btn.appendChild(label);
+
+            colorOptions.appendChild(btn);
+        });
+
+        if (!selectedColor || !availableColors.includes(selectedColor)) {
+            selectColor(availableColors[0]);
+        } else {
+            selectColor(selectedColor);
+        }
+    }
+
+    function selectColor(color) {
+        selectedColor = color;
+        document.querySelectorAll('.color-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-color') === color);
+        });
+
+        const colorMap = {
+            'Black': '#1a1a1a',
+            'White': '#f5f5f5',
+            'Navy': '#001f3f',
+            'Gray': '#808080'
+        };
+
+        const shirtFill = document.getElementById('shirtFill');
+        if (shirtFill) {
+            shirtFill.setAttribute('fill', colorMap[color] || '#1a1a1a');
+        }
+
+        updateVariantChips();
+        updateCTA();
+    }
+
+    function selectSize(size) {
+        selectedSize = size;
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.getAttribute('data-size') === size);
+        });
+        updateVariantChips();
+        updateCTA();
+    }
+
+    function changeQuantity(delta){
+        const next = Math.max(1, Math.min(99, (parseInt(selectedQuantity || 1, 10) || 1) + delta));
+        selectedQuantity = next;
+        const inp = document.getElementById('quantityInput');
+        if (inp) inp.value = String(next);
+        updateVariantChips();
+        updateCTA();
+    }
+
+    function setQuantityFromInput(val){
+        const n = Math.max(1, Math.min(99, parseInt(val || '1', 10) || 1));
+        selectedQuantity = n;
+        const inp = document.getElementById('quantityInput');
+        if (inp && inp.value !== String(n)) inp.value = String(n);
+        updateVariantChips();
+        updateCTA();
+    }
+
+    let isZoomed = false;
+    function toggleZoom() {
+        const canvas = document.getElementById('previewCanvas') || document.querySelector('.preview-canvas');
+        const toggleBtn = document.getElementById('zoomToggle');
+
+        if (!canvas || !toggleBtn) return;
+
+        isZoomed = !isZoomed;
+
+        if (isZoomed) {
+            canvas.classList.add('zoomed');
+            toggleBtn.classList.add('active');
+            toggleBtn.querySelector('svg').innerHTML = `
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+            `;
+        } else {
+            canvas.classList.remove('zoomed');
+            toggleBtn.classList.remove('active');
+            toggleBtn.querySelector('svg').innerHTML = `
+                <circle cx="11" cy="11" r="8"/>
+                <path d="M21 21l-4.35-4.35"/>
+                <line x1="11" y1="8" x2="11" y2="14"/>
+                <line x1="8" y1="11" x2="14" y2="11"/>
+            `;
+        }
+    }
+
+    function init() {
+        updateProgress();
+        updateStepIndicator();
+        initializeMockups();
+
+        const mobileCarousel = document.querySelector('.style-cards');
+        const swipeNav = document.querySelector('.swipe-nav');
+        const grid = document.querySelector('.style-cards-desktop');
+        if (mobileCarousel) mobileCarousel.classList.add('hidden');
+        if (swipeNav) swipeNav.classList.add('hidden');
+        if (grid) grid.classList.remove('hidden');
+
+        if (window.innerWidth >= 768) {
+            const adv = document.querySelector('.advanced-controls');
+            if (adv) adv.classList.remove('hidden');
+        }
+    }
+
+    window.addEventListener('load', init);
 </script>
 
 </body>
