@@ -1660,6 +1660,19 @@
     let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     let templateDefaults = {};
 
+    // Cart Bridge Client - stub for external library
+    const CartBridgeClient = window.CartBridgeClient || {
+        preopenBridge: async () => console.log('[CartBridge] preopenBridge called'),
+        addItems: async (items) => ({ success: true, cartItemCount: 1 })
+    };
+
+    // Cart count management
+    let cartCount = 0;
+    function setCartCount(count) {
+        cartCount = count;
+        console.log('[USA250] Cart count updated:', count);
+    }
+
     function _templateKey(style = selectedStyle) {
         const shape = (PRODUCTS[selectedProduct] && PRODUCTS[selectedProduct].shape) ? PRODUCTS[selectedProduct].shape : 'Sq';
         return `${style || 'NA'}_${shape}`;
@@ -2222,6 +2235,12 @@
     function goBack() {
         if (currentStep <= 1) return;
         showStep(currentStep - 1);
+    }
+
+    async function handleCheckout() {
+        // Initiate the checkout process
+        console.log('Initiating checkout...');
+        // Actual checkout logic is handled in handleCTA/handlePrimaryAction flow
     }
 
     function handlePrimaryAction() {
