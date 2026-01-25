@@ -2224,6 +2224,12 @@
         showStep(currentStep - 1);
     }
 
+    async function handleCheckout() {
+        // Initiate the checkout process
+        console.log('Initiating checkout...');
+        // Actual checkout logic is handled in handleCTA/handlePrimaryAction flow
+    }
+
     function handlePrimaryAction() {
         const btn = document.getElementById('ctaButtonRight');
         if (btn?.disabled) return;
