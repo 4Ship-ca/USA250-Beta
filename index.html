@@ -1699,6 +1699,12 @@
             .replace(/'/g, '&#39;');
     }
     
+    // Generate mockup URL based on naming convention
+    function getMockupUrl(style, product) {
+        const shape = PRODUCTS[product].shape;
+        return `mockups/Style_${style}_${shape}_${product}.png`;
+    }
+
     // Load mockup image with fallback
     function loadMockup(img, style, product) {
         const mockupUrl = getMockupUrl(style, product);
