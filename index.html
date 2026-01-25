@@ -1704,14 +1704,18 @@
         const mockupUrl = getMockupUrl(style, product);
         img.src = mockupUrl;
         img.onerror = () => {
-            // Fallback to placeholder
-            img.style.background = '#1a1a1a';
-            img.style.display = 'flex';
-            img.style.alignItems = 'center';
-            img.style.justifyContent = 'center';
-            img.textContent = `${style} - ${product}`;
-            img.style.color = '#666';
-            img.style.fontSize = '12px';
+            // Fallback: replace img with a placeholder div
+            const placeholder = document.createElement('div');
+            placeholder.style.width = '100%';
+            placeholder.style.height = '100%';
+            placeholder.style.background = '#1a1a1a';
+            placeholder.style.display = 'flex';
+            placeholder.style.alignItems = 'center';
+            placeholder.style.justifyContent = 'center';
+            placeholder.style.color = '#666';
+            placeholder.style.fontSize = '12px';
+            placeholder.textContent = `${style} - ${product}`;
+            img.parentNode.replaceChild(placeholder, img);
         };
     }
 
