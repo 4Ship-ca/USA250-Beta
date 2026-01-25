@@ -1,2998 +1,2245 @@
-<!--
-USA250 v1.27.2 - Cart bridge stable + same-tab cart navigation + expose Style in cart
-Base: Working v1.9 layout
-Added: Color/Size selectors, Zoom toggle
-Navigation: Guided multi-step flow
-Last Updated: January 15, 2026
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>America 250 - Design Your Style</title>
-    
-    <link rel=\"icon\" href=\"data:,\">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Cinzel:wght@700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        :root {
-            --gold: #d4af37;
-            --bg: #0a0a0a;
-            --panel: #161616;
-            --border: #333;
-        }
-        
-        body {
-            background: var(--bg);
-            color: white;
-            font-family: 'Montserrat', sans-serif;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        /* Mobile-first design */
-        .container {
-            width: 100%;
-            min-height: 100vh;
-            padding: 20px;
-            padding-bottom: 100px;
-        }
-        
-        .progress-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: #222;
-            z-index: 1000;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--gold), #ffd700);
-            transition: width 0.3s ease;
-            width: 25%;
-        }
-        
-        .header { text-align: center; padding: 20px 0; 
-            text-align: left;
-            padding: 40px 20px 20px;
-        }
-        
-        .logo {
-            font-size: 28px;
-            font-weight: 900;
-            color: var(--gold);
-            letter-spacing: 2px;
-        }
-        
-        .step-indicator {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #888;
-        }
-        
-        .style-section {
-            margin: 30px 0;
-        }
-        
-        .section-title {
-            font-size: 18px;
-            color: var(--gold);
-            margin-bottom: 15px;
-            text-align: left;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        
-        .style-cards {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            margin: 0;
-            height: 400px;
-        }
-        
-        
-        /* Unified style selection: use the card grid everywhere (no swipe/carousel) */
-        .style-cards, .swipe-nav { display: none !important; }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>America 250 - Design Your Style</title>
 
-        /* Mobile-friendly grid sizing */
-        @media (max-width: 767px) {
-            .style-cards-desktop {
-                grid-template-columns: repeat(2, minmax(150px, 1fr));
-                gap: 14px;
-            }
-            .style-card-desktop .card-mockup { height: 150px; }
-            .style-card-desktop .card-title { font-size: 15px; }
-            .style-card-desktop .card-description { font-size: 11px; }
-        }
-.style-card {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: var(--panel);
-            border-radius: 20px;
-            border: 2px solid var(--border);
-            overflow: hidden;
-            transition: transform 0.3s ease, opacity 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .style-card.active {
-            transform: scale(1);
-            opacity: 1;
-            z-index: 10;
-        }
-        
-        .style-card.prev {
-            transform: translateX(-20px) scale(0.95);
-            opacity: 0.5;
-            z-index: 5;
-        }
-        
-        .style-card.next {
-            transform: translateX(20px) scale(0.95);
-            opacity: 0.5;
-            z-index: 5;
-        }
-        
-        .card-mockup {
-            width: 100%;
-            height: 250px;
-            background: #222;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            font-size: 14px;
-            color: #666;
-        }
-        
-        .card-content {
-            padding: 20px;
-            text-align: left;
-        }
-        
-        .card-title {
-            font-size: 22px;
-            font-weight: 900;
-            color: var(--gold);
-            margin-bottom: 8px;
-        }
-        
-        .card-description {
-            font-size: 14px;
-            color: #aaa;
-            margin-bottom: 15px;
-        }
-        
-        .card-select-btn {
-            background: var(--gold);
-            color: black;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-weight: 900;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .card-select-btn:active {
-            transform: scale(0.95);
-        }
-        
-        .swipe-nav {
-            display: flex;
-            justify-content: flex-start;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .swipe-nav button {
-            background: #333;
-            border: none;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            transition: background 0.2s;
-        }
-        
-        .swipe-nav button:active {
-            background: var(--gold);
-            color: black;
-        }
-        
-        .location-section {
-            margin: 30px 0;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .locate-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            padding: 18px;
-            border-radius: 15px;
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            cursor: pointer;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 10px;
-        }
-        
-        .locate-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .or-divider {
-            text-align: left;
-            color: #666;
-            margin: 15px 0;
-            position: relative;
-        }
-        
-        .or-divider::before,
-        .or-divider::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            width: 40%;
-            height: 1px;
-            background: #333;
-        }
-        
-        .or-divider::before { left: 0; }
-        .or-divider::after { right: 0; }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-label {
-            font-size: 12px;
-            color: var(--gold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-            display: block;
-        }
-        
-        .text-input {
-            width: 100%;
-            background: #1a1a1a;
-            border: 2px solid #333;
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
-            font-size: 16px;
-            outline: none;
-        }
-        
-        .text-input:focus {
-            border-color: var(--gold);
-        }
-        
-        .char-counter {
-            font-size: 11px;
-            color: #666;
-            text-align: right;
-            margin-top: 5px;
-        }
-        
-        .suggestions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-        
-        .suggestion-chip {
-            background: #222;
-            border: 1px solid #444;
-            padding: 10px 15px;
-            border-radius: 20px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .suggestion-chip:active {
-            background: var(--gold);
-            color: black;
-            border-color: var(--gold);
-        }
-        
-        .preview-section {
-            margin: 30px 0;
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 20px;
-            border: 2px solid #333;
-        }
-        
-        .preview-title {
-            font-size: 16px;
-            color: var(--gold);
-            text-align: left;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-        
-        .preview-canvas {
-            width: 100%;
-            /* Mobile-first: use full available width; desktop overrides below */
-            max-width: 100%;
-            margin: 0;
-            aspect-ratio: 5/4;
-            background: #000;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        #previewSVG {
-            display: block;
-            margin: 0 auto;
-            width: 100%;
-            height: 100%;
-            max-width: 100%;
-            transition: transform 0.3s ease;
-            transform: scale(1);
-            transform-origin: center center;
-            transform-box: fill-box;
-            transform-box: view-box;
-        }
-        
-        .tweak-section {
-            margin: 20px 0;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .tweak-toggle {
-            text-align: left;
-            margin-bottom: 20px;
-        }
-        
-        .toggle-btn {
-            background: transparent;
-            border: 2px solid #444;
-            padding: 12px 30px;
-            border-radius: 25px;
-            color: #aaa;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .toggle-btn.active {
-            background: var(--gold);
-            color: black;
-            border-color: var(--gold);
-        }
-        
-        .tweak-controls {
-            display: none;
-        }
-        
-        .tweak-controls.active {
-            display: block;
-        }
-        
-        .control-group {
-            margin-bottom: 25px;
-        }
-        
-        .control-label {
-            font-size: 13px;
-            color: #aaa;
-            text-align: left;
-            margin-bottom: 10px;
-        }
-        
-        .button-labels {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 8px;
-            font-size: 11px;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            text-align: left;
-        }
-        
-        .button-grid-extended {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr);
-            gap: 8px;
-        }
-        
-        .tweak-btn {
-            aspect-ratio: 1;
-            background: #222;
-            border: 2px solid #444;
-            border-radius: 15px;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-        }
-        
-        .tweak-btn:active {
-            background: var(--gold);
-            color: black;
-            border-color: var(--gold);
-            transform: scale(0.95);
-        }
-        
-        .sticky-cta {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 80%, transparent);
-            padding: 20px;
-            z-index: 100;
-        }
-/* New Container for Side-by-Side buttons */
-.cta-row {
-    display: flex;
-    gap: 15px;
-    max-width: 500px;
-    margin: 0;
-}
+  <link rel="icon" href="data:," />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Cinzel:wght@700;900&family=Oswald:wght@700&display=swap" rel="stylesheet">
 
-/* Back Button Styling */
-.back-btn {
-    width: 60px; /* Square-ish shape */
-    flex-shrink: 0;
-    background: #333;
-    border: 2px solid #444;
-    border-radius: 15px;
-    color: white;
-    font-size: 24px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.back-btn:active {
-    transform: scale(0.95);
-    background: var(--gold);
-    color: black;
-    border-color: var(--gold);
-}
-
-.back-btn:disabled {
-    opacity: 0; /* Hide it completely if disabled (Step 1) */
-    pointer-events: none;
-}
-
-/* Adjust Mega Btn to fill remaining space */
-.mega-btn {
-    flex-grow: 1; 
-    margin: 0; /* Remove auto margins since we use flex gap */
-}
-
-        
-        .mega-btn {
-            width: 100%;
-            max-width: 500px;
-            margin: 0;
-            background: linear-gradient(135deg, var(--gold) 0%, #ffd700 100%);
-            border: none;
-            padding: 20px;
-            border-radius: 15px;
-            color: black;
-            font-size: 18px;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            cursor: pointer;
-            box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3);
-            transition: transform 0.2s;
-            display: block;
-        }
-        
-        .mega-btn:active {
-            transform: scale(0.98);
-        }
-        
-        .mega-btn:disabled {
-            background: #444;
-            color: #888;
-            cursor: not-allowed;
-        }
-        
-        /* Desktop styles */
-        @media (min-width: 768px) {
-            .container {
-                display: grid;
-                grid-template-columns: 450px 1fr;
-                gap: 30px;
-                max-width: 1400px;
-                margin: 0;
-                padding: 40px;
-            }
-        .header.global-header {
-            grid-column: 1 / -1;
-            width: 100%;
-        }
-
-            
-            .left-panel {
-                height: 90vh;
-                overflow-y: auto;
-                padding-right: 15px;
-            }
-            
-            .left-panel::-webkit-scrollbar {
-                width: 6px;
-            }
-            
-            .left-panel::-webkit-scrollbar-thumb {
-                background: var(--gold);
-                border-radius: 10px;
-            }
-            
-            .right-panel {
-                position: sticky;
-                top: 40px;
-                height: fit-content;
-                display: flex;
-                flex-direction: column;
-                gap: 24px;
-            }
-
-             .header {
-                text-align: left;
-                padding: 20px 0;
-            }
-            
-            .logo {
-                font-size: 32px;
-            }
-            
-            
-.style-cards-desktop {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-    width: 100%;
-}
-
-            
-            .style-cards {
-                display: none;
-            }
-            
-            .swipe-nav {
-                display: none;
-            }
-            
-            .style-card-desktop {
-                background: var(--panel);
-                border: 2px solid var(--border);
-                border-radius: 15px;
-                overflow: hidden;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            
-            .style-card-desktop:hover {
-                border-color: var(--gold);
-                transform: translateY(-5px);
-            }
-            
-            .style-card-desktop.selected {
-                border-color: var(--gold);
-                box-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
-            }
-            
-            .card-mockup {
-                height: 180px;
-            }
-            
-            .card-content {
-                padding: 15px;
-            }
-            
-            .card-title {
-                font-size: 18px;
-            }
-            
-            .card-description {
-                font-size: 13px;
-            }
-            
-            .card-select-btn {
-                padding: 10px 25px;
-                font-size: 14px;
-            }
-            
-            .preview-section {
-                padding: 30px;
-            }
-            
-            .preview-canvas {
-                /* Desktop/tablet: make the preview fill ~75% of the right panel */
-                width: 75%;
-                max-width: 980px;
-            }
-            
-            .advanced-controls {
-                display: block;
-                margin-top: 20px;
-                padding: 20px;
-                background: #1a1a1a;
-                border-radius: 15px;
-            }
-            
-            .slider-group {
-                margin-bottom: 15px;
-            }
-            
-            .slider-label {
-                display: flex;
-                justify-content: space-between;
-                font-size: 11px;
-                color: #aaa;
-                margin-bottom: 8px;
-                text-transform: uppercase;
-                letter-spacing: 1px;
-            }
-            
-            .slider-value {
-                color: var(--gold);
-                font-family: monospace;
-            }
-            
-            input[type="range"] {
-                width: 100%;
-                height: 6px;
-                background: #333;
-                border-radius: 5px;
-                outline: none;
-                -webkit-appearance: none;
-            }
-            
-            input[type="range"]::-webkit-slider-thumb {
-                -webkit-appearance: none;
-                width: 20px;
-                height: 20px;
-                background: var(--gold);
-                border-radius: 50%;
-                cursor: pointer;
-            }
-            
-            input[type="range"]::-moz-range-thumb {
-                width: 20px;
-                height: 20px;
-                background: var(--gold);
-                border-radius: 50%;
-                cursor: pointer;
-                border: none;
-            }
-            
-            .sticky-cta {
-                position: static;
-                background: transparent;
-                padding: 20px 0;
-            }
-        }
-        
-        .hidden { display: none !important; }
-        .loading { opacity: 0.5; pointer-events: none; }
-        
-        .product-selector {
-            margin-bottom: 20px;
-        }
-    
-/* SELECTOR SECTIONS */
-.selector-section {
-    margin-bottom: 20px;
-
-    text-align: left;
-}
-
-
-.selector-section.color-section {
-    margin-bottom: 32px; /* extra space between Color and Size */
-}
-.selector-label {
-    font-size: 14px;
-    color: var(--gold);
-    margin-bottom: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-align: left;
-    width: 100%;
-    align-self: flex-start;
-}
-
-/* COLOR OPTIONS */
-.color-row {
-    display: flex;
-    align-items: flex-end; /* keep zoom button at lower-right of the color area */
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.color-row .color-options {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.color-row .zoom-toggle {
-    margin-left: auto;
-}
-
-.color-options {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    min-height: 50px; /* Prevent layout shift when colors load */
-}
-
-.color-options:empty::after {
-    content: 'Select a style to see available colors';
-    color: #666;
-    font-size: 13px;
-    font-style: italic;
-}
-
-.color-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 3px solid var(--border);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    position: relative;
-    background: var(--panel);
-}
-
-.color-btn:hover {
-    transform: scale(1.1);
-    border-color: var(--gold);
-}
-
-.color-btn.active {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
-}
-
-.color-btn::before {
-    content: '';
-    position: absolute;
-    inset: 4px;
-    border-radius: 50%;
-}
-
-.color-btn[data-color="Black"]::before { background: #000; }
-.color-btn[data-color="White"]::before { background: #fff; border: 1px solid #ddd; }
-.color-btn[data-color="Navy"]::before { background: #001f3f; }
-.color-btn[data-color="Gray"]::before { background: #808080; }
-
-.color-btn .color-name {
-    position: absolute;
-    bottom: -25px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 11px;
-    color: #888;
-    white-space: nowrap;
-}
-
-.color-btn.active .color-name {
-    color: var(--gold);
-    font-weight: 700;
-}
-
-
-/* Standardized Size Buttons */
-.size-options {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-.size-btn {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 3px solid var(--border);
-    background: var(--panel);
-    color: white;
-    font-weight: 700;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    flex: none;
-}
-
-.size-btn:hover {
-    transform: scale(1.1);
-    border-color: var(--gold);
-}
-
-.size-btn.active {
-    border-color: var(--gold);
-    background: var(--gold);
-    color: black;
-    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
-}
-
-
-
-.quantity-controls{
-    display:flex;
-    gap:10px;
-    align-items:center;
-}
-
-.qty-btn{
-    width:48px;
-    height:44px;
-    background: var(--panel);
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    color: white;
-    font-weight: 900;
-    font-size: 20px;
-    line-height: 1;
-    cursor: pointer;
-    transition: all 0.2s ease;
-}
-
-.qty-btn:hover{
-    border-color: var(--gold);
-}
-
-.qty-input{
-    flex:0 0 auto;
-    max-width:80px;
-    height:44px;
-    background: var(--panel);
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    color: white;
-    font-weight: 800;
-    font-size: 16px;
-    text-align: center;
-    outline: none;
-}
-
-.qty-input:focus{
-    border-color: var(--gold);
-}
-/* Mobile responsive */
-@media (max-width: 768px) {
-    .color-options {
-        justify-content: flex-start;
-    }
-    
-    .size-options {
-        flex-wrap: wrap;
-    }
-    
-    .size-btn {
-        flex: 1 0 70px;
-        min-width: 70px;
+    :root{
+      --gold:#d4af37;
+      --bg:#0a0a0a;
+      --panel:#161616;
+      --border:#333;
     }
 
-    /* Mobile: give the full-width preview a subtle border so it reads as a "frame" */
-    .preview-canvas {
-        border: 2px solid rgba(255, 255, 255, 0.14);
-    }
-}
-
-.preview-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    width: 100%;
-    max-width: 100%;
-    margin: 0 auto 20px;
-}
-
-@media (max-width: 520px) {
-    .preview-row {
-        gap: 10px;
+    body{
+      background:var(--bg);
+      color:#fff;
+      font-family:'Montserrat', sans-serif;
+      overflow-x:hidden;
+      -webkit-tap-highlight-color:transparent;
     }
 
-    .color-row {
-        flex-wrap: wrap;
+    .hidden{ display:none !important; }
+    .loading{ opacity:0.5; pointer-events:none; }
+
+    /* Progress */
+    .progress-bar{
+      position:fixed;
+      top:0; left:0; right:0;
+      height:4px;
+      background:#222;
+      z-index:1000;
+    }
+    .progress-fill{
+      height:100%;
+      background:linear-gradient(90deg, var(--gold), #ffd700);
+      transition:width 0.3s ease;
+      width:16.6667%;
     }
 
-    .color-row .zoom-toggle {
-        margin-left: auto;
+    /* Header */
+    .header{
+      text-align:left;
+      padding:40px 20px 20px;
+    }
+    .header.global-header{
+      width:100%;
+    }
+    .logo{
+      font-size:28px;
+      font-weight:900;
+      color:var(--gold);
+      letter-spacing:2px;
+    }
+    .step-indicator{
+      margin-top:10px;
+      font-size:14px;
+      color:#888;
     }
 
-    .preview-wrapper {
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
+    /* Sections */
+    .style-section{ margin:30px 0; }
+    .section-title{
+      font-size:18px;
+      color:var(--gold);
+      margin-bottom:15px;
+      text-align:left;
+      text-transform:uppercase;
+      letter-spacing:1.5px;
     }
-}
 
-.preview-wrapper {
-    position: relative;
-    background: #111;
-    border-radius: 15px;
-    padding: 20px;
-    width: 88%;
-    min-width: 75%;
-    max-width: 90%;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 0;
-    overflow: hidden; /* Crop when zoomed */
-}
-
-/* Zoom affects SVG only (frame/container does not grow) */
-.preview-canvas.zoomed #previewSVG {
-    transform: scale(1.5);
-}
-
-/* Zoom button - Bottom right corner */
-.zoom-toggle {
-    flex: 0 0 auto;
-    position: relative;
-    background: rgba(0, 0, 0, 0.65);
-    border: 2px solid var(--border);
-    border-radius: 10px;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--gold);
-    transition: all 0.2s ease;
-    z-index: 10;
-}
-
-.zoom-toggle:hover {
-    background: rgba(0, 0, 0, 0.85);
-    border-color: var(--gold);
-    transform: scale(1.06);
-}
-
-.zoom-toggle.active {
-    background: transparent;
-    border-color: var(--gold);
-    color: var(--gold);
-}
-
-.container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 30px;
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    text-align: center;
-}
-
-.left-panel, .right-panel {
-    width: 100%;
-    max-width: 600px;
-}
-
-
-.preview-section {
-    background: #1a1a1a;
-    padding: 20px;
-    border-radius: 20px;
-    border: 2px solid #333;
-    margin: 0 !important;
-}
-
-.location-section, .tweak-section {
-    background: #1a1a1a;
-    padding: 25px;
-    border-radius: 20px;
-    border: 2px solid #333;
-    margin: 0 !important;
-}
-
-@media (max-width: 1024px) {
-    .container {
-        display: flex !important;
-        flex-direction: column !important;
+    /* Product selector */
+    .product-selector{ margin-bottom:20px; }
+    .input-label{
+      font-size:12px;
+      color:var(--gold);
+      text-transform:uppercase;
+      letter-spacing:1px;
+      margin-bottom:8px;
+      display:block;
+      text-align:left;
     }
-    /* Step 1: show style selection first, preview below */
-    body:not(.after-style) .left-panel { order: 1 !important; }
-    body:not(.after-style) .right-panel { order: 2 !important; }
 
-    /* Steps 2-4: keep preview first (above inputs) */
-    body.after-style .left-panel { order: 2 !important; }
-    body.after-style .right-panel { order: 1 !important; }
-}
+    /* Style cards (desktop grid only; carousel disabled) */
+    .style-cards, .swipe-nav{ display:none !important; }
 
-/* Hide the old sticky CTA at the bottom of the page */
-body > .sticky-cta {
-    display: none !important;
-}
-
-.sticky-cta-right {
-    display: block;
-}
-
-@media (max-width: 1024px) {
-    .sticky-cta-right {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: rgba(10, 10, 10, 0.95);
-        padding: 15px 20px;
-        border-top: 1px solid #333;
-        z-index: 1000;
-        margin-top: 0 !important;
+    .style-cards-desktop{
+      display:grid;
+      grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));
+      gap:20px;
+      margin-top:20px;
+      width:100%;
     }
-}
-
-
-
-
-
-.location-section, .tweak-section {
-    background: #1a1a1a;
-    padding: 25px;
-    border-radius: 20px;
-    border: 2px solid #333;
-    margin: 0 !important;
-    max-width: 100% !important;
-}
-
-@media (min-width: 768px) {
-    .container {
-        grid-template-columns: 350px 1fr; /* Narrower left panel for style selection */
+    @media (max-width:767px){
+      .style-cards-desktop{
+        grid-template-columns:repeat(2, minmax(150px, 1fr));
+        gap:14px;
+      }
+      .style-card-desktop .card-mockup{ height:150px; }
+      .style-card-desktop .card-title{ font-size:15px; }
+      .style-card-desktop .card-description{ font-size:11px; }
     }
-}
 
-/* Ensure hidden steps don't take space */
-.hidden { display: none !important; }
+    .style-card-desktop{
+      background:var(--panel);
+      border:2px solid var(--border);
+      border-radius:12px;
+      cursor:pointer;
+      transition:all 0.3s ease;
+      overflow:hidden;
+    }
+    .style-card-desktop:hover{
+      border-color:var(--gold);
+      transform:translateY(-4px);
+    }
+    .style-card-desktop.selected{
+      border-color:var(--gold);
+      box-shadow:0 0 15px rgba(212,175,55,0.3);
+    }
+    .style-card-desktop .card-mockup{ height:120px; background:#222; }
+    .card-content{ padding:10px; text-align:left; }
+    .card-title{ font-size:14px; font-weight:900; color:var(--gold); margin-bottom:6px; }
+    .card-description{ font-size:11px; color:#aaa; }
 
+    /* Location/tweak panels */
+    .location-section, .tweak-section{
+      background:#1a1a1a;
+      padding:25px;
+      border-radius:20px;
+      border:2px solid #333;
+      margin:0 !important;
+      max-width:100% !important;
+    }
 
+    .input-group{ margin-bottom:20px; }
+    .text-input{
+      width:100%;
+      background:#1a1a1a;
+      border:2px solid #333;
+      padding:15px;
+      border-radius:10px;
+      color:white;
+      font-size:16px;
+      outline:none;
+    }
+    .text-input:focus{ border-color:var(--gold); }
+    .char-counter{
+      font-size:11px;
+      color:#666;
+      text-align:right;
+      margin-top:5px;
+    }
 
-.style-cards-desktop {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-    width: 100%;
-}
+    .locate-btn{
+      width:100%;
+      background:linear-gradient(135deg,#667eea 0%, #764ba2 100%);
+      border:none;
+      padding:18px;
+      border-radius:15px;
+      color:white;
+      font-size:16px;
+      font-weight:700;
+      cursor:pointer;
+      margin-bottom:15px;
+      display:flex;
+      align-items:center;
+      justify-content:flex-start;
+      gap:10px;
+    }
+    .locate-btn:active{ transform:scale(0.98); }
 
+    .or-divider{
+      text-align:left;
+      color:#666;
+      margin:15px 0;
+      position:relative;
+    }
+    .or-divider::before, .or-divider::after{
+      content:'';
+      position:absolute;
+      top:50%;
+      width:40%;
+      height:1px;
+      background:#333;
+    }
+    .or-divider::before{ left:0; }
+    .or-divider::after{ right:0; }
 
-.style-card-desktop {
-    background: var(--panel);
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    overflow: hidden;
-}
+    /* Preview */
+    .preview-section{
+      background:#1a1a1a;
+      padding:20px;
+      border-radius:20px;
+      border:2px solid #333;
+      margin:0 !important;
+    }
+    .preview-title{
+      font-size:16px;
+      color:var(--gold);
+      text-align:left;
+      margin-bottom:15px;
+      text-transform:uppercase;
+      letter-spacing:1.5px;
+    }
 
-.style-card-desktop.selected {
-    border-color: var(--gold);
-    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
-}
+    .preview-row{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      width:100%;
+      max-width:100%;
+      margin:0 auto 20px;
+    }
+    .preview-wrapper{
+      position:relative;
+      background:#111;
+      border-radius:15px;
+      padding:20px;
+      width:88%;
+      min-width:75%;
+      max-width:90%;
+      margin-left:auto;
+      margin-right:auto;
+      overflow:hidden; /* crop when zoomed */
+    }
 
-.style-card-desktop .card-mockup {
-    height: 120px;
-}
+    .preview-canvas{
+      width:100%;
+      max-width:100%;
+      margin:0;
+      aspect-ratio:5/4;
+      background:#000;
+      border-radius:10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+      position:relative;
+    }
+    /* Mobile frame */
+    @media (max-width:768px){
+      .preview-canvas{ border:2px solid rgba(255,255,255,0.14); }
+    }
 
-.style-card-desktop .card-content {
-    padding: 10px;
-}
+    #previewSVG{
+      display:block;
+      margin:0 auto;
+      width:100%;
+      height:100%;
+      max-width:100%;
+      transition:transform 0.3s ease;
+      transform:scale(1);
+      transform-origin:center center;
+      transform-box:fill-box;
+      transform-box:view-box;
+    }
+    .preview-canvas.zoomed #previewSVG{ transform:scale(1.5); }
 
-.style-card-desktop .card-title {
-    font-size: 14px;
-}
+    .preview-tools{
+      display:flex;
+      justify-content:flex-end;
+      margin-top:10px;
+    }
+    .zoom-toggle{
+      flex:0 0 auto;
+      position:relative;
+      background:rgba(0,0,0,0.65);
+      border:2px solid var(--border);
+      border-radius:10px;
+      width:44px;
+      height:44px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      color:var(--gold);
+      transition:all 0.2s ease;
+      z-index:10;
+    }
+    .zoom-toggle:hover{
+      background:rgba(0,0,0,0.85);
+      border-color:var(--gold);
+      transform:scale(1.06);
+    }
+    .zoom-toggle.active{
+      background:transparent;
+      border-color:var(--gold);
+      color:var(--gold);
+    }
 
-.style-card-desktop .card-description {
-    font-size: 11px;
-}
+    /* v1.30.0 - Variant chips + step-based variant visibility */
+    .variant-chips{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.08);
+      border-radius:14px;
+      padding:12px 14px;
+      margin-top:10px;
+    }
+    .chip-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+    }
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(255,255,255,0.12);
+      background:rgba(0,0,0,0.25);
+      color:rgba(255,255,255,0.9);
+      font-weight:700;
+      font-size:12px;
+      letter-spacing:0.04em;
+      text-transform:uppercase;
+    }
+    .chip-change{
+      flex:0 0 auto;
+      padding:8px 12px;
+      border-radius:999px;
+      border:1px solid rgba(212,175,55,0.5);
+      background:transparent;
+      color:var(--gold);
+      font-weight:900;
+      cursor:pointer;
+    }
+    .chip-change:hover{ background:rgba(212,175,55,0.12); }
 
+    .helper-text{
+      margin-top:8px;
+      color:rgba(255,255,255,0.65);
+      font-size:13px;
+      line-height:1.4;
+      text-align:left;
+    }
 
-/* Collapse empty left-panel height after style is selected (prevents giant blank column) */
-@media (min-width: 768px) {
-  body.after-style .left-panel {
-    height: auto !important;
-    overflow: visible !important;
-  }
-}
+    /* Variant controls (color/size/qty) */
+    .selector-section{ margin-bottom:20px; text-align:left; }
+    .selector-section.color-section{ margin-bottom:32px; }
+    .selector-label{
+      font-size:14px;
+      color:var(--gold);
+      margin-bottom:10px;
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      text-align:left;
+      width:100%;
+      align-self:flex-start;
+    }
 
-/* When the CTA is fixed on mobile/tablet, keep content from hiding behind it */
-@media (max-width: 1024px) {
-  .container {
-    padding-bottom: 120px !important;
-  }
-}
+    .color-row{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .color-row .color-options{ flex:1 1 auto; min-width:0; }
 
+    .color-options{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      min-height:50px;
+    }
+    .color-options:empty::after{
+      content:'Select a style to see available colors';
+      color:#666;
+      font-size:13px;
+      font-style:italic;
+    }
 
-/* v1.26.4 - Variant chips + step-based variant visibility */
-.preview-tools{
-    display:flex;
-    justify-content:flex-end;
-    margin-top: 10px;
-}
+    .color-btn{
+      width:50px;
+      height:50px;
+      border-radius:50%;
+      border:3px solid var(--border);
+      cursor:pointer;
+      transition:all 0.3s ease;
+      position:relative;
+      background:var(--panel);
+    }
+    .color-btn:hover{
+      transform:scale(1.1);
+      border-color:var(--gold);
+    }
+    .color-btn.active{
+      border-color:var(--gold);
+      box-shadow:0 0 0 3px rgba(212,175,55,0.3);
+    }
+    .color-btn::before{
+      content:'';
+      position:absolute;
+      inset:4px;
+      border-radius:50%;
+    }
+    .color-btn[data-color="Black"]::before{ background:#000; }
+    .color-btn[data-color="White"]::before{ background:#fff; border:1px solid #ddd; }
+    .color-btn[data-color="Navy"]::before{ background:#001f3f; }
+    .color-btn[data-color="Gray"]::before{ background:#808080; }
 
-.variant-chips{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    gap: 12px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px;
-    padding: 12px 14px;
-    margin-top: 10px;
-}
+    .color-btn .color-name{
+      position:absolute;
+      bottom:-25px;
+      left:50%;
+      transform:translateX(-50%);
+      font-size:11px;
+      color:#888;
+      white-space:nowrap;
+    }
+    .color-btn.active .color-name{
+      color:var(--gold);
+      font-weight:700;
+    }
 
-.chip-row{
-    display:flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
+    .size-options{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .size-btn{
+      width:50px;
+      height:50px;
+      border-radius:50%;
+      border:3px solid var(--border);
+      background:var(--panel);
+      color:white;
+      font-weight:700;
+      font-size:12px;
+      cursor:pointer;
+      transition:all 0.3s ease;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:0;
+      flex:none;
+    }
+    .size-btn:hover{
+      transform:scale(1.1);
+      border-color:var(--gold);
+    }
+    .size-btn.active{
+      border-color:var(--gold);
+      background:var(--gold);
+      color:black;
+      box-shadow:0 0 0 3px rgba(212,175,55,0.3);
+    }
 
-.chip{
-    display:inline-flex;
-    align-items:center;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(0,0,0,0.25);
-    color: rgba(255,255,255,0.9);
-    font-weight: 700;
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-}
+    .quantity-controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+    .qty-btn{
+      width:48px;
+      height:44px;
+      background:var(--panel);
+      border:2px solid var(--border);
+      border-radius:10px;
+      color:white;
+      font-weight:900;
+      font-size:20px;
+      line-height:1;
+      cursor:pointer;
+      transition:all 0.2s ease;
+    }
+    .qty-btn:hover{ border-color:var(--gold); }
+    .qty-input{
+      flex:0 0 auto;
+      max-width:80px;
+      height:44px;
+      background:var(--panel);
+      border:2px solid var(--border);
+      border-radius:10px;
+      color:white;
+      font-weight:800;
+      font-size:16px;
+      text-align:center;
+      outline:none;
+    }
+    .qty-input:focus{ border-color:var(--gold); }
 
-.chip-change{
-    flex: 0 0 auto;
-    padding: 8px 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(212,175,55,0.5);
-    background: transparent;
-    color: var(--gold);
-    font-weight: 900;
-    cursor: pointer;
-}
+    @media (max-width:520px){
+      .preview-row{ gap:10px; }
+      .color-row{ flex-wrap:wrap; }
+      .preview-wrapper{ width:100%; min-width:0; max-width:100%; }
+    }
 
-.chip-change:hover{
-    background: rgba(212,175,55,0.12);
-}
+    /* Tweak */
+    .tweak-toggle{ text-align:left; margin-bottom:20px; }
+    .toggle-btn{
+      background:transparent;
+      border:2px solid #444;
+      padding:12px 30px;
+      border-radius:25px;
+      color:#aaa;
+      font-size:14px;
+      cursor:pointer;
+      transition:all 0.2s;
+    }
+    .toggle-btn.active{
+      background:var(--gold);
+      color:black;
+      border-color:var(--gold);
+    }
+    .tweak-controls{ display:none; }
+    .tweak-controls.active{ display:block; }
 
-.helper-text{
-    margin-top: 8px;
-    color: rgba(255,255,255,0.65);
-    font-size: 13px;
-    line-height: 1.4;
-}
+    .control-group{ margin-bottom:25px; }
+    .control-label{
+      font-size:13px;
+      color:#aaa;
+      text-align:left;
+      margin-bottom:10px;
+    }
+    .button-labels{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:10px;
+      margin-bottom:8px;
+      font-size:11px;
+      color:#888;
+      text-transform:uppercase;
+      letter-spacing:0.5px;
+      text-align:left;
+    }
+    .button-grid-extended{
+      display:grid;
+      grid-template-columns:repeat(6, 1fr);
+      gap:8px;
+    }
+    .tweak-btn{
+      aspect-ratio:1;
+      background:#222;
+      border:2px solid #444;
+      border-radius:15px;
+      color:white;
+      font-size:20px;
+      cursor:pointer;
+      transition:all 0.2s;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:700;
+    }
+    .tweak-btn:active{
+      background:var(--gold);
+      color:black;
+      border-color:var(--gold);
+      transform:scale(0.95);
+    }
 
+    /* Advanced controls visible on desktop in JS */
+    .advanced-controls{
+      display:block;
+      margin-top:20px;
+      padding:20px;
+      background:#1a1a1a;
+      border-radius:15px;
+    }
+    .advanced-controls.hidden{ display:none !important; }
 
-/* CART TOAST (post add-to-cart) */
-.cart-toast {
-    position: fixed;
-    right: 18px;
-    bottom: 92px; /* sits above mobile sticky CTA */
-    z-index: 2500;
-    background: rgba(12, 12, 12, 0.92);
-    border: 1px solid #333;
-    border-radius: 14px;
-    padding: 14px 14px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
-    max-width: 320px;
-    width: calc(100% - 36px);
-}
-.cart-toast .toast-title {
-    color: var(--gold);
-    font-weight: 800;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    font-size: 12px;
-    margin-bottom: 8px;
-    text-align: left;
-}
-.cart-toast .toast-body {
-    color: #ddd;
-    font-size: 13px;
-    line-height: 1.35;
-    margin-bottom: 10px;
-    text-align: left;
-}
-.cart-toast .toast-actions {
-    display: flex;
-    gap: 10px;
-    justify-content: flex-end;
-}
-.cart-toast .toast-actions .toggle-btn {
-    padding: 10px 14px;
-    border-radius: 20px;
-    font-size: 13px;
-}
-@media (max-width: 1024px) {
-    .cart-toast { bottom: 98px; }
-}
+    .slider-group{ margin-bottom:15px; }
+    .slider-label{
+      display:flex;
+      justify-content:space-between;
+      font-size:11px;
+      color:#aaa;
+      margin-bottom:8px;
+      text-transform:uppercase;
+      letter-spacing:1px;
+    }
+    .slider-value{
+      color:var(--gold);
+      font-family:monospace;
+    }
+    input[type="range"]{
+      width:100%;
+      height:6px;
+      background:#333;
+      border-radius:5px;
+      outline:none;
+      -webkit-appearance:none;
+    }
+    input[type="range"]::-webkit-slider-thumb{
+      -webkit-appearance:none;
+      width:20px;
+      height:20px;
+      background:var(--gold);
+      border-radius:50%;
+      cursor:pointer;
+    }
+    input[type="range"]::-moz-range-thumb{
+      width:20px;
+      height:20px;
+      background:var(--gold);
+      border-radius:50%;
+      cursor:pointer;
+      border:none;
+    }
 
+    /* Right CTA */
+    /* Hide old bottom CTA if it ever exists */
+    body > .sticky-cta{ display:none !important; }
 
+    .sticky-cta-right{ display:block; }
+    @media (max-width:1024px){
+      .sticky-cta-right{
+        position:fixed;
+        bottom:0;
+        left:0;
+        right:0;
+        background:rgba(10,10,10,0.95);
+        padding:15px 20px;
+        border-top:1px solid #333;
+        z-index:1000;
+        margin-top:0 !important;
+      }
+    }
 
-/* --- Cart + CTA split buttons --- */
-.cta-row{
-  display:flex;
-  gap:10px;
-  align-items:stretch;
-  flex-wrap:nowrap;
-}
-.cta-split{
-  display:flex;
-  gap:10px;
-  flex:1 1 auto;
-  min-width:0;
-}
-.cta-split #ctaButtonRight{
-  flex:0 0 60%;
-  min-width:0;
-}
-.cta-split #viewCartBtn{
-  flex:0 0 40%;
-  min-width:0;
-}
+    .cta-row{
+      display:flex;
+      gap:10px;
+      align-items:stretch;
+      flex-wrap:nowrap;
+      max-width:500px;
+      margin:0;
+    }
+    .cta-split{
+      display:flex;
+      gap:10px;
+      flex:1 1 auto;
+      min-width:0;
+    }
 
-.cart-btn{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  gap:10px;
-  border-radius:18px;
-  border:2px solid rgba(255,255,255,0.18);
-  background:rgba(255,255,255,0.08);
-  color:rgba(255,255,255,0.92);
-  font-weight:900;
-  letter-spacing:0.05em;
-  text-transform:uppercase;
-  box-shadow:0 10px 30px rgba(0,0,0,0.45);
-  padding:18px 22px;
-  cursor:pointer;
-}
+    .mega-btn{
+      width:100%;
+      max-width:500px;
+      margin:0;
+      background:linear-gradient(135deg, var(--gold) 0%, #ffd700 100%);
+      border:none;
+      padding:20px;
+      border-radius:15px;
+      color:black;
+      font-size:18px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      cursor:pointer;
+      box-shadow:0 10px 30px rgba(212,175,55,0.3);
+      transition:transform 0.2s;
+      display:block;
+    }
+    .mega-btn:active{ transform:scale(0.98); }
+    .mega-btn:disabled{
+      background:#444;
+      color:#888;
+      cursor:not-allowed;
+      box-shadow:none;
+    }
 
-.cart-btn[disabled],
-.cart-btn[aria-disabled="true"]{
-  opacity:0.42;
-  cursor:not-allowed;
-  filter:saturate(0.6);
-  box-shadow:none;
-}
+    .cart-btn{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      border-radius:18px;
+      border:2px solid rgba(255,255,255,0.18);
+      background:rgba(255,255,255,0.08);
+      color:rgba(255,255,255,0.92);
+      font-weight:900;
+      letter-spacing:0.05em;
+      text-transform:uppercase;
+      box-shadow:0 10px 30px rgba(0,0,0,0.45);
+      padding:18px 22px;
+      cursor:pointer;
+      min-width:0;
+    }
+    .cart-btn[disabled],
+    .cart-btn[aria-disabled="true"]{
+      opacity:0.42;
+      cursor:not-allowed;
+      filter:saturate(0.6);
+      box-shadow:none;
+    }
+    .cart-badge{
+      position:absolute;
+      top:-10px;
+      right:-10px;
+      min-width:26px;
+      height:26px;
+      padding:0 8px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:999px;
+      background:rgba(0,0,0,0.92);
+      border:2px solid rgba(255,255,255,0.25);
+      color:#fff;
+      font-size:12px;
+      font-weight:900;
+    }
 
-.cart-badge{
-  position:absolute;
-  top:-10px;
-  right:-10px;
-  min-width:26px;
-  height:26px;
-  padding:0 8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:999px;
-  background:rgba(0,0,0,0.92);
-  border:2px solid rgba(255,255,255,0.25);
-  color:#fff;
-  font-size:12px;
-  font-weight:900;
-}
+    .cta-split #ctaButtonRight{ flex:0 0 60%; }
+    .cta-split #viewCartBtn{ flex:0 0 40%; }
 
-@media (max-width: 520px){
-  .cta-split #ctaButtonRight{ flex:0 0 55%; }
-  .cta-split #viewCartBtn{ flex:0 0 45%; }
-  .cart-btn{ padding:16px 14px; font-size:14px; }
-}
+    @media (max-width:520px){
+      .cta-split #ctaButtonRight{ flex:0 0 55%; }
+      .cta-split #viewCartBtn{ flex:0 0 45%; }
+      .cart-btn{ padding:16px 14px; font-size:14px; }
+    }
 
-</style>
+    /* Cart toast (optional UI) */
+    .cart-toast{
+      position:fixed;
+      right:18px;
+      bottom:92px;
+      z-index:2500;
+      background:rgba(12,12,12,0.92);
+      border:1px solid #333;
+      border-radius:14px;
+      padding:14px 14px;
+      box-shadow:0 12px 30px rgba(0,0,0,0.45);
+      max-width:320px;
+      width:calc(100% - 36px);
+    }
+    .cart-toast .toast-title{
+      color:var(--gold);
+      font-weight:800;
+      letter-spacing:0.5px;
+      text-transform:uppercase;
+      font-size:12px;
+      margin-bottom:8px;
+      text-align:left;
+    }
+    .cart-toast .toast-body{
+      color:#ddd;
+      font-size:13px;
+      line-height:1.35;
+      margin-bottom:10px;
+      text-align:left;
+    }
+    .cart-toast .toast-actions{
+      display:flex;
+      gap:10px;
+      justify-content:flex-end;
+    }
+    .cart-toast .toast-actions .toggle-btn{
+      padding:10px 14px;
+      border-radius:20px;
+      font-size:13px;
+    }
+    @media (max-width:1024px){
+      .cart-toast{ bottom:98px; }
+    }
+
+    /* ---- Layout (single source of truth) ---- */
+    .container{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:30px;
+      max-width:1400px;
+      margin:0 auto;
+      padding:20px;
+      padding-bottom:120px; /* room for fixed CTA on <=1024 */
+      text-align:center;
+      min-height:100vh;
+    }
+    .left-panel, .right-panel{
+      width:100%;
+      max-width:600px;
+    }
+
+    /* Ordering behavior on <=1024 (step 1: styles first; step 2+: preview first) */
+    @media (max-width:1024px){
+      body:not(.after-style) .left-panel{ order:1 !important; }
+      body:not(.after-style) .right-panel{ order:2 !important; }
+
+      body.after-style .left-panel{ order:2 !important; }
+      body.after-style .right-panel{ order:1 !important; }
+    }
+
+    /* True desktop split-pane */
+    @media (min-width:1025px){
+      .container{
+        display:grid;
+        grid-template-columns:420px 1fr;
+        align-items:start;
+        gap:30px;
+        padding:40px;
+        padding-bottom:40px;
+        text-align:left;
+      }
+      .header.global-header{ grid-column:1 / -1; }
+      .left-panel, .right-panel{ max-width:none; }
+      .left-panel{
+        height:90vh;
+        overflow-y:auto;
+        padding-right:15px;
+      }
+      .left-panel::-webkit-scrollbar{ width:6px; }
+      .left-panel::-webkit-scrollbar-thumb{ background:var(--gold); border-radius:10px; }
+
+      .right-panel{
+        position:sticky;
+        top:40px;
+        height:fit-content;
+        display:flex;
+        flex-direction:column;
+        gap:24px;
+      }
+      .sticky-cta-right{
+        position:static;
+        background:transparent;
+        border:0;
+        padding:20px 0;
+      }
+
+      /* Collapse empty left panel after style selected */
+      body.after-style .left-panel{
+        height:auto !important;
+        overflow:visible !important;
+      }
+
+      /* Desktop preview sizing */
+      .preview-wrapper{ width:75%; max-width:980px; }
+    }
+  </style>
 </head>
+
 <body>
-
-<div class="progress-bar">
+  <div class="progress-bar">
     <div class="progress-fill" id="progressFill"></div>
-</div>
+  </div>
 
-<div class="container">
-        <div class="header global-header">
-            <div class="logo">AMERICA 250 <span style="font-size: 12px; opacity: 0.5; font-weight: normal; margin-left: 8px;">v1.26.4</span></div>
-            <div class="step-indicator" id="stepIndicator">Step 1 of 4: Pick Your Style</div>
-            <a href="#" onclick="hardReset(); return false;" style="font-size: 11px; color: #666; text-decoration: underline; display: block; margin-top: 5px;">Start Over</a>
-        </div>
+  <div class="container">
+    <div class="header global-header">
+      <div class="logo">AMERICA 250 <span id="versionBadge" style="font-size:12px;opacity:.5;font-weight:normal;margin-left:8px;">v1.30.0</span></div>
+      <div class="step-indicator" id="stepIndicator">Step 1 of 6: Pick Your Style</div>
+      <a href="#" onclick="hardReset(); return false;" style="font-size:11px;color:#666;text-decoration:underline;display:block;margin-top:5px;">Start Over</a>
+    </div>
 
     <div class="left-panel">
-        <!-- STEP 1: Style Selection -->
-        <div class="style-section" id="step1">
-            <h2 class="section-title">Choose Your Style</h2>
-            
-            <div class="product-selector">
-                <label class="input-label">Product Type</label>
-                <select id="productSelect" onchange="changeProduct(this.value)" style="width: 100%; background: #1a1a1a; border: 2px solid #333; padding: 12px; border-radius: 10px; color: white; font-size: 14px;">
-                    <option value="tee">👕 T-Shirt - $24.99</option>
-                </select>
-                <p style="font-size: 11px; color: #666; margin-top: 5px;">
-                    Shape: <span id="shapeIndicator">Square (DTG)</span>
-                </p>
-            </div>
-            
-            <!-- Mobile: Swipeable Cards -->
-            <div class="style-cards">
-                <div class="style-card active" data-style="A">
-                    <div class="card-mockup"></div>
-                    <div class="card-content">
-                        <div class="card-title">Heritage Style</div>
-                        <div class="card-description">Classic Americana</div>
-                        <button class="card-select-btn" onclick="selectStyle('A')">Select This Style</button>
-                    </div>
-                </div>
-                <div class="style-card next" data-style="B">
-                    <div class="card-mockup"></div>
-                    <div class="card-content">
-                        <div class="card-title">Midnight Style</div>
-                        <div class="card-description">Bold & Modern</div>
-                        <button class="card-select-btn" onclick="selectStyle('B')">Select This Style</button>
-                    </div>
-                </div>
-                <div class="style-card" data-style="C">
-                    <div class="card-mockup"></div>
-                    <div class="card-content">
-                        <div class="card-title">Retro Style</div>
-                        <div class="card-description">Vintage Vibes</div>
-                        <button class="card-select-btn" onclick="selectStyle('C')">Select This Style</button>
-                    </div>
-                </div>
-                <div class="style-card" data-style="D">
-                    <div class="card-mockup"></div>
-                    <div class="card-content">
-                        <div class="card-title">Outdoors Style</div>
-                        <div class="card-description">Nature Inspired</div>
-                        <button class="card-select-btn" onclick="selectStyle('D')">Select This Style</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="swipe-nav">
-                <button onclick="previousCard()">←</button>
-                <button onclick="nextCard()">→</button>
-            </div>
-            
-            <!-- Desktop: Grid -->
-            <div class="style-cards-desktop">
-                <div class="style-card-desktop" data-style="A" onclick="selectStyle('A')">
-                    <div class="card-mockup"></div>
-                    <div class="card-content">
-                        <div class="card-title">Heritage</div>
-                        <div class="card-description">Classic Americana</div>
-                    </div>
-                </div>
-                <div class="style-card-desktop" data-style="B" onclick="selectStyle('B')">
-                    <div class="card-mockup"></div>
-                    <div class="card-content">
-                        <div class="card-title">Midnight</div>
-                        <div class="card-description">Bold & Modern</div>
-                    </div>
-                </div>
-                <div class="style-card-desktop" data-style="C" onclick="selectStyle('C')">
-                    <div class="card-mockup"></div>
-                    <div class="card-content">
-                        <div class="card-title">Retro</div>
-                        <div class="card-description">Vintage Vibes</div>
-                    </div>
-                </div>
-                <div class="style-card-desktop" data-style="D" onclick="selectStyle('D')">
-                    <div class="card-mockup"></div>
-                    <div class="card-content">
-                        <div class="card-title">Outdoors</div>
-                        <div class="card-description">Nature Inspired</div>
-                    </div>
-                </div>
-            </div>
+      <!-- STEP 1: Style Selection -->
+      <div class="style-section" id="step1">
+        <h2 class="section-title">Choose Your Style</h2>
+
+        <div class="product-selector">
+          <label class="input-label">Product Type</label>
+          <select id="productSelect" onchange="changeProduct(this.value)" style="width:100%;background:#1a1a1a;border:2px solid #333;padding:12px;border-radius:10px;color:white;font-size:14px;">
+            <option value="tee">👕 T-Shirt - $24.99</option>
+          </select>
+          <p style="font-size:11px;color:#666;margin-top:5px;">
+            Shape: <span id="shapeIndicator">Square (DTG)</span>
+          </p>
         </div>
+
+        <!-- Desktop/Mobile: Grid -->
+        <div class="style-cards-desktop">
+          <div class="style-card-desktop" data-style="A" onclick="selectStyle('A')">
+            <div class="card-mockup"></div>
+            <div class="card-content">
+              <div class="card-title">Heritage</div>
+              <div class="card-description">Classic Americana</div>
+            </div>
+          </div>
+          <div class="style-card-desktop" data-style="B" onclick="selectStyle('B')">
+            <div class="card-mockup"></div>
+            <div class="card-content">
+              <div class="card-title">Midnight</div>
+              <div class="card-description">Bold &amp; Modern</div>
+            </div>
+          </div>
+          <div class="style-card-desktop" data-style="C" onclick="selectStyle('C')">
+            <div class="card-mockup"></div>
+            <div class="card-content">
+              <div class="card-title">Retro</div>
+              <div class="card-description">Vintage Vibes</div>
+            </div>
+          </div>
+          <div class="style-card-desktop" data-style="D" onclick="selectStyle('D')">
+            <div class="card-mockup"></div>
+            <div class="card-content">
+              <div class="card-title">Outdoors</div>
+              <div class="card-description">Nature Inspired</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    
-    <!-- Right Panel: Preview & Steps 2-4 -->
+
+    <!-- Right Panel: Preview & Steps 2-6 -->
     <div class="right-panel">
-        <div class="preview-section">
-            <div class="preview-title">Live Preview</div>
-            <div class="preview-row">
-                <div class="preview-wrapper">
-                    <div class="preview-canvas" id="previewCanvas">
-                        <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
-                            <defs>
-                                <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
-                                <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
-                            </defs>
-                            <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
-                            <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice" />
-                            <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
-                                <textPath href="#pathTop" startOffset="50%"></textPath>
-                            </text>
-                            <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
-                                <textPath href="#pathMid" startOffset="50%"></textPath>
-                            </text>
-                        </svg>
-                    </div>
-                </div>
+      <div class="preview-section">
+        <div class="preview-title">Live Preview</div>
+
+        <div class="preview-row">
+          <div class="preview-wrapper">
+            <div class="preview-canvas" id="previewCanvas">
+              <svg id="previewSVG" viewBox="0 0 500 400" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                  <path id="pathTop" d="M 20,223 A 230,45 0 0,1 480,223" />
+                  <path id="pathMid" d="M 20,282 A 230,65 0 0,1 480,282" />
+                </defs>
+                <rect id="shirtFill" x="0" y="0" width="500" height="400" fill="#1a1a1a" />
+                <image id="bgImage" x="-8" y="-8" width="516" height="416" preserveAspectRatio="xMidYMid slice"></image>
+
+                <text id="cityText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="10">
+                  <textPath href="#pathTop" startOffset="50%"></textPath>
+                </text>
+                <text id="groupText" text-anchor="middle" fill="#F2E8C9" font-family="Libre Baskerville" font-weight="700" font-size="8">
+                  <textPath href="#pathMid" startOffset="50%"></textPath>
+                </text>
+              </svg>
             </div>
+          </div>
+        </div>
 
-            <div class="preview-tools">
-                <button class="zoom-toggle" id="zoomToggle" onclick="toggleZoom()" aria-label="Toggle 150% zoom" title="Toggle 150% zoom">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="11" cy="11" r="8"/>
-                        <path d="M21 21l-4.35-4.35"/>
-                        <line x1="11" y1="8" x2="11" y2="14"/>
-                        <line x1="8" y1="11" x2="14" y2="11"/>
-                    </svg>
-                </button>
-            </div>
+        <div class="preview-tools">
+          <button class="zoom-toggle" id="zoomToggle" onclick="toggleZoom()" aria-label="Toggle 150% zoom" title="Toggle 150% zoom">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="M21 21l-4.35-4.35"></path>
+              <line x1="11" y1="8" x2="11" y2="14"></line>
+              <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+          </button>
+        </div>
 
-            <div id="variantChips" class="variant-chips hidden">
-                <div class="chip-row">
-                    <span class="chip" id="chipStyle"></span>
-                    <span class="chip" id="chipColor"></span>
-                    <span class="chip" id="chipSize"></span>
-                    <span class="chip" id="chipQty"></span>
-                </div>
-                <button class="chip-change" type="button" onclick="jumpToVariants()">Change</button>
-            </div>
+        <div id="variantChips" class="variant-chips hidden">
+          <div class="chip-row">
+            <span class="chip" id="chipStyle"></span>
+            <span class="chip" id="chipColor"></span>
+            <span class="chip" id="chipSize"></span>
+            <span class="chip" id="chipQty"></span>
+          </div>
+          <button class="chip-change" type="button" onclick="jumpToVariants()">Change</button>
+        </div>
 
-            <div id="variantControls">
-
-<!-- COLOR SELECTOR -->
-        <div class="selector-section color-section">
+        <div id="variantControls">
+          <!-- COLOR -->
+          <div class="selector-section color-section">
             <div class="selector-label">Color</div>
             <div class="color-row">
-                <div class="color-options" id="colorOptions">
-                    <!-- Populated by updateColorOptions() -->
-                </div></div>
-        </div>
-<!-- SIZE SELECTOR -->
-        <div class="selector-section">
+              <div class="color-options" id="colorOptions"></div>
+            </div>
+          </div>
+
+          <!-- SIZE + QTY -->
+          <div class="selector-section">
             <div class="selector-label">Size</div>
-            
+
             <div class="size-options">
-                <button class="size-btn" data-size="S" onclick="selectSize('S')">S</button>
-                <button class="size-btn" data-size="M" onclick="selectSize('M')">M</button>
-                <button class="size-btn active" data-size="L" onclick="selectSize('L')">L</button>
-                <button class="size-btn" data-size="XL" onclick="selectSize('XL')">XL</button>
-                <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
-                <button class="size-btn" data-size="3XL" onclick="selectSize('3XL')">3XL</button>
+              <button class="size-btn" data-size="S" onclick="selectSize('S')">S</button>
+              <button class="size-btn" data-size="M" onclick="selectSize('M')">M</button>
+              <button class="size-btn active" data-size="L" onclick="selectSize('L')">L</button>
+              <button class="size-btn" data-size="XL" onclick="selectSize('XL')">XL</button>
+              <button class="size-btn" data-size="2XL" onclick="selectSize('2XL')">2XL</button>
+              <button class="size-btn" data-size="3XL" onclick="selectSize('3XL')">3XL</button>
             </div>
 
-            <div class="selector-label" style="margin-top: 14px;">Quantity</div>
-
+            <div class="selector-label" style="margin-top:14px;">Quantity</div>
             <div class="quantity-controls">
-                <button class="qty-btn" type="button" onclick="changeQuantity(-1)">−</button>
-                <input id="quantityInput" class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" oninput="setQuantityFromInput(this.value)">
-                <button class="qty-btn" type="button" onclick="changeQuantity(1)">+</button>
+              <button class="qty-btn" type="button" onclick="changeQuantity(-1)">−</button>
+              <input id="quantityInput" class="qty-input" type="number" min="1" max="99" value="1" inputmode="numeric" oninput="setQuantityFromInput(this.value)">
+              <button class="qty-btn" type="button" onclick="changeQuantity(1)">+</button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2: Options (informational block; controls are above) -->
+      <div class="location-section hidden" id="step2">
+        <div class="section-title">Choose Color, Size &amp; Quantity</div>
+        <div class="helper-text">Pick your options here. During City/Group/Refine we’ll hide these controls to reduce scrolling, but you can change them again on Confirm.</div>
+      </div>
+
+      <!-- STEP 3: City -->
+      <div class="location-section hidden" id="step3">
+        <h2 class="section-title">Your Location</h2>
+        <button class="locate-btn" onclick="useGeolocation()">
+          <span>📍</span>
+          <span>Use My Location</span>
+        </button>
+        <div class="or-divider">OR</div>
+        <div class="input-group">
+          <label class="input-label">City &amp; State</label>
+          <input type="text" class="text-input" id="cityInput" maxlength="50" placeholder="MIAMI, FLORIDA" oninput="updateCity()">
+          <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Group -->
+      <div class="location-section hidden" id="step4">
+        <h2 class="section-title">Your Group</h2>
+        <div class="input-group">
+          <label class="input-label">Group or Family Name</label>
+          <input type="text" class="text-input" id="groupInput" maxlength="35" placeholder="THE SMITH FAMILY" oninput="updateGroup()">
+          <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
+        </div>
+      </div>
+
+      <!-- STEP 5: Refine -->
+      <div class="tweak-section hidden" id="step5">
+        <div class="tweak-toggle">
+          <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">⚙️ Fine-Tune Your Design</button>
         </div>
 
-
-
+        <div class="tweak-controls" id="tweakControls">
+          <div class="control-group">
+            <div class="control-label">City Text</div>
+            <div class="button-labels">
+              <span>Size</span><span>Position</span><span>Arc</span>
             </div>
+            <div class="button-grid-extended">
+              <button class="tweak-btn" onclick="adjustCity('size', -1)">A-</button>
+              <button class="tweak-btn" onclick="adjustCity('size', 1)">A+</button>
+              <button class="tweak-btn" onclick="adjustCity('y', -1)">↑</button>
+              <button class="tweak-btn" onclick="adjustCity('y', 1)">↓</button>
+              <button class="tweak-btn" onclick="adjustCity('arc', -5)">⌒-</button>
+              <button class="tweak-btn" onclick="adjustCity('arc', 5)">⌒+</button>
+            </div>
+          </div>
 
-<!-- STEP 2: Color/Size/Qty -->
-        <div class="location-section hidden" id="step2">
-            <div class="section-title">Choose Color, Size & Quantity</div>
-            <div class="helper-text">Pick your options here. During City/Group/Refine we’ll hide these controls to reduce scrolling, but you can change them again on Confirm.</div>
+          <div class="control-group">
+            <div class="control-label">Group Text</div>
+            <div class="button-labels">
+              <span>Size</span><span>Position</span><span>Arc</span>
+            </div>
+            <div class="button-grid-extended">
+              <button class="tweak-btn" onclick="adjustGroup('size', -1)">A-</button>
+              <button class="tweak-btn" onclick="adjustGroup('size', 1)">A+</button>
+              <button class="tweak-btn" onclick="adjustGroup('y', -1)">↑</button>
+              <button class="tweak-btn" onclick="adjustGroup('y', 1)">↓</button>
+              <button class="tweak-btn" onclick="adjustGroup('arc', -5)">⌒-</button>
+              <button class="tweak-btn" onclick="adjustGroup('arc', 5)">⌒+</button>
+            </div>
+          </div>
+
+          <button class="toggle-btn" onclick="resetDesign()" style="width:100%;margin-top:15px;">🔄 Reset to Auto</button>
         </div>
 
-<!-- STEP 3: Location -->
-        <div class="location-section hidden" id="step3">
-            <h2 class="section-title">Your Location</h2>
-            <button class="locate-btn" onclick="useGeolocation()">
-                <span>📍</span>
-                <span>Use My Location</span>
+        <div class="advanced-controls hidden">
+          <div class="slider-group">
+            <div class="slider-label"><span>City Size</span><span class="slider-value" id="citySizeVal">10</span></div>
+            <input type="range" id="citySizeSlider" min="10" max="80" value="10" oninput="updateSlider('citySize', this.value)">
+          </div>
+          <div class="slider-group">
+            <div class="slider-label"><span>City Y-Position</span><span class="slider-value" id="cityYVal">223</span></div>
+            <input type="range" id="cityYSlider" min="0" max="300" value="223" oninput="updateSlider('cityY', this.value)">
+          </div>
+          <div class="slider-group">
+            <div class="slider-label"><span>Group Size</span><span class="slider-value" id="groupSizeVal">8</span></div>
+            <input type="range" id="groupSizeSlider" min="8" max="50" value="8" oninput="updateSlider('groupSize', this.value)">
+          </div>
+          <div class="slider-group">
+            <div class="slider-label"><span>Group Y-Position</span><span class="slider-value" id="groupYVal">282</span></div>
+            <input type="range" id="groupYSlider" min="50" max="400" value="282" oninput="updateSlider('groupY', this.value)">
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 6: Confirm -->
+      <div class="location-section hidden" id="step6">
+        <div class="section-title">Confirm</div>
+        <div class="helper-text">
+          Review your design and options. If you want to change Color/Size/Qty, tap “Change” on the chips above or use the controls shown in this step.
+        </div>
+
+        <div class="summary-grid" style="margin-top:14px; display:grid; gap:10px;">
+          <div style="display:flex; justify-content:space-between; gap:10px;">
+            <span style="opacity:.75;">City</span>
+            <strong id="confirmCity" style="text-align:right;"></strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; gap:10px;">
+            <span style="opacity:.75;">Group</span>
+            <strong id="confirmGroup" style="text-align:right;"></strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; gap:10px;">
+            <span style="opacity:.75;">Style</span>
+            <strong id="confirmStyle" style="text-align:right;"></strong>
+          </div>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:14px; flex-wrap:wrap;">
+          <button class="toggle-btn" type="button" onclick="startAnotherDesign()">Start Another Design</button>
+          <button class="toggle-btn" type="button" onclick="jumpToStyle()">Change Style</button>
+        </div>
+      </div>
+
+      <!-- Sticky CTA for Right Panel -->
+      <div class="sticky-cta-right">
+        <div class="cta-row">
+          <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="display:none;width:60px;flex:0 0 60px;">←</button>
+
+          <div class="cta-split">
+            <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()">Continue →</button>
+
+            <button class="cart-btn" id="viewCartBtn" onclick="handleViewCart()" disabled aria-disabled="true">
+              <span>View Cart</span>
+              <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
             </button>
-            <div class="or-divider">OR</div>
-            <div class="input-group">
-                <label class="input-label">City & State</label>
-                <input type="text" class="text-input" id="cityInput" maxlength="50" placeholder="MIAMI, FLORIDA" oninput="updateCity()">
-                <div class="char-counter"><span id="cityCounter">50</span> characters remaining</div>
-            </div>
+          </div>
         </div>
-
-        <!-- STEP 4: Group Name -->
-        <div class="location-section hidden" id="step4">
-            <h2 class="section-title">Your Group</h2>
-            <div class="input-group">
-                <label class="input-label">Group or Family Name</label>
-                <input type="text" class="text-input" id="groupInput" maxlength="35" placeholder="THE SMITH FAMILY" oninput="updateGroup()">
-                <div class="char-counter"><span id="groupCounter">35</span> characters remaining</div>
-            </div>
-        </div>
-
-        <!-- STEP 5: Refine Design -->
-        <div class="tweak-section hidden" id="step5">
-            <div class="tweak-toggle">
-                <button class="toggle-btn" id="tweakToggle" onclick="toggleTweak()">
-                    ⚙️ Fine-Tune Your Design
-                </button>
-            </div>
-            <div class="tweak-controls" id="tweakControls">
-                <div class="control-group">
-                    <div class="control-label">City Text</div>
-                    <div class="button-labels">
-                        <span>Size</span>
-                        <span>Position</span>
-                        <span>Arc</span>
-                    </div>
-                    <div class="button-grid-extended">
-                        <button class="tweak-btn" onclick="adjustCity('size', -1)">A-</button>
-                        <button class="tweak-btn" onclick="adjustCity('size', 1)">A+</button>
-                        <button class="tweak-btn" onclick="adjustCity('y', -1)">↑</button>
-                        <button class="tweak-btn" onclick="adjustCity('y', 1)">↓</button>
-                        <button class="tweak-btn" onclick="adjustCity('arc', -5)">⌒-</button>
-                        <button class="tweak-btn" onclick="adjustCity('arc', 5)">⌒+</button>
-                    </div>
-                </div>
-                <div class="control-group">
-                    <div class="control-label">Group Text</div>
-                    <div class="button-labels">
-                        <span>Size</span>
-                        <span>Position</span>
-                        <span>Arc</span>
-                    </div>
-                    <div class="button-grid-extended">
-                        <button class="tweak-btn" onclick="adjustGroup('size', -1)">A-</button>
-                        <button class="tweak-btn" onclick="adjustGroup('size', 1)">A+</button>
-                        <button class="tweak-btn" onclick="adjustGroup('y', -1)">↑</button>
-                        <button class="tweak-btn" onclick="adjustGroup('y', 1)">↓</button>
-                        <button class="tweak-btn" onclick="adjustGroup('arc', -5)">⌒-</button>
-                        <button class="tweak-btn" onclick="adjustGroup('arc', 5)">⌒+</button>
-                    </div>
-                </div>
-                <button class="toggle-btn" onclick="resetDesign()" style="width: 100%; margin-top: 15px;">
-                    🔄 Reset to Auto
-                </button>
-            </div>
-            <div class="advanced-controls hidden">
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>City Size</span>
-                        <span class="slider-value" id="citySizeVal">10</span>
-                    </div>
-                    <input type="range" id="citySizeSlider" min="10" max="80" value="10" oninput="updateSlider('citySize', this.value)">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>City Y-Position</span>
-                        <span class="slider-value" id="cityYVal">223</span>
-                    </div>
-                    <input type="range" id="cityYSlider" min="0" max="300" value="223" oninput="updateSlider('cityY', this.value)">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Group Size</span>
-                        <span class="slider-value" id="groupSizeVal">8</span>
-                    </div>
-                    <input type="range" id="groupSizeSlider" min="8" max="50" value="8" oninput="updateSlider('groupSize', this.value)">
-                </div>
-                <div class="slider-group">
-                    <div class="slider-label">
-                        <span>Group Y-Position</span>
-                        <span class="slider-value" id="groupYVal">282</span>
-                    </div>
-                    <input type="range" id="groupYSlider" min="50" max="400" value="282" oninput="updateSlider('groupY', this.value)">
-                </div>
-            </div>
-        </div>
-
-        
+      </div>
     </div>
-    
-    
-        
-        
+  </div>
 
-    
-        
-<!-- STEP 6: Confirm -->
-        <div class="location-section hidden" id="step6">
-            <div class="section-title">Confirm</div>
-            <div class="helper-text">
-                Review your design and options. If you want to change Color/Size/Qty, tap “Change” on the chips above or use the controls shown in this step.
-            </div>
+  <!-- Cart Toast (optional UI) -->
+  <div id="cartToast" class="cart-toast hidden" role="status" aria-live="polite">
+    <div class="toast-title">Added to cart</div>
+    <div class="toast-body">Your item was added to cart. You can add another design, or open your cart when you’re ready to checkout.</div>
+    <div class="toast-actions">
+      <button class="toggle-btn" type="button" onclick="hideCartToast()">Close</button>
+      <button class="toggle-btn" type="button" onclick="handleViewCart()">Open Cart</button>
+    </div>
+  </div>
 
-            <div class="summary-grid" style="margin-top:14px; display:grid; gap:10px;">
-                <div style="display:flex; justify-content:space-between; gap:10px;">
-                    <span style="opacity:.75;">City</span>
-                    <strong id="confirmCity" style="text-align:right;"></strong>
-                </div>
-                <div style="display:flex; justify-content:space-between; gap:10px;">
-                    <span style="opacity:.75;">Group</span>
-                    <strong id="confirmGroup" style="text-align:right;"></strong>
-                </div>
-                <div style="display:flex; justify-content:space-between; gap:10px;">
-                    <span style="opacity:.75;">Style</span>
-                    <strong id="confirmStyle" style="text-align:right;"></strong>
-                </div>
-            </div>
+  <script>
+    // =========================
+    // v1.30.0 — Production Build
+    // =========================
 
-            <div style="display:flex; gap:12px; margin-top:14px; flex-wrap:wrap;">
-                <button class="toggle-btn" type="button" onclick="startAnotherDesign()">Start Another Design</button>
-                <button class="toggle-btn" type="button" onclick="jumpToStyle()">Change Style</button>
-            </div>
-        </div>
-
-<!-- Sticky CTA for Right Panel -->
-        <div class="sticky-cta-right">
-            <div class="cta-row">
-                <button class="toggle-btn" id="backBtnRight" onclick="goBack()" style="display:none;width:60px;flex:0 0 60px;">←</button>
-
-                <div class="cta-split">
-                    <button class="mega-btn" id="ctaButtonRight" onclick="handlePrimaryAction()">Continue →</button>
-
-                    <button class="cart-btn" id="viewCartBtn" onclick="handleViewCart()" disabled aria-disabled="true">
-                        <span>View Cart</span>
-                        <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-</div>
-</div>
-
-<!-- Redundant CTA removed -->
-
-<script>
-    // State management
+    // State
     let currentStep = 1;
+    const BUILDER_VERSION = "v1.30.0";
 
-let cartItemCount = 0;
+    let cartItemCount = 0;
 
-function setCartCount(n){
-    cartItemCount = Math.max(0, Number(n) || 0);
-    const btn = document.getElementById("viewCartBtn");
-    const badge = document.getElementById("cartBadge");
-
-    const isEmpty = cartItemCount <= 0;
-
-    if (btn){
-        btn.disabled = isEmpty;
-        btn.setAttribute("aria-disabled", isEmpty ? "true" : "false");
-    }
-    if (badge){
-        if (!isEmpty){
-            badge.style.display = "flex";
-            badge.textContent = String(cartItemCount);
-        } else {
-            badge.style.display = "none";
-            badge.textContent = "0";
-        }
-    }
-}
-
-async function handleViewCart(){
-    // Navigate to Shopify USA250 cart in the same tab, preserving where the shopper came from.
-    let current = window.location.href;
-    let lastUrl = current;
-    try{
-        if (window.localStorage){
-            const key = "usa250_last_builder_url";
-            // store current
-            localStorage.setItem(key, current);
-            const stored = localStorage.getItem(key);
-            if (stored && /^https?:\/\//i.test(stored)){
-                lastUrl = stored;
-            }
-        }
-    }catch(e){}
-
-    const baseCart = "https://shop.4ship.ca/cart";
-    const params = new URLSearchParams();
-    params.set("view", "usa250");
-    params.set("return_to", lastUrl);
-    const target = baseCart + "?" + params.toString();
-
-    try{
-        window.location.href = target;
-    }catch(e){
-        // Fallback: plain cart
-        window.location.href = baseCart;
-    }
-}
-
-    
-
-    function hardReset() {
-        if (confirm("Are you sure you want to clear your design and start over?")) {
-            try {
-                if (window.sessionStorage) {
-                    sessionStorage.removeItem('usa250_session');
-                }
-            } catch (e) {}
-            window.location.reload();
-        }
-    }
-let currentCardIndex = 0;
+    let currentCardIndex = 0; // (carousel disabled, but keeping harmless)
     let selectedStyle = null;
     let selectedProduct = 'tee';
-    let selectedColor = null; // default chosen per-style in updateColorOptions()
+    let selectedColor = null;
     let selectedSize = 'L';
-    
     let selectedQuantity = 1;
-let cityText = '';
+    let cityText = '';
     let groupText = '';
-    
-    let _cityAdvanceTimer = null;
-    let _groupAdvanceTimer = null;
-let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
+
+    let _cartToastTimer = null;
+
+    let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     let templateDefaults = {}; // per (style+shape) baseline values for Reset to Auto
     function _templateKey(style = selectedStyle) {
-        const shape = (PRODUCTS[selectedProduct] && PRODUCTS[selectedProduct].shape) ? PRODUCTS[selectedProduct].shape : 'Sq';
-        return `${style || 'NA'}_${shape}`;
+      const shape = (PRODUCTS[selectedProduct] && PRODUCTS[selectedProduct].shape) ? PRODUCTS[selectedProduct].shape : 'Sq';
+      return `${style || 'NA'}_${shape}`;
     }
 
-    
-    const PRODUCTS = {
-        'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' },
+    function hardReset() {
+      if (confirm("Are you sure you want to clear your design and start over?")) {
+        try { if (window.sessionStorage) sessionStorage.removeItem('usa250_session'); } catch (e) {}
+        window.location.reload();
+      }
+    }
 
-        'tee-navy-3xl': { shopifyVariantId: '46056446099606', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-black-3xl': { shopifyVariantId: '46056446132374', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_black_gpr_4-0_gildan_64000' },
-        'tee-gray-3xl': { shopifyVariantId: '46056446165142', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-white-3xl': { shopifyVariantId: '46056446197910', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_white_gpr_4-0_gildan_64000' }
+    function setCartCount(n){
+      cartItemCount = Math.max(0, Number(n) || 0);
+      const btn = document.getElementById("viewCartBtn");
+      const badge = document.getElementById("cartBadge");
+      const isEmpty = cartItemCount <= 0;
+
+      if (btn){
+        btn.disabled = isEmpty;
+        btn.setAttribute("aria-disabled", isEmpty ? "true" : "false");
+      }
+      if (badge){
+        if (!isEmpty){
+          badge.style.display = "flex";
+          badge.textContent = String(cartItemCount);
+        } else {
+          badge.style.display = "none";
+          badge.textContent = "0";
+        }
+      }
+    }
+
+    async function handleViewCart(){
+      let current = window.location.href;
+      let lastUrl = current;
+      try{
+        if (window.localStorage){
+          const key = "usa250_last_builder_url";
+          localStorage.setItem(key, current);
+          const stored = localStorage.getItem(key);
+          if (stored && /^https?:\/\//i.test(stored)) lastUrl = stored;
+        }
+      }catch(e){}
+
+      const baseCart = "https://shop.4ship.ca/cart";
+      const params = new URLSearchParams();
+      params.set("view", "usa250");
+      params.set("return_to", lastUrl);
+      const target = baseCart + "?" + params.toString();
+
+      try{ window.location.href = target; }
+      catch(e){ window.location.href = baseCart; }
+    }
+
+    // Data
+    const PRODUCTS = {
+      'tee': { shape: 'Sq', name: 'T-Shirt', price: 24.99, category: 'Apparel' },
     };
-    
+
     const STYLES = {
-        A: { font: "Libre Baskerville", color: "#F2E8C9", weight: "700", name: "Heritage" },
-        B: { font: "Anton", color: "#E6DCC8", weight: "400", name: "Midnight" },
-        C: { font: "Oswald", color: "#A61A26", weight: "700", name: "Retro" },
-        D: { font: "Cinzel", color: "#0F2A1B", weight: "700", name: "Outdoors" }
+      A: { font: "Libre Baskerville", color: "#F2E8C9", weight: "700", name: "Heritage" },
+      B: { font: "Anton", color: "#E6DCC8", weight: "400", name: "Midnight" },
+      C: { font: "Oswald", color: "#A61A26", weight: "700", name: "Retro" },
+      D: { font: "Cinzel", color: "#0F2A1B", weight: "700", name: "Outdoors" }
+    };
+
+    // Style -> available colors
+    const STYLE_COLORS = {
+      'A': ['Black', 'Navy'],
+      'B': ['Black', 'Navy'],
+      'C': ['Black', 'Navy', 'White', 'Gray'],
+      'D': ['Gray', 'White']
+    };
+
+    // Shopify integration (kept for future use)
+    const SHOPIFY_CONFIG = {
+      backendUrl: 'https://usa250-backend.vercel.app/api/create-draft-order',
+      productId: '8581802721430'
+    };
+
+    // Global variant map (single source of truth)
+    const VARIANT_MAP = {
+      'tee-navy-m':   { shopifyVariantId: '46056445444246', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
+      'tee-navy-l':   { shopifyVariantId: '46056445477014', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000' },
+      'tee-navy-xl':  { shopifyVariantId: '46056445509782', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000' },
+      'tee-navy-2xl': { shopifyVariantId: '46056445542550', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000' },
+      'tee-navy-s':   { shopifyVariantId: '46056445575318', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000' },
+      'tee-navy-3xl': { shopifyVariantId: '46056446099606', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_navy_gpr_4-0_gildan_64000' },
+
+      'tee-black-m':   { shopifyVariantId: '46056445608086', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
+      'tee-black-l':   { shopifyVariantId: '46056445640854', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000' },
+      'tee-black-xl':  { shopifyVariantId: '46056445673622', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000' },
+      'tee-black-2xl': { shopifyVariantId: '46056445706390', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000' },
+      'tee-black-s':   { shopifyVariantId: '46056445739158', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
+      'tee-black-3xl': { shopifyVariantId: '46056446132374', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_black_gpr_4-0_gildan_64000' },
+
+      'tee-gray-m':   { shopifyVariantId: '46056445771926', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_gray_gpr_4-0_gildan_64000' },
+      'tee-gray-l':   { shopifyVariantId: '46056445804694', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_gray_gpr_4-0_gildan_64000' },
+      'tee-gray-xl':  { shopifyVariantId: '46056445837462', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_gray_gpr_4-0_gildan_64000' },
+      'tee-gray-2xl': { shopifyVariantId: '46056445870230', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_gray_gpr_4-0_gildan_64000' },
+      'tee-gray-s':   { shopifyVariantId: '46056445902998', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_gray_gpr_4-0_gildan_64000' },
+      'tee-gray-3xl': { shopifyVariantId: '46056446165142', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_gray_gpr_4-0_gildan_64000' },
+
+      'tee-white-m':   { shopifyVariantId: '46056445935766', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000' },
+      'tee-white-l':   { shopifyVariantId: '46056445968534', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000' },
+      'tee-white-xl':  { shopifyVariantId: '46056446001302', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000' },
+      'tee-white-2xl': { shopifyVariantId: '46056446034070', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000' },
+      'tee-white-s':   { shopifyVariantId: '46056446066838', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' },
+      'tee-white-3xl': { shopifyVariantId: '46056446197910', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_white_gpr_4-0_gildan_64000' }
     };
 
     // ------------------------------------------------------------
-    // v1.17 hardening: caching + safe SVG text + export font loading
+    // Export hardening: caching + safe SVG text + export font loading
     // ------------------------------------------------------------
     const EXPORT_FONT_IMPORT_URL = 'https://fonts.googleapis.com/css2?family=Anton&family=Libre+Baskerville:wght@700&family=Montserrat:wght@500;700;900&family=Cinzel:wght@700;900&family=Oswald:wght@700&display=swap';
 
     const _assetCache = {
-        images: new Map(),   // src -> Promise<HTMLImageElement>
-        json: new Map(),     // url -> Promise<any|null>
-        bgBase64: new Map()  // imageUrl -> Promise<string>
+      images: new Map(),   // src -> Promise<HTMLImageElement>
+      json: new Map(),     // url -> Promise<any|null>
+      bgBase64: new Map()  // imageUrl -> Promise<string>
     };
 
     function escapeXml(str) {
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     async function fetchJsonCached(url) {
-        if (!url) return null;
-        if (_assetCache.json.has(url)) return _assetCache.json.get(url);
+      if (!url) return null;
+      if (_assetCache.json.has(url)) return _assetCache.json.get(url);
 
-        const p = fetch(url, { cache: 'force-cache' })
-            .then(r => (r && r.ok) ? r.json() : null)
-            .catch(() => null);
+      const p = fetch(url, { cache: 'force-cache' })
+        .then(r => (r && r.ok) ? r.json() : null)
+        .catch(() => null);
 
-        _assetCache.json.set(url, p);
-        return p;
+      _assetCache.json.set(url, p);
+      return p;
     }
 
     function injectFontImport(svgEl) {
-        try {
-            if (!svgEl || !svgEl.querySelector) return;
-            if (svgEl.querySelector('style[data-export-fonts="1"]')) return;
+      try {
+        if (!svgEl || !svgEl.querySelector) return;
+        if (svgEl.querySelector('style[data-export-fonts="1"]')) return;
 
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const styleEl = document.createElementNS(svgNS, 'style');
-            styleEl.setAttribute('data-export-fonts', '1');
-            styleEl.textContent = `@import url("${EXPORT_FONT_IMPORT_URL}");`;
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const styleEl = document.createElementNS(svgNS, 'style');
+        styleEl.setAttribute('data-export-fonts', '1');
+        styleEl.textContent = `@import url("${EXPORT_FONT_IMPORT_URL}");`;
 
-            // Put it at the top so it is applied early
-            const firstChild = svgEl.firstChild;
-            if (firstChild) svgEl.insertBefore(styleEl, firstChild);
-            else svgEl.appendChild(styleEl);
-        } catch (e) {
-            // non-fatal
-        }
+        const firstChild = svgEl.firstChild;
+        if (firstChild) svgEl.insertBefore(styleEl, firstChild);
+        else svgEl.appendChild(styleEl);
+      } catch (e) {}
     }
 
     async function ensureFontsLoadedForExport() {
-        try {
-            if (!document.fonts || typeof document.fonts.load !== 'function') return;
+      try {
+        if (!document.fonts || typeof document.fonts.load !== 'function') return;
 
-            const style = (selectedStyle && STYLES[selectedStyle]) ? STYLES[selectedStyle] : null;
-            const activeFont = (style && style.font) ? style.font : 'Montserrat';
-            const activeWeight = (style && style.weight) ? String(style.weight) : '400';
+        const style = (selectedStyle && STYLES[selectedStyle]) ? STYLES[selectedStyle] : null;
+        const activeFont = (style && style.font) ? style.font : 'Montserrat';
+        const activeWeight = (style && style.weight) ? String(style.weight) : '400';
 
-            const fontsToLoad = new Set([
-                activeFont,
-                'Libre Baskerville',
-                'Montserrat',
-                'Anton',
-                'Cinzel',
-                'Oswald'
-            ]);
+        const fontsToLoad = new Set([
+          activeFont, 'Libre Baskerville', 'Montserrat', 'Anton', 'Cinzel', 'Oswald'
+        ]);
+        const weightsToLoad = new Set([activeWeight, '400', '700', '900']);
+        const loads = [];
 
-            const weightsToLoad = new Set([activeWeight, '400', '700', '900']);
-            const loads = [];
+        fontsToLoad.forEach((f) => {
+          weightsToLoad.forEach((w) => {
+            loads.push(document.fonts.load(`${w} 16px "${f}"`));
+          });
+        });
 
-            fontsToLoad.forEach((f) => {
-                weightsToLoad.forEach((w) => {
-                    loads.push(document.fonts.load(`${w} 16px "${f}"`));
-                });
-            });
+        await Promise.race([
+          Promise.all(loads),
+          new Promise(resolve => setTimeout(resolve, 2000))
+        ]);
 
-            // Don't ever hang checkout/export on fonts
-            await Promise.race([
-                Promise.all(loads),
-                new Promise(resolve => setTimeout(resolve, 2000))
-            ]);
-
-            await Promise.race([
-                document.fonts.ready,
-                new Promise(resolve => setTimeout(resolve, 2000))
-            ]);
-        } catch (e) {
-            // non-fatal
-        }
+        await Promise.race([
+          document.fonts.ready,
+          new Promise(resolve => setTimeout(resolve, 2000))
+        ]);
+      } catch (e) {}
     }
 
-    
-    // Shopify Integration
-    const SHOPIFY_CONFIG = {
-        backendUrl: 'https://usa250-backend.vercel.app/api/create-draft-order',
-        productId: '8581802721430'
-    };
+    function loadImage(src) {
+      if (!src) return Promise.reject(new Error('Missing image src'));
+
+      const isString = typeof src === 'string';
+      const cacheable = isString && !src.startsWith('blob:') && !src.startsWith('data:');
+
+      if (cacheable && _assetCache.images.has(src)) return _assetCache.images.get(src);
+
+      const p = new Promise((resolve, reject) => {
+        const img = new Image();
+        img.decoding = 'async';
+        if (isString && /^https?:\/\//i.test(src)) img.crossOrigin = 'anonymous';
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('Failed to load image: ' + src));
+        img.src = src;
+      });
+
+      if (cacheable) _assetCache.images.set(src, p);
+      return p;
+    }
+
     // ------------------------------------------------------------
     // Shopify Cart Bridge (cumulative cart, token + postMessage)
     // ------------------------------------------------------------
-    const CART_BRIDGE = {
-        // Bridge page on Shopify (keep Visible, but don't link it in navigation)
-        // Token is used BOTH in URL (?t=...) and in postMessage payload for compatibility.
-        token: "mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc",
-        bridgeOrigin: "https://shop.4ship.ca",
-        bridgeUrl: "https://shop.4ship.ca/pages/cart-bridge?t=mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc",
-        popupName: "shopify_cart",
-        popupFeatures: "width=460,height=720,menubar=0,toolbar=0,location=0,status=0,scrollbars=1,resizable=1"
-    };
-
     const CartBridgeClient = (() => {
-  // NOTE: Bridge URL includes token (?t=...). Keep this in sync with the Shopify "Cart Bridge" page.
-  const BRIDGE_URL = "https://shop.4ship.ca/pages/cart-bridge?t=mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc";
-  const BRIDGE_TOKEN = (() => {
-    try { return new URL(BRIDGE_URL).searchParams.get("t") || ""; } catch (e) { return ""; }
-  })();
+      const BRIDGE_URL = "https://shop.4ship.ca/pages/cart-bridge?t=mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc";
+      const BRIDGE_ORIGIN = new URL(BRIDGE_URL).origin;
+      let bridgeTargetOrigin = BRIDGE_ORIGIN;
 
-  // Some Shopify stores may redirect/canonicalize between the custom domain and the myshopify domain.
-  // Accept BOTH so READY/ADD replies aren't dropped.
-  const BRIDGE_ALLOWED_ORIGINS = new Set([
-    new URL(BRIDGE_URL).origin,
-    "https://your4ship.myshopify.com"
-  ]);
+      const BRIDGE_TOKEN = (() => {
+        try { return new URL(BRIDGE_URL).searchParams.get("t") || ""; } catch (e) { return ""; }
+      })();
 
-  let bridgeWin = null;
-  let ready = false;
-  let readyPromise = null;
+      const BRIDGE_ALLOWED_ORIGINS = new Set([
+        new URL(BRIDGE_URL).origin,
+        "https://your4ship.myshopify.com"
+      ]);
 
-  // requestId -> { resolve, reject, timeout, type }
-  const pending = new Map();
+      let bridgeWin = null;
+      let ready = false;
+      let readyPromise = null;
+      const pending = new Map();
 
-  function uid() {
-    return "r_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
-  }
-  function preopenBridge() {
-    // Must be called from a user gesture (click/tap) to avoid popup blockers.
-    if (bridgeWin && !bridgeWin.closed) return bridgeWin;
+      function uid() {
+        return "r_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
+      }
 
-    // Stable name allows reuse across clicks.
-    // NOTE: no 'noopener' here; we need the window handle for postMessage.
-    bridgeWin = window.open(BRIDGE_URL, "cart_bridge", "width=520,height=720");
-    if (!bridgeWin) throw new Error("Popup blocked. Allow popups for 4ship.shop, then try again.");
-    return bridgeWin;
-  }
+      function preopenBridge() {
+        if (bridgeWin && !bridgeWin.closed) return bridgeWin;
+        bridgeWin = window.open(BRIDGE_URL, "cart_bridge", "width=520,height=720");
+        if (!bridgeWin) throw new Error("Popup blocked. Allow popups for shop.4ship.ca, then try again.");
+        return bridgeWin;
+      }
 
-  function openBridge() {
-    // Safe to call from async code: will NOT attempt to create a popup.
-    if (!bridgeWin || bridgeWin.closed) {
-      throw new Error("Cart Bridge not ready. Click 'Open Cart' (allow popups) once, then try again.");
-    }
-    try { bridgeWin.focus(); } catch (e) {}
-    return bridgeWin;
-  }
+      function openBridge() {
+        if (!bridgeWin || bridgeWin.closed) {
+          throw new Error("Cart Bridge not ready. Click 'Open Cart' (allow popups) once, then try again.");
+        }
+        try { bridgeWin.focus(); } catch (e) {}
+        return bridgeWin;
+      }
 
-  function postToBridge(payload) {
-    if (!bridgeWin || bridgeWin.closed) openBridge();
-    const type = payload && payload.type;
+      function postToBridge(payload) {
+        if (!bridgeWin || bridgeWin.closed) openBridge();
+        const type = payload && payload.type;
 
-    // For initial handshake, allow a wildcard fallback (some Shopify setups can redirect),
-    // but only for PING so we never duplicate cart adds.
-    if (type === "PING") {
-      try { bridgeWin.postMessage(payload, BRIDGE_ORIGIN); } catch (e) {}
-      try { bridgeWin.postMessage(payload, "*"); } catch (e) {}
-      return;
-    }
-
-    // Once READY is received, we lock onto the bridge's actual origin.
-    const target = bridgeTargetOrigin || BRIDGE_ORIGIN;
-    try { bridgeWin.postMessage(payload, target); } catch (e) {}
-  }
-
-  function request(type, payload = {}, timeoutMs = 15000) {
-    const requestId = payload.requestId || uid();
-
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        pending.delete(requestId);
-        reject(new Error(`Cart Bridge timeout for ${type}.`));
-      }, timeoutMs);
-
-      pending.set(requestId, { resolve, reject, timeout, type });
-
-      postToBridge({ type, token: BRIDGE_TOKEN, requestId, ...payload });
-    });
-  }
-
-  async function ensureReady(timeoutMs = 9000) {
-    if (ready && bridgeWin && !bridgeWin.closed) return true;
-
-    openBridge();
-
-    if (readyPromise) return readyPromise;
-
-    readyPromise = new Promise((resolve, reject) => {
-      const started = Date.now();
-
-      const tick = () => {
-        if (ready) {
-          cleanup();
-          resolve(true);
+        if (type === "PING") {
+          try { bridgeWin.postMessage(payload, BRIDGE_ORIGIN); } catch (e) {}
+          try { bridgeWin.postMessage(payload, "*"); } catch (e) {}
           return;
         }
-        if (Date.now() - started > timeoutMs) {
-          cleanup();
-          reject(new Error("Cart Bridge not ready. Confirm the Shopify bridge page is published and the token matches."));
+
+        const target = bridgeTargetOrigin || BRIDGE_ORIGIN;
+        try { bridgeWin.postMessage(payload, target); } catch (e) {}
+      }
+
+      function request(type, payload = {}, timeoutMs = 15000) {
+        const requestId = payload.requestId || uid();
+        return new Promise((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            pending.delete(requestId);
+            reject(new Error(`Cart Bridge timeout for ${type}.`));
+          }, timeoutMs);
+
+          pending.set(requestId, { resolve, reject, timeout, type });
+          postToBridge({ type, token: BRIDGE_TOKEN, requestId, ...payload });
+        });
+      }
+
+      async function ensureReady(timeoutMs = 9000) {
+        if (ready && bridgeWin && !bridgeWin.closed) return true;
+        openBridge();
+        if (readyPromise) return readyPromise;
+
+        readyPromise = new Promise((resolve, reject) => {
+          const started = Date.now();
+
+          const tick = () => {
+            if (ready) { cleanup(); resolve(true); return; }
+            if (Date.now() - started > timeoutMs) {
+              cleanup();
+              reject(new Error("Cart Bridge not ready. Confirm the Shopify bridge page is published and the token matches."));
+              return;
+            }
+            try { postToBridge({ type: "PING", token: BRIDGE_TOKEN }); } catch (e) {}
+          };
+
+          const interval = setInterval(tick, 350);
+          const cleanup = () => { clearInterval(interval); readyPromise = null; };
+          tick();
+        });
+
+        return readyPromise;
+      }
+
+      window.addEventListener("message", (ev) => {
+        const msg = ev && ev.data ? ev.data : null;
+        if (!msg || typeof msg !== "object") return;
+
+        if (BRIDGE_TOKEN && msg.token && msg.token !== BRIDGE_TOKEN) return;
+        if (ev.origin && !BRIDGE_ALLOWED_ORIGINS.has(ev.origin)) return;
+
+        if (msg.type === "READY") {
+          ready = true;
+          bridgeTargetOrigin = ev.origin;
           return;
         }
-        // Ping repeatedly until READY is received (bridge might still be loading).
-        try { postToBridge({ type: "PING", token: BRIDGE_TOKEN }); } catch (e) {}
-      };
 
-      const interval = setInterval(tick, 350);
+        if (!msg.requestId && pending.size === 1) {
+          const [rid, p] = pending.entries().next().value;
+          clearTimeout(p.timeout);
+          pending.delete(rid);
 
-      const cleanup = () => {
-        clearInterval(interval);
-        readyPromise = null;
-      };
+          if (msg.type === "ADD_ERR") p.reject(new Error(msg.message || "Cart add failed."));
+          else p.resolve(msg);
+          return;
+        }
 
-      // Kick immediately.
-      tick();
-    });
+        if (!msg.requestId) return;
 
-    return readyPromise;
-  }
+        const p = pending.get(msg.requestId);
+        if (!p) return;
 
-  window.addEventListener("message", (ev) => {
-    const msg = ev && ev.data ? ev.data : null;
-    if (!msg || typeof msg !== "object") return;
+        clearTimeout(p.timeout);
+        pending.delete(msg.requestId);
 
-    // Only accept messages from the bridge window.
-    if (bridgeWin && ev.source !== bridgeWin) {
-      // Sometimes browsers wrap window refs; if this blocks you, we can relax it, but keep it strict for now.
-      // return;
-    }
+        if (msg.type === "ADD_ERR") p.reject(new Error(msg.message || "Cart add failed."));
+        else p.resolve(msg);
+      });
 
-    // Token gate: ignore anything that doesn't have our token (READY may include token; our bridge does).
-    if (BRIDGE_TOKEN && msg.token && msg.token !== BRIDGE_TOKEN) return;
+      async function addItems(items) {
+        await ensureReady();
+        const resp = await request("ADD_ITEMS", { items });
+        if (resp && resp.type === "ADD_ERR") throw new Error(resp.message || "Cart add failed.");
+        return resp;
+      }
 
-    // Origin gate: accept either custom domain or myshopify domain.
-    if (ev.origin && !BRIDGE_ALLOWED_ORIGINS.has(ev.origin)) return;
+      function openCart() {
+        preopenBridge();
+        ensureReady().catch(() => {});
+        try { postToBridge({ type: "OPEN_CART", token: BRIDGE_TOKEN }); } catch (e) {}
+      }
 
-    // Handshake
-    if (msg.type === "READY") {
-      ready = true;
-      
-      bridgeTargetOrigin = ev.origin;
-return;
-    }
+      return { addItems, openCart, preopenBridge, openBridge, ensureReady };
+    })();
 
-    // Resolve typed fallbacks if requestId isn't echoed (older bridge versions).
-    if (!msg.requestId && pending.size === 1) {
-      const [rid, p] = pending.entries().next().value;
-      clearTimeout(p.timeout);
-      pending.delete(rid);
-
-      if (msg.type === "ADD_ERR") p.reject(new Error(msg.message || "Cart add failed."));
-      else p.resolve(msg);
-      return;
-    }
-
-    if (!msg.requestId) return;
-
-    const p = pending.get(msg.requestId);
-    if (!p) return;
-
-    clearTimeout(p.timeout);
-    pending.delete(msg.requestId);
-
-    if (msg.type === "ADD_ERR") p.reject(new Error(msg.message || "Cart add failed."));
-    else p.resolve(msg);
-  });
-
-  async function addItems(items) {
-    await ensureReady();
-    const resp = await request("ADD_ITEMS", { items });
-
-    // Bridge sends ADD_ERR on failure.
-    if (resp && resp.type === "ADD_ERR") throw new Error(resp.message || "Cart add failed.");
-    return resp;
-  }
-
-  function openCart() {
-    // Must be triggered by a user gesture to avoid popup blockers.
-    preopenBridge();
-    ensureReady().catch(() => {});
-    try { postToBridge({ type: "OPEN_CART", token: BRIDGE_TOKEN }); } catch (e) {}
-  }
-
-  return { addItems, openCart, preopenBridge, openBridge, ensureReady };
-})();
-    const VARIANT_MAP = {
-        'tee-navy-m': { shopifyVariantId: '46056445444246', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-navy-l': { shopifyVariantId: '46056445477014', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-navy-xl': { shopifyVariantId: '46056445509782', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-navy-2xl': { shopifyVariantId: '46056445542550', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-navy-s': { shopifyVariantId: '46056445575318', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-black-m': { shopifyVariantId: '46056445608086', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
-        'tee-black-l': { shopifyVariantId: '46056445640854', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000' },
-        'tee-black-xl': { shopifyVariantId: '46056445673622', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000' },
-        'tee-black-2xl': { shopifyVariantId: '46056445706390', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000' },
-        'tee-black-s': { shopifyVariantId: '46056445739158', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
-        'tee-gray-m': { shopifyVariantId: '46056445771926', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-gray-l': { shopifyVariantId: '46056445804694', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-gray-xl': { shopifyVariantId: '46056445837462', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-gray-2xl': { shopifyVariantId: '46056445870230', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-gray-s': { shopifyVariantId: '46056445902998', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-white-m': { shopifyVariantId: '46056445935766', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-l': { shopifyVariantId: '46056445968534', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-xl': { shopifyVariantId: '46056446001302', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-2xl': { shopifyVariantId: '46056446034070', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-s': { shopifyVariantId: '46056446066838', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' },
-        'tee-navy-3xl': { shopifyVariantId: '46056446099606', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-black-3xl': { shopifyVariantId: '46056446132374', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_black_gpr_4-0_gildan_64000' },
-        'tee-gray-3xl': { shopifyVariantId: '46056446165142', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-white-3xl': { shopifyVariantId: '46056446197910', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_white_gpr_4-0_gildan_64000' }
-    };
-    
+    // Mockups
     function getMockupUrl(style, product) {
-        const shape = PRODUCTS[product].shape;
-        return `mockups/Style_${style}_${shape}_${product}.png`;
+      const shape = PRODUCTS[product].shape;
+      return `mockups/Style_${style}_${shape}_${product}.png`;
     }
-    
+
     function loadMockup(imgElement, style, product) {
-        const primaryUrl = getMockupUrl(style, product);
-        imgElement.src = primaryUrl;
-        imgElement.alt = `${STYLES[style].name} - ${PRODUCTS[product].name}`;
-        
+      const primaryUrl = getMockupUrl(style, product);
+      imgElement.src = primaryUrl;
+      imgElement.alt = `${STYLES[style].name} - ${PRODUCTS[product].name}`;
+
+      imgElement.onerror = () => {
+        imgElement.src = 'mockups/placeholder.png';
         imgElement.onerror = () => {
-            imgElement.src = 'mockups/placeholder.png';
-            imgElement.onerror = () => {
-                const colors = { A: '#1a3a5c', B: '#0a0a0a', C: '#5c1a1a', D: '#1a3a1a' };
-                imgElement.style.background = colors[style] || '#333';
-                imgElement.alt = `${STYLES[style].name} Style Preview`;
-            };
+          const colors = { A: '#1a3a5c', B: '#0a0a0a', C: '#5c1a1a', D: '#1a3a1a' };
+          imgElement.style.background = colors[style] || '#333';
+          imgElement.alt = `${STYLES[style].name} Style Preview`;
         };
+      };
     }
-    
+
     function initializeMockups() {
-        const styles = ['A', 'B', 'C', 'D'];
-        console.log("Initializing mockups for styles:", styles);
-        
-        styles.forEach(style => {
-            // Mobile cards
-            const mobileCards = document.querySelectorAll(`.style-card[data-style="${style}"] .card-mockup`);
-            mobileCards.forEach(card => {
-                const img = new Image();
-                img.style.width = '100%';
-                img.style.height = '100%';
-                img.style.objectFit = 'cover';
-                img.onload = () => {
-                    card.innerHTML = '';
-                    card.appendChild(img);
-                };
-                loadMockup(img, style, selectedProduct);
-            });
-            
-            // Desktop cards
-            const desktopCards = document.querySelectorAll(`.style-card-desktop[data-style="${style}"] .card-mockup`);
-            desktopCards.forEach(card => {
-                const img = new Image();
-                img.style.width = '100%';
-                img.style.height = '100%';
-                img.style.objectFit = 'cover';
-                img.onload = () => {
-                    card.innerHTML = '';
-                    card.appendChild(img);
-                };
-                loadMockup(img, style, selectedProduct);
-            });
+      const styles = ['A','B','C','D'];
+      styles.forEach(style => {
+        const desktopCards = document.querySelectorAll(`.style-card-desktop[data-style="${style}"] .card-mockup`);
+        desktopCards.forEach(card => {
+          const img = new Image();
+          img.style.width = '100%';
+          img.style.height = '100%';
+          img.style.objectFit = 'cover';
+          img.onload = () => { card.innerHTML = ''; card.appendChild(img); };
+          loadMockup(img, style, selectedProduct);
         });
+      });
     }
-    
-    function nextCard() {
-        const cards = document.querySelectorAll('.style-card');
-        cards[currentCardIndex].classList.remove('active');
-        cards[currentCardIndex].classList.add('prev');
-        
-        currentCardIndex = (currentCardIndex + 1) % cards.length;
-        
-        cards[currentCardIndex].classList.remove('prev', 'next');
-        cards[currentCardIndex].classList.add('active');
-        
-        if (currentCardIndex < cards.length - 1) {
-            cards[currentCardIndex + 1].classList.remove('prev');
-            cards[currentCardIndex + 1].classList.add('next');
-        }
-    }
-    
-    function previousCard() {
-        const cards = document.querySelectorAll('.style-card');
-        cards[currentCardIndex].classList.remove('active');
-        cards[currentCardIndex].classList.add('next');
-        
-        currentCardIndex = (currentCardIndex - 1 + cards.length) % cards.length;
-        
-        cards[currentCardIndex].classList.remove('prev', 'next');
-        cards[currentCardIndex].classList.add('active');
-    }
-    
+
+    // Product change
     function changeProduct(productKey) {
-        selectedProduct = productKey;
-        const product = PRODUCTS[productKey];
-        const shapeText = product.shape === 'Sq' ? 'Square (DTG)' : 'Oval (Merch)';
-        document.getElementById('shapeIndicator').textContent = shapeText;
-        console.log("Initializing mockups..."); initializeMockups();
-        if (selectedStyle) {
-            loadTemplate(selectedStyle, product.shape);
-        }
+      selectedProduct = productKey;
+      const product = PRODUCTS[productKey];
+      const shapeText = product.shape === 'Sq' ? 'Square (DTG)' : 'Oval (Merch)';
+      document.getElementById('shapeIndicator').textContent = shapeText;
+
+      initializeMockups();
+      if (selectedStyle) loadTemplate(selectedStyle, product.shape);
     }
-    
+
+    // Style selection
     function selectStyle(style) {
-        selectedStyle = style;
-        
-        document.querySelectorAll('.style-card-desktop').forEach(card => {
-            card.classList.remove('selected');
-        });
-        document.querySelector(`[data-style="${style}"]`)?.classList.add('selected');
-        
-        const styleConfig = STYLES[style];
-        document.getElementById('cityText').setAttribute('fill', styleConfig.color);
-        document.getElementById('cityText').setAttribute('font-family', styleConfig.font);
-        document.getElementById('groupText').setAttribute('fill', styleConfig.color);
-        document.getElementById('groupText').setAttribute('font-family', styleConfig.font);
-        
-        const shape = PRODUCTS[selectedProduct].shape;
-        loadTemplate(style, shape);
-        
-        // Update color options for selected style
-        updateColorOptions();
-        
-        currentStep = 2;
-        showStep(2);
+      selectedStyle = style;
+
+      // Correctly highlight the desktop card (avoid grabbing the wrong [data-style])
+      document.querySelectorAll('.style-card-desktop').forEach(card => card.classList.remove('selected'));
+      document.querySelector(`.style-card-desktop[data-style="${style}"]`)?.classList.add('selected');
+
+      const styleConfig = STYLES[style];
+      const cityEl = document.getElementById('cityText');
+      const groupEl = document.getElementById('groupText');
+
+      if (cityEl && styleConfig){
+        cityEl.setAttribute('fill', styleConfig.color);
+        cityEl.setAttribute('font-family', styleConfig.font);
+      }
+      if (groupEl && styleConfig){
+        groupEl.setAttribute('fill', styleConfig.color);
+        groupEl.setAttribute('font-family', styleConfig.font);
+      }
+
+      const shape = PRODUCTS[selectedProduct].shape;
+      loadTemplate(style, shape);
+
+      updateColorOptions();
+      updateVariantChips();
+      updateCTA();
+
+      showStep(2);
     }
-    
+
     async function loadTemplate(style, shape) {
-        try {
-            const templatePath = `templates/Style_${style}_${shape}.svg`;
-            const jsonPath = `templates/Style_${style}_${shape}.json`;
-            
-            const bgImage = document.getElementById('bgImage');
-            if (bgImage) {
-                bgImage.setAttribute('href', templatePath);
-                    // Safari/older SVG engines
-                    bgImage.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', templatePath);
-            }
-            
-            const baseline = await fetchJsonCached(jsonPath);
-            
-            if (baseline && baseline.sliders) {
-                const s = baseline.sliders;
-                if (s.cityY) document.getElementById('cityYSlider').value = s.cityY;
-                if (s.citySize) document.getElementById('citySizeSlider').value = s.citySize;
-                if (s.groupY) document.getElementById('groupYSlider').value = s.groupY;
-                if (s.gSize) document.getElementById('groupSizeSlider').value = s.gSize;
-                
-                baselineArch.cityArch = parseInt(s.archIntensity) || 64;
-                baselineArch.groupArch = parseInt(s.gArch) || 64;
-                baselineArch.cityTrack = parseInt(s.cityTrack) || 0;
-                baselineArch.groupTrack = parseInt(s.gTrack) || 2;
+      try {
+        const templatePath = `templates/Style_${style}_${shape}.svg`;
+        const jsonPath = `templates/Style_${style}_${shape}.json`;
 
-                // Sync numeric labels beside sliders (so the UI matches loaded presets)
-                if (s.cityY && document.getElementById('cityYVal')) document.getElementById('cityYVal').textContent = s.cityY;
-                if (s.citySize && document.getElementById('citySizeVal')) document.getElementById('citySizeVal').textContent = s.citySize;
-                if (s.groupY && document.getElementById('groupYVal')) document.getElementById('groupYVal').textContent = s.groupY;
-                if (s.gSize && document.getElementById('groupSizeVal')) document.getElementById('groupSizeVal').textContent = s.gSize;
-
-                // Save defaults for "Reset to Auto" (per style + shape)
-                const key = _templateKey(style);
-                templateDefaults[key] = {
-                    citySize: parseInt(s.citySize) || parseInt(document.getElementById('citySizeSlider')?.value || 10),
-                    cityY: parseInt(s.cityY) || parseInt(document.getElementById('cityYSlider')?.value || 223),
-                    groupSize: parseInt(s.gSize) || parseInt(document.getElementById('groupSizeSlider')?.value || 8),
-                    groupY: parseInt(s.groupY) || parseInt(document.getElementById('groupYSlider')?.value || 282),
-                    arch: {
-                        cityArch: parseInt(s.archIntensity) || 64,
-                        groupArch: parseInt(s.gArch) || 64,
-                        cityTrack: parseInt(s.cityTrack) || 0,
-                        groupTrack: parseInt(s.gTrack) || 2
-                    }
-                };
-            }
-            
-            updatePreview();
-            
-        } catch (error) {
-            console.error('Template load failed:', error);
-            updatePreview();
+        const bgImage = document.getElementById('bgImage');
+        if (bgImage) {
+          bgImage.setAttribute('href', templatePath);
+          bgImage.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', templatePath);
         }
+
+        const baseline = await fetchJsonCached(jsonPath);
+        if (baseline && baseline.sliders) {
+          const s = baseline.sliders;
+
+          if (s.cityY) document.getElementById('cityYSlider').value = s.cityY;
+          if (s.citySize) document.getElementById('citySizeSlider').value = s.citySize;
+          if (s.groupY) document.getElementById('groupYSlider').value = s.groupY;
+          if (s.gSize) document.getElementById('groupSizeSlider').value = s.gSize;
+
+          baselineArch.cityArch = parseInt(s.archIntensity) || 64;
+          baselineArch.groupArch = parseInt(s.gArch) || 64;
+          baselineArch.cityTrack = parseInt(s.cityTrack) || 0;
+          baselineArch.groupTrack = parseInt(s.gTrack) || 2;
+
+          if (s.cityY && document.getElementById('cityYVal')) document.getElementById('cityYVal').textContent = s.cityY;
+          if (s.citySize && document.getElementById('citySizeVal')) document.getElementById('citySizeVal').textContent = s.citySize;
+          if (s.groupY && document.getElementById('groupYVal')) document.getElementById('groupYVal').textContent = s.groupY;
+          if (s.gSize && document.getElementById('groupSizeVal')) document.getElementById('groupSizeVal').textContent = s.gSize;
+
+          const key = _templateKey(style);
+          templateDefaults[key] = {
+            citySize: parseInt(s.citySize) || parseInt(document.getElementById('citySizeSlider')?.value || 10),
+            cityY: parseInt(s.cityY) || parseInt(document.getElementById('cityYSlider')?.value || 223),
+            groupSize: parseInt(s.gSize) || parseInt(document.getElementById('groupSizeSlider')?.value || 8),
+            groupY: parseInt(s.groupY) || parseInt(document.getElementById('groupYSlider')?.value || 282),
+            arch: {
+              cityArch: parseInt(s.archIntensity) || 64,
+              groupArch: parseInt(s.gArch) || 64,
+              cityTrack: parseInt(s.cityTrack) || 0,
+              groupTrack: parseInt(s.gTrack) || 2
+            }
+          };
+        }
+
+        updatePreview();
+      } catch (error) {
+        console.error('Template load failed:', error);
+        updatePreview();
+      }
     }
-    
-    function useGeolocation() {
-        useCity('BRANTFORD, ONTARIO');
-    }
-    
+
+    // City/Group
+    function useGeolocation() { useCity('BRANTFORD, ONTARIO'); }
+
     function useCity(city) {
-        document.getElementById('cityInput').value = city;
-        updateCity();
-        setTimeout(() => {
-            currentStep = 3;
-            showStep(3);
-        }, 300);
-    }
-    
-            function updateCity() {
-        // 1. Update text variables
-        cityText = (document.getElementById('cityInput').value || '').toUpperCase().slice(0, 50);
-        document.getElementById('cityInput').value = cityText;
-
-        // 2. Update counter
-        const remaining = 50 - cityText.length;
-        document.getElementById('cityCounter').textContent = remaining;
-
-        // 3. Update Visuals
-        updatePreview();
-        updateCTA();
-
-        // 4. Auto-advance removed: user must press Continue
+      document.getElementById('cityInput').value = city;
+      updateCity();
     }
 
-    function useGroup(group) {
-        document.getElementById('groupInput').value = group;
-        updateGroup();
-        // Auto-advance removed here too; user confirms with Continue
+    function updateCity() {
+      cityText = (document.getElementById('cityInput').value || '').toUpperCase().slice(0, 50);
+      document.getElementById('cityInput').value = cityText;
+
+      const remaining = 50 - cityText.length;
+      document.getElementById('cityCounter').textContent = remaining;
+
+      updatePreview();
+      updateCTA();
     }
-    
+
     function updateGroup() {
-        groupText = (document.getElementById('groupInput').value || '').toUpperCase().slice(0, 35);
-        document.getElementById('groupInput').value = groupText;
+      groupText = (document.getElementById('groupInput').value || '').toUpperCase().slice(0, 35);
+      document.getElementById('groupInput').value = groupText;
 
-        const remaining = 35 - groupText.length;
-        document.getElementById('groupCounter').textContent = remaining;
+      const remaining = 35 - groupText.length;
+      document.getElementById('groupCounter').textContent = remaining;
 
-        updatePreview();
-        updateCTA();
+      updatePreview();
+      updateCTA();
     }
 
-    
+    // Tweak controls
     function toggleTweak() {
-        const controls = document.getElementById('tweakControls');
-        const btn = document.getElementById('tweakToggle');
-        controls.classList.toggle('active');
-        btn.classList.toggle('active');
+      const controls = document.getElementById('tweakControls');
+      const btn = document.getElementById('tweakToggle');
+      controls.classList.toggle('active');
+      btn.classList.toggle('active');
     }
-    
+
     function adjustCity(property, delta) {
-        if (property === 'size') {
-            let current = parseInt(document.getElementById('citySizeSlider')?.value || 10);
-            current = Math.max(10, Math.min(80, current + delta));
-            updateSlider('citySize', current);
-        } else if (property === 'y') {
-            let current = parseInt(document.getElementById('cityYSlider')?.value || 223);
-            current = Math.max(0, Math.min(300, current + (delta * 5)));
-            updateSlider('cityY', current);
-        } else if (property === 'arc') {
-            baselineArch.cityArch = Math.max(10, Math.min(450, baselineArch.cityArch + delta));
-            updatePreview();
-        }
+      if (property === 'size') {
+        let current = parseInt(document.getElementById('citySizeSlider')?.value || 10);
+        current = Math.max(10, Math.min(80, current + delta));
+        updateSlider('citySize', current);
+      } else if (property === 'y') {
+        let current = parseInt(document.getElementById('cityYSlider')?.value || 223);
+        current = Math.max(0, Math.min(300, current + (delta * 5)));
+        updateSlider('cityY', current);
+      } else if (property === 'arc') {
+        baselineArch.cityArch = Math.max(10, Math.min(450, baselineArch.cityArch + delta));
+        updatePreview();
+      }
     }
-    
+
     function adjustGroup(property, delta) {
-        if (property === 'size') {
-            let current = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
-            current = Math.max(8, Math.min(50, current + delta));
-            updateSlider('groupSize', current);
-        } else if (property === 'y') {
-            let current = parseInt(document.getElementById('groupYSlider')?.value || 282);
-            current = Math.max(50, Math.min(400, current + (delta * 5)));
-            updateSlider('groupY', current);
-        } else if (property === 'arc') {
-            baselineArch.groupArch = Math.max(10, Math.min(450, baselineArch.groupArch + delta));
-            updatePreview();
-        }
+      if (property === 'size') {
+        let current = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
+        current = Math.max(8, Math.min(50, current + delta));
+        updateSlider('groupSize', current);
+      } else if (property === 'y') {
+        let current = parseInt(document.getElementById('groupYSlider')?.value || 282);
+        current = Math.max(50, Math.min(400, current + (delta * 5)));
+        updateSlider('groupY', current);
+      } else if (property === 'arc') {
+        baselineArch.groupArch = Math.max(10, Math.min(450, baselineArch.groupArch + delta));
+        updatePreview();
+      }
     }
-    
+
     function updateSlider(property, value) {
-        const slider = document.getElementById(property + 'Slider');
-        const valueDisplay = document.getElementById(property + 'Val');
-        if (slider) slider.value = value;
-        if (valueDisplay) valueDisplay.textContent = value;
-        updatePreview();
+      const slider = document.getElementById(property + 'Slider');
+      const valueDisplay = document.getElementById(property + 'Val');
+      if (slider) slider.value = value;
+      if (valueDisplay) valueDisplay.textContent = value;
+      updatePreview();
     }
-    
+
     function resetDesign() {
-        const key = _templateKey(selectedStyle);
-        const d = templateDefaults[key];
+      const key = _templateKey(selectedStyle);
+      const d = templateDefaults[key];
 
-        if (d && d.arch) {
-            // Restore baseline arch/track first
-            baselineArch.cityArch = d.arch.cityArch;
-            baselineArch.groupArch = d.arch.groupArch;
-            baselineArch.cityTrack = d.arch.cityTrack;
-            baselineArch.groupTrack = d.arch.groupTrack;
+      if (d && d.arch) {
+        baselineArch.cityArch = d.arch.cityArch;
+        baselineArch.groupArch = d.arch.groupArch;
+        baselineArch.cityTrack = d.arch.cityTrack;
+        baselineArch.groupTrack = d.arch.groupTrack;
 
-            // Restore slider values + labels
-            updateSlider('citySize', d.citySize);
-            updateSlider('cityY', d.cityY);
-            updateSlider('groupSize', d.groupSize);
-            updateSlider('groupY', d.groupY);
+        updateSlider('citySize', d.citySize);
+        updateSlider('cityY', d.cityY);
+        updateSlider('groupSize', d.groupSize);
+        updateSlider('groupY', d.groupY);
 
-            // Ensure preview reflects restored arch/track as well
-            updatePreview();
-            return;
-        }
-
-        // Fallback defaults (should rarely be used)
-        baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
-        updateSlider('citySize', 10);
-        updateSlider('cityY', 223);
-        updateSlider('groupSize', 8);
-        updateSlider('groupY', 282);
         updatePreview();
-    }
-    
-    function formatText(text, baseSize) {
-        if (!text) return '';
-        const words = String(text).split(/\s+/).filter(w => w.length > 0);
-        return words.map((word, i) => {
-            const dx = i > 0 ? `dx="${baseSize * 0.45}"` : '';
+        return;
+      }
 
-            if (/^\d+$/.test(word)) {
-                return `<tspan ${dx} font-size="${baseSize * 1.35}">${escapeXml(word)}</tspan>`;
-            } else {
-                const first = escapeXml(word[0] || '');
-                const rest = escapeXml(word.slice(1) || '');
-                return `<tspan ${dx} font-size="${baseSize * 1.35}">${first}</tspan><tspan font-size="${baseSize}">${rest}</tspan>`;
-            }
-        }).join('');
+      baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
+      updateSlider('citySize', 10);
+      updateSlider('cityY', 223);
+      updateSlider('groupSize', 8);
+      updateSlider('groupY', 282);
+      updatePreview();
+    }
+
+    // SVG text helpers
+    function formatText(text, baseSize) {
+      if (!text) return '';
+      const words = String(text).split(/\s+/).filter(w => w.length > 0);
+      return words.map((word, i) => {
+        const dx = i > 0 ? `dx="${baseSize * 0.45}"` : '';
+        if (/^\d+$/.test(word)) {
+          return `<tspan ${dx} font-size="${baseSize * 1.35}">${escapeXml(word)}</tspan>`;
+        } else {
+          const first = escapeXml(word[0] || '');
+          const rest = escapeXml(word.slice(1) || '');
+          return `<tspan ${dx} font-size="${baseSize * 1.35}">${first}</tspan><tspan font-size="${baseSize}">${rest}</tspan>`;
+        }
+      }).join('');
     }
 
     function updatePreview() {
-        const style = STYLES[selectedStyle];
-        const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
-        const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
-        const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
-        const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
-        
-        const pathTop = document.getElementById('pathTop');
-        const pathMid = document.getElementById('pathMid');
-        
-        if (pathTop && pathMid) {
-            pathTop.setAttribute('d', `M 20,${cityY} A 230,${baselineArch.cityArch} 0 0,1 480,${cityY}`);
-            pathMid.setAttribute('d', `M 20,${groupY} A 230,${baselineArch.groupArch} 0 0,1 480,${groupY}`);
-        }
-        
-        const cityContainer = document.querySelector('#cityText');
-        const groupContainer = document.querySelector('#groupText');
-        
-        if (cityContainer && style) {
-            cityContainer.setAttribute('fill', style.color);
-            cityContainer.setAttribute('font-family', `"${style.font}"`);
-            cityContainer.setAttribute('font-weight', style.weight);
-            cityContainer.style.fontFamily = `"${style.font}", sans-serif`;
-            cityContainer.style.letterSpacing = baselineArch.cityTrack + "px";
-            cityContainer.setAttribute('font-size', citySize);
-            
-            const cityTextPath = cityContainer.querySelector('textPath');
-            if (cityTextPath) {
-                cityTextPath.innerHTML = formatText(cityText, citySize);
-            }
-        }
-        
-        if (groupContainer && style) {
-            groupContainer.setAttribute('fill', style.color);
-            groupContainer.setAttribute('font-family', `"${style.font}"`);
-            groupContainer.setAttribute('font-weight', style.weight);
-            groupContainer.style.fontFamily = `"${style.font}", sans-serif`;
-            groupContainer.style.letterSpacing = baselineArch.groupTrack + "px";
-            groupContainer.setAttribute('font-size', groupSize);
-            
-            const groupTextPath = groupContainer.querySelector('textPath');
-            if (groupTextPath) {
-                groupTextPath.innerHTML = formatText(groupText, groupSize);
-            }
-        }
+      const style = STYLES[selectedStyle];
+      const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
+      const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
+      const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
+      const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
+
+      const pathTop = document.getElementById('pathTop');
+      const pathMid = document.getElementById('pathMid');
+
+      if (pathTop && pathMid) {
+        pathTop.setAttribute('d', `M 20,${cityY} A 230,${baselineArch.cityArch} 0 0,1 480,${cityY}`);
+        pathMid.setAttribute('d', `M 20,${groupY} A 230,${baselineArch.groupArch} 0 0,1 480,${groupY}`);
+      }
+
+      const cityContainer = document.querySelector('#cityText');
+      const groupContainer = document.querySelector('#groupText');
+
+      if (cityContainer && style) {
+        cityContainer.setAttribute('fill', style.color);
+        cityContainer.setAttribute('font-family', `"${style.font}"`);
+        cityContainer.setAttribute('font-weight', style.weight);
+        cityContainer.style.fontFamily = `"${style.font}", sans-serif`;
+        cityContainer.style.letterSpacing = baselineArch.cityTrack + "px";
+        cityContainer.setAttribute('font-size', citySize);
+
+        const cityTextPath = cityContainer.querySelector('textPath');
+        if (cityTextPath) cityTextPath.innerHTML = formatText(cityText, citySize);
+      }
+
+      if (groupContainer && style) {
+        groupContainer.setAttribute('fill', style.color);
+        groupContainer.setAttribute('font-family', `"${style.font}"`);
+        groupContainer.setAttribute('font-weight', style.weight);
+        groupContainer.style.fontFamily = `"${style.font}", sans-serif`;
+        groupContainer.style.letterSpacing = baselineArch.groupTrack + "px";
+        groupContainer.setAttribute('font-size', groupSize);
+
+        const groupTextPath = groupContainer.querySelector('textPath');
+        if (groupTextPath) groupTextPath.innerHTML = formatText(groupText, groupSize);
+      }
     }
-    
-    
-function showStep(step) {
-        const TOTAL_STEPS = 6;
 
-        currentStep = Math.max(1, Math.min(TOTAL_STEPS, step));
+    // Steps
+    function showStep(step) {
+      const TOTAL_STEPS = 6;
+      currentStep = Math.max(1, Math.min(TOTAL_STEPS, step));
 
-        // Show only the active step section
-        for (let i = 1; i <= TOTAL_STEPS; i++) {
-            const stepEl = document.getElementById(`step${i}`);
-            if (!stepEl) continue;
-            if (i === currentStep) stepEl.classList.remove('hidden');
-            else stepEl.classList.add('hidden');
-        }
+      for (let i = 1; i <= TOTAL_STEPS; i++) {
+        const stepEl = document.getElementById(`step${i}`);
+        if (!stepEl) continue;
+        if (i === currentStep) stepEl.classList.remove('hidden');
+        else stepEl.classList.add('hidden');
+      }
 
-        // After-style layout adjustments (used heavily for mobile ordering)
-        document.body.classList.toggle('after-style', currentStep !== 1);
+      document.body.classList.toggle('after-style', currentStep !== 1);
 
-        // Variant controls are only shown on Step 2 (choose options) and Step 6 (confirm)
-        updateVariantVisibility();
+      updateVariantVisibility();
+      updateProgress();
+      updateStepIndicator();
+      updateCTA();
 
-        // Update UI
-        updateProgress();
-        updateStepIndicator();
-        updateCTA();
+      if (currentStep === 6) updateConfirmSummary();
 
-        if (currentStep === 6) {
-            updateConfirmSummary();
-        }
-
-        // Helpful mobile scroll-to-step
-        if (window.innerWidth <= 768) {
-            document.getElementById(`step${currentStep}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+      if (window.innerWidth <= 768) {
+        document.getElementById(`step${currentStep}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     }
 
     function updateProgress() {
-        const TOTAL_STEPS = 6;
-        const progress = (currentStep / TOTAL_STEPS) * 100;
-        const fill = document.getElementById('progressFill');
-        if (fill) fill.style.width = `${progress}%`;
+      const TOTAL_STEPS = 6;
+      const progress = (currentStep / TOTAL_STEPS) * 100;
+      const fill = document.getElementById('progressFill');
+      if (fill) fill.style.width = `${progress}%`;
     }
 
     function updateStepIndicator() {
-        const labels = [
-            'Pick Your Style',
-            'Choose Color/Size/Qty',
-            'Enter City',
-            'Enter Group',
-            'Refine Design',
-            'Confirm'
-        ];
-        const indicator = document.getElementById('stepIndicator');
-        if (!indicator) return;
-        indicator.textContent = `Step ${currentStep} of 6: ${labels[currentStep - 1] || ''}`;
+      const labels = [
+        'Pick Your Style',
+        'Choose Color/Size/Qty',
+        'Enter City',
+        'Enter Group',
+        'Refine Design',
+        'Confirm'
+      ];
+      const indicator = document.getElementById('stepIndicator');
+      if (!indicator) return;
+      indicator.textContent = `Step ${currentStep} of 6: ${labels[currentStep - 1] || ''}`;
     }
 
     function updateCTA() {
-        const btn = document.getElementById('ctaButtonRight');
-        const backBtn = document.getElementById('backBtnRight');
-        if (!btn) return;
+      const btn = document.getElementById('ctaButtonRight');
+      const backBtn = document.getElementById('backBtnRight');
+      if (!btn) return;
 
-        // If we're returning from Shopify Cart (bfcache) and the CTA was left in a loading state, reset it.
-        if (btn.dataset.loading === 'true') return;
+      if (btn.dataset.loading === 'true') return;
 
-        // Back
-        if (backBtn) {
-            backBtn.disabled = (currentStep === 1);
-        }
+      if (backBtn) {
+        backBtn.disabled = (currentStep === 1);
+        backBtn.style.display = (currentStep > 1) ? '' : 'none';
+      }
 
-        let label = 'Continue →';
-        let enabled = true;
+      let label = 'Continue →';
+      let enabled = true;
 
-        if (currentStep === 1) {
-            enabled = !!selectedStyle;
-            label = enabled ? 'Continue →' : 'Select a Style';
-        } else if (currentStep === 2) {
-            enabled = !!selectedColor && !!selectedSize && (selectedQuantity >= 1);
-            label = 'Continue →';
-        } else if (currentStep === 3) {
-            enabled = (cityText || '').trim().length > 0;
-            label = 'Continue →';
-        } else if (currentStep === 4) {
-            enabled = (groupText || '').trim().length > 0;
-            label = 'Continue →';
-        } else if (currentStep === 5) {
-            enabled = true;
-            label = 'Continue →';
-        } else if (currentStep === 6) {
-            enabled = !!selectedStyle && !!selectedColor && !!selectedSize && (selectedQuantity >= 1)
-                      && (cityText || '').trim().length > 0
-                      && (groupText || '').trim().length > 0;
-            label = 'Add to Cart →';
-        }
+      if (currentStep === 1) {
+        enabled = !!selectedStyle;
+        label = enabled ? 'Continue →' : 'Select a Style';
+      } else if (currentStep === 2) {
+        enabled = !!selectedColor && !!selectedSize && (selectedQuantity >= 1);
+        label = 'Continue →';
+      } else if (currentStep === 3) {
+        enabled = (cityText || '').trim().length > 0;
+        label = 'Continue →';
+      } else if (currentStep === 4) {
+        enabled = (groupText || '').trim().length > 0;
+        label = 'Continue →';
+      } else if (currentStep === 5) {
+        enabled = true;
+        label = 'Continue →';
+      } else if (currentStep === 6) {
+        enabled = !!selectedStyle && !!selectedColor && !!selectedSize && (selectedQuantity >= 1)
+          && (cityText || '').trim().length > 0
+          && (groupText || '').trim().length > 0;
+        label = 'Add to Cart →';
+      }
 
-        btn.textContent = label;
-        btn.disabled = !enabled;
-        btn.style.opacity = enabled ? '1' : '0.55';
-        btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+      btn.textContent = label;
+      btn.disabled = !enabled;
+      btn.style.opacity = enabled ? '1' : '0.55';
+      btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
     }
 
     function goBack() {
-        if (currentStep <= 1) return;
-        showStep(currentStep - 1);
+      if (currentStep <= 1) return;
+      showStep(currentStep - 1);
     }
 
     function handlePrimaryAction() {
-        const btn = document.getElementById('ctaButtonRight');
-        if (btn?.disabled) return;
+      const btn = document.getElementById('ctaButtonRight');
+      if (btn?.disabled) return;
 
-        if (currentStep === 6) {
-            handleCheckout();
-            return;
-        }
-
-        showStep(currentStep + 1);
+      if (currentStep === 6) {
+        handleCheckout();
+        return;
+      }
+      showStep(currentStep + 1);
     }
 
     function updateVariantVisibility() {
-        const vc = document.getElementById('variantControls');
-        const chips = document.getElementById('variantChips');
+      const vc = document.getElementById('variantControls');
+      const chips = document.getElementById('variantChips');
 
-        const showFull = (currentStep === 2 || currentStep === 6);
+      const showFull = (currentStep === 2 || currentStep === 6);
+      if (vc) vc.style.display = showFull ? '' : 'none';
 
-        if (vc) vc.style.display = showFull ? '' : 'none';
+      if (chips) {
+        const showChips = (!showFull && currentStep !== 1);
+        chips.classList.toggle('hidden', !showChips);
+      }
 
-        // Chips: show on steps 3–5 (and hide on 1,2,6)
-        if (chips) {
-            const showChips = (!showFull && currentStep !== 1);
-            chips.classList.toggle('hidden', !showChips);
-        }
-
-        updateVariantChips();
+      updateVariantChips();
     }
 
     function updateVariantChips() {
-        const styleName = selectedStyle ? (STYLES[selectedStyle]?.name || selectedStyle) : '';
-        const c = selectedColor || '';
-        const s = selectedSize || '';
-        const q = selectedQuantity || 1;
+      const styleName = selectedStyle ? (STYLES[selectedStyle]?.name || selectedStyle) : '';
+      const c = selectedColor || '';
+      const s = selectedSize || '';
+      const q = selectedQuantity || 1;
 
-        const chipStyle = document.getElementById('chipStyle');
-        const chipColor = document.getElementById('chipColor');
-        const chipSize  = document.getElementById('chipSize');
-        const chipQty   = document.getElementById('chipQty');
+      const chipStyle = document.getElementById('chipStyle');
+      const chipColor = document.getElementById('chipColor');
+      const chipSize  = document.getElementById('chipSize');
+      const chipQty   = document.getElementById('chipQty');
 
-        if (chipStyle) chipStyle.textContent = styleName ? `STYLE: ${styleName}` : 'STYLE: —';
-        if (chipColor) chipColor.textContent = c ? `COLOR: ${c}` : 'COLOR: —';
-        if (chipSize)  chipSize.textContent  = s ? `SIZE: ${s}` : 'SIZE: —';
-        if (chipQty)   chipQty.textContent   = `QTY: ${q}`;
+      if (chipStyle) chipStyle.textContent = styleName ? `STYLE: ${styleName}` : 'STYLE: —';
+      if (chipColor) chipColor.textContent = c ? `COLOR: ${c}` : 'COLOR: —';
+      if (chipSize)  chipSize.textContent  = s ? `SIZE: ${s}` : 'SIZE: —';
+      if (chipQty)   chipQty.textContent   = `QTY: ${q}`;
     }
 
     function updateConfirmSummary() {
-        const styleName = selectedStyle ? (STYLES[selectedStyle]?.name || selectedStyle) : '—';
-        const cc = document.getElementById('confirmCity');
-        const cg = document.getElementById('confirmGroup');
-        const cs = document.getElementById('confirmStyle');
+      const styleName = selectedStyle ? (STYLES[selectedStyle]?.name || selectedStyle) : '—';
+      const cc = document.getElementById('confirmCity');
+      const cg = document.getElementById('confirmGroup');
+      const cs = document.getElementById('confirmStyle');
 
-        if (cc) cc.textContent = (cityText || '—');
-        if (cg) cg.textContent = (groupText || '—');
-        if (cs) cs.textContent = styleName;
+      if (cc) cc.textContent = (cityText || '—');
+      if (cg) cg.textContent = (groupText || '—');
+      if (cs) cs.textContent = styleName;
 
-        // Show full variant controls on confirm
-        updateVariantVisibility();
+      updateVariantVisibility();
     }
 
-    function jumpToVariants() {
-        showStep(2);
-    }
-
-    function jumpToStyle() {
-        showStep(1);
-    }
+    function jumpToVariants(){ showStep(2); }
+    function jumpToStyle(){ showStep(1); }
 
     function startAnotherDesign() {
-        // Keep style/color/size/qty; clear UDF and reset refine sliders to defaults
-        cityText = '';
-        groupText = '';
-
-        const cityInput = document.getElementById('cityInput');
-        const groupInput = document.getElementById('groupInput');
-        if (cityInput) cityInput.value = '';
-        if (groupInput) groupInput.value = '';
-
-        // Reset refine sliders (matches initial defaults)
-        if (typeof resetDesign === 'function') resetDesign();
-        else {
-            updateSlider('citySize', 10);
-            updateSlider('cityY', 223);
-            updateSlider('groupSize', 8);
-            updateSlider('groupY', 282);
-        }
-
-        updatePreview();
-        showStep(3);
+      cityText = '';
+      groupText = '';
+      const cityInput = document.getElementById('cityInput');
+      const groupInput = document.getElementById('groupInput');
+      if (cityInput) cityInput.value = '';
+      if (groupInput) groupInput.value = '';
+      resetDesign();
+      updatePreview();
+      showStep(3);
     }
 
     function resetCtaLoadingState() {
-        const btn = document.getElementById('ctaButtonRight');
-        if (!btn) return;
-        if (btn.dataset.loading === 'true') {
-            btn.dataset.loading = 'false';
-        }
-        btn.classList.remove('loading');
-        btn.style.pointerEvents = '';
-        updateCTA();
+      const btn = document.getElementById('ctaButtonRight');
+      if (!btn) return;
+      if (btn.dataset.loading === 'true') btn.dataset.loading = 'false';
+      btn.classList.remove('loading');
+      btn.style.pointerEvents = '';
+      updateCTA();
     }
 
-    // Returning from Shopify cart often uses BFCache; reset CTA state on restore.
-    window.addEventListener('pageshow', () => {
-        resetCtaLoadingState();
-    });
-    window.addEventListener('focus', () => {
-        resetCtaLoadingState();
-    });
+    window.addEventListener('pageshow', resetCtaLoadingState);
+    window.addEventListener('focus', resetCtaLoadingState);
 
-
-    // Cart toast helpers
-    let _cartToastTimer = null;
-
+    // Cart toast
     function showCartToast(cartItemCount) {
-        const t = document.getElementById('cartToast');
-        if (!t) return;
+      const t = document.getElementById('cartToast');
+      if (!t) return;
 
-        // Remember the default copy once.
-        if (!t.dataset.defaultTitle) {
-            const titleEl0 = t.querySelector('.toast-title');
-            const bodyEl0 = t.querySelector('.toast-body');
-            t.dataset.defaultTitle = titleEl0 ? titleEl0.textContent : 'Added to cart';
-            t.dataset.defaultBody = bodyEl0 ? bodyEl0.textContent : '';
-        }
+      if (!t.dataset.defaultTitle) {
+        const titleEl0 = t.querySelector('.toast-title');
+        const bodyEl0 = t.querySelector('.toast-body');
+        t.dataset.defaultTitle = titleEl0 ? titleEl0.textContent : 'Added to cart';
+        t.dataset.defaultBody = bodyEl0 ? bodyEl0.textContent : '';
+      }
 
-        const titleEl = t.querySelector('.toast-title');
-        const bodyEl = t.querySelector('.toast-body');
+      const titleEl = t.querySelector('.toast-title');
+      const bodyEl = t.querySelector('.toast-body');
 
-        if (typeof cartItemCount === 'number') {
-            if (titleEl) titleEl.textContent = 'Added to cart (' + cartItemCount + ')';
-            if (bodyEl) bodyEl.textContent =
-                'Cart now has ' + cartItemCount + ' item' + (cartItemCount === 1 ? '' : 's') +
-                '. You can add another design, or open your cart when you’re ready to checkout.';
-        } else {
-            if (titleEl) titleEl.textContent = t.dataset.defaultTitle;
-            if (bodyEl) bodyEl.textContent = t.dataset.defaultBody;
-        }
+      if (typeof cartItemCount === 'number') {
+        if (titleEl) titleEl.textContent = 'Added to cart (' + cartItemCount + ')';
+        if (bodyEl) bodyEl.textContent =
+          'Cart now has ' + cartItemCount + ' item' + (cartItemCount === 1 ? '' : 's') +
+          '. You can add another design, or open your cart when you’re ready to checkout.';
+      } else {
+        if (titleEl) titleEl.textContent = t.dataset.defaultTitle;
+        if (bodyEl) bodyEl.textContent = t.dataset.defaultBody;
+      }
 
-        t.classList.remove('hidden');
-        if (_cartToastTimer) clearTimeout(_cartToastTimer);
-        _cartToastTimer = setTimeout(() => {
-            hideCartToast();
-        }, 6500);
+      t.classList.remove('hidden');
+      if (_cartToastTimer) clearTimeout(_cartToastTimer);
+      _cartToastTimer = setTimeout(() => hideCartToast(), 6500);
     }
 
     function hideCartToast() {
-        const t = document.getElementById('cartToast');
-        if (!t) return;
-        t.classList.add('hidden');
-        if (_cartToastTimer) {
-            clearTimeout(_cartToastTimer);
-            _cartToastTimer = null;
-        }
+      const t = document.getElementById('cartToast');
+      if (!t) return;
+      t.classList.add('hidden');
+      if (_cartToastTimer) { clearTimeout(_cartToastTimer); _cartToastTimer = null; }
     }
 
-    function goToCart() {
-        // Always navigate to the Shopify cart in the same tab
-        window.location.href = 'https://shop.4ship.ca/cart';
+    function onAddToCartSuccess(cartItemCountValue) {
+      const btn = document.getElementById('ctaButtonRight');
+      if (btn) {
+        btn.dataset.loading = 'false';
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        btn.style.pointerEvents = '';
+        btn.textContent = 'Added ✓';
+        setTimeout(() => updateCTA(), 1200);
+      }
+
+      if (typeof cartItemCountValue === 'number') {
+        setCartCount(cartItemCountValue);
+        showCartToast(cartItemCountValue);
+      } else {
+        showCartToast(null);
+      }
     }
 
-    function onAddToCartSuccess(cartItemCount) {
-        const btn = document.getElementById('ctaButtonRight');
-        if (btn) {
-            btn.dataset.loading = 'false';
-            btn.classList.remove('loading');
-            btn.disabled = false;
-            btn.style.pointerEvents = '';
-            btn.textContent = 'Added ✓';
-            // Restore the normal CTA label shortly after.
-            setTimeout(() => {
-                updateCTA();
-            }, 1200);
-        }
-        setCartCount(cartItemCount);
+    // Color / Size / Qty
+    function updateColorOptions() {
+      const colorOptions = document.getElementById('colorOptions');
+      if (!colorOptions || !selectedStyle) return;
+
+      const availableColors = STYLE_COLORS[selectedStyle] || ['Black', 'White', 'Navy', 'Gray'];
+      colorOptions.innerHTML = '';
+
+      availableColors.forEach(color => {
+        const btn = document.createElement('button');
+        btn.className = 'color-btn';
+        btn.setAttribute('data-color', color);
+        btn.onclick = () => selectColor(color);
+
+        const label = document.createElement('span');
+        label.className = 'color-name';
+        label.textContent = color;
+        btn.appendChild(label);
+
+        colorOptions.appendChild(btn);
+      });
+
+      if (!selectedColor || !availableColors.includes(selectedColor)) {
+        selectColor(availableColors[0]);
+      } else {
+        selectColor(selectedColor);
+      }
     }
 
-async function generate9000pxPNG() {
-        try {
-            const canvas = document.createElement('canvas');
-            const scale = 18;
-            canvas.width = 500 * scale;
-            canvas.height = 400 * scale;
-            const ctx = canvas.getContext('2d');
-            // Make sure the chosen font is ready for SVG->canvas rendering
-            await ensureFontsLoadedForExport();
-            
-            const style = STYLES[selectedStyle];
-            const citySize = parseInt(document.getElementById('citySizeSlider')?.value || 10);
-            const cityY = parseInt(document.getElementById('cityYSlider')?.value || 223);
-            const groupSize = parseInt(document.getElementById('groupSizeSlider')?.value || 8);
-            const groupY = parseInt(document.getElementById('groupYSlider')?.value || 282);
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const svg = document.createElementNS(svgNS, 'svg');
-            svg.setAttribute('width', canvas.width);
-            svg.setAttribute('height', canvas.height);
-            svg.setAttribute('viewBox', `0 0 ${canvas.width} ${canvas.height}`);
-            injectFontImport(svg);
-            
-            const defs = document.createElementNS(svgNS, 'defs');
-            const cityPath = document.createElementNS(svgNS, 'path');
-            cityPath.setAttribute('id', 'exportCityPath');
-            cityPath.setAttribute('d', `M ${20*scale},${cityY*scale} A ${230*scale},${baselineArch.cityArch*scale} 0 0,1 ${480*scale},${cityY*scale}`);
-            const groupPath = document.createElementNS(svgNS, 'path');
-            groupPath.setAttribute('id', 'exportGroupPath');
-            groupPath.setAttribute('d', `M ${20*scale},${groupY*scale} A ${230*scale},${baselineArch.groupArch*scale} 0 0,1 ${480*scale},${groupY*scale}`);
-            defs.appendChild(cityPath);
-            defs.appendChild(groupPath);
-            svg.appendChild(defs);
-            
-            const cityTextEl = document.createElementNS(svgNS, 'text');
-            cityTextEl.setAttribute('text-anchor', 'middle');
-            cityTextEl.setAttribute('fill', style.color);
-            cityTextEl.setAttribute('font-family', style.font);
-            cityTextEl.setAttribute('font-weight', style.weight);
-            cityTextEl.setAttribute('font-size', citySize * scale);
-            cityTextEl.style.letterSpacing = (baselineArch.cityTrack * scale) + 'px';
-            const cityTextPath = document.createElementNS(svgNS, 'textPath');
-            cityTextPath.setAttribute('href', '#exportCityPath');
-            cityTextPath.setAttribute('startOffset', '50%');
-            cityTextPath.innerHTML = formatText(cityText, citySize * scale);
-            cityTextEl.appendChild(cityTextPath);
-            svg.appendChild(cityTextEl);
-            
-            const groupTextEl = document.createElementNS(svgNS, 'text');
-            groupTextEl.setAttribute('text-anchor', 'middle');
-            groupTextEl.setAttribute('fill', style.color);
-            groupTextEl.setAttribute('font-family', style.font);
-            groupTextEl.setAttribute('font-weight', style.weight);
-            groupTextEl.setAttribute('font-size', groupSize * scale);
-            groupTextEl.style.letterSpacing = (baselineArch.groupTrack * scale) + 'px';
-            const groupTextPath = document.createElementNS(svgNS, 'textPath');
-            groupTextPath.setAttribute('href', '#exportGroupPath');
-            groupTextPath.setAttribute('startOffset', '50%');
-            groupTextPath.innerHTML = formatText(groupText, groupSize * scale);
-            groupTextEl.appendChild(groupTextPath);
-            svg.appendChild(groupTextEl);
-            
-            const svgData = new XMLSerializer().serializeToString(svg);
-            const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
-            const svgUrl = URL.createObjectURL(svgBlob);
-            const textImage = await loadImage(svgUrl);
-            ctx.drawImage(textImage, 0, 0);
-            URL.revokeObjectURL(svgUrl);
-            
-            return new Promise((resolve) => {
-                canvas.toBlob((blob) => {
-                    resolve(blob);
-                }, 'image/png', 0.95);
-            });
-            
-        } catch (error) {
-            console.error('PNG generation failed:', error);
-            return null;
-        }
-    }
-    
-    function loadImage(src) {
-        if (!src) return Promise.reject(new Error('Missing image src'));
+    function selectColor(color) {
+      selectedColor = color;
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-color') === color);
+      });
 
-        const isString = typeof src === 'string';
-        const cacheable = isString && !src.startsWith('blob:') && !src.startsWith('data:');
+      const colorMap = {
+        'Black': '#1a1a1a',
+        'White': '#f5f5f5',
+        'Navy': '#001f3f',
+        'Gray': '#808080'
+      };
+      const shirtFill = document.getElementById('shirtFill');
+      if (shirtFill) shirtFill.setAttribute('fill', colorMap[color] || '#1a1a1a');
 
-        if (cacheable && _assetCache.images.has(src)) {
-            return _assetCache.images.get(src);
-        }
-
-        const p = new Promise((resolve, reject) => {
-            const img = new Image();
-            img.decoding = 'async';
-
-            // Only set crossOrigin for absolute http(s) URLs
-            if (isString && /^https?:\/\//i.test(src)) {
-                img.crossOrigin = 'anonymous';
-            }
-
-            img.onload = () => resolve(img);
-            img.onerror = () => reject(new Error('Failed to load image: ' + src));
-            img.src = src;
-        });
-
-        if (cacheable) _assetCache.images.set(src, p);
-        return p;
+      updateVariantChips();
+      updateCTA();
     }
 
+    function selectSize(size) {
+      selectedSize = size;
+      document.querySelectorAll('.size-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-size') === size);
+      });
+
+      updateVariantChips();
+      updateCTA();
+    }
+
+    function changeQuantity(delta){
+      const next = Math.max(1, Math.min(99, (parseInt(selectedQuantity || 1, 10) || 1) + delta));
+      selectedQuantity = next;
+      const inp = document.getElementById('quantityInput');
+      if (inp) inp.value = String(next);
+
+      updateVariantChips();
+      updateCTA();
+    }
+
+    function setQuantityFromInput(val){
+      const n = Math.max(1, Math.min(99, parseInt(val || '1', 10) || 1));
+      selectedQuantity = n;
+      const inp = document.getElementById('quantityInput');
+      if (inp && inp.value !== String(n)) inp.value = String(n);
+
+      updateVariantChips();
+      updateCTA();
+    }
+
+    // Zoom
+    let isZoomed = false;
+    function toggleZoom() {
+      const canvas = document.getElementById('previewCanvas') || document.querySelector('.preview-canvas');
+      const toggleBtn = document.getElementById('zoomToggle');
+      if (!canvas || !toggleBtn) return;
+
+      isZoomed = !isZoomed;
+
+      if (isZoomed) {
+        canvas.classList.add('zoomed');
+        toggleBtn.classList.add('active');
+        toggleBtn.querySelector('svg').innerHTML = `
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+          <line x1="8" y1="11" x2="14" y2="11"/>
+        `;
+      } else {
+        canvas.classList.remove('zoomed');
+        toggleBtn.classList.remove('active');
+        toggleBtn.querySelector('svg').innerHTML = `
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+          <line x1="11" y1="8" x2="11" y2="14"/>
+          <line x1="8" y1="11" x2="14" y2="11"/>
+        `;
+      }
+    }
+
+    // Checkout / Add-to-cart
     async function handleCheckout() {
-    // Validate selections
-    if (!selectedStyle || !selectedProduct || !selectedColor || !selectedSize) {
+      if (!selectedStyle || !selectedProduct || !selectedColor || !selectedSize) {
         alert('Please select all options');
         return;
-    }
-    
-    const checkoutBtn = document.getElementById('ctaButtonRight') || document.getElementById('ctaButton');
-    const originalText = checkoutBtn ? checkoutBtn.textContent : '';
-    if (checkoutBtn) {
-        if (checkoutBtn) checkoutBtn.textContent = 'Preparing design...';
+      }
+
+      const checkoutBtn = document.getElementById('ctaButtonRight');
+      const originalText = checkoutBtn ? checkoutBtn.textContent : '';
+
+      if (checkoutBtn) {
+        checkoutBtn.textContent = 'Preparing design...';
         checkoutBtn.disabled = true;
-            checkoutBtn.dataset.loading = 'true';
-    }
-    
-    try {
-        // Pre-open Cart Bridge BEFORE any async work (required to avoid popup blockers)
+        checkoutBtn.dataset.loading = 'true';
+      }
+
+      try {
+        // Pre-open bridge (user gesture)
         CartBridgeClient.preopenBridge();
-        // VARIANT MAPPING
-        const VARIANT_MAP = {
-            'tee-black-s': { shopifyVariantId: '46057714417814', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
-            'tee-black-m': { shopifyVariantId: '46057714548886', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
-            'tee-black-l': { shopifyVariantId: '46057714516118', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000' },
-            'tee-black-xl': { shopifyVariantId: '46057714483350', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000' },
-            'tee-black-2xl': { shopifyVariantId: '46057714450582', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000' },
-            'tee-white-s': { shopifyVariantId: '46057714581654', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' },
-            'tee-white-m': { shopifyVariantId: '46057714712726', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000' },
-            'tee-white-l': { shopifyVariantId: '46057714679958', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000' },
-            'tee-white-xl': { shopifyVariantId: '46057714647190', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000' },
-            'tee-white-2xl': { shopifyVariantId: '46057714614422', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000' },
-            'tee-navy-s': { shopifyVariantId: '46057714745494', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-navy-m': { shopifyVariantId: '46057714876566', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-navy-l': { shopifyVariantId: '46057714843798', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-navy-xl': { shopifyVariantId: '46057714811030', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-navy-2xl': { shopifyVariantId: '46057714778262', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000' },
-            'tee-gray-s': { shopifyVariantId: '46057714909334', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_gray_gpr_4-0_gildan_64000' },
-            'tee-gray-m': { shopifyVariantId: '46057715040406', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_gray_gpr_4-0_gildan_64000' },
-            'tee-gray-l': { shopifyVariantId: '46057715007638', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_gray_gpr_4-0_gildan_64000' },
-            'tee-gray-xl': { shopifyVariantId: '46057714974870', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_gray_gpr_4-0_gildan_64000' },
-            'tee-gray-2xl': { shopifyVariantId: '46057714942102', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_gray_gpr_4-0_gildan_64000' }
-        };
-        
-        console.log('Starting checkout process...');
-        
-        // 1. Get SVG and clone it
+
         const svg = document.getElementById('previewSVG');
-        if (!svg) {
-            throw new Error('Design preview not found');
-        }
-        
+        if (!svg) throw new Error('Design preview not found');
+
         const svgClone = svg.cloneNode(true);
-        
-        // Preview-only underlays: remove them for exported print PNG (keep transparency)
-        // IMPORTANT: #bgImage is the *design layer* (crest/template). Do NOT remove it.
-        // If we ever add a true preview-only mockup layer, it should use id="mockupImage".
+
+        // Keep design (#bgImage) but remove any true preview-only layers if added later
         const _exportMockup = svgClone.querySelector('#mockupImage');
         if (_exportMockup) _exportMockup.remove();
+
         const _exportShirt = svgClone.querySelector('#shirtFill');
         if (_exportShirt) {
-            _exportShirt.setAttribute('fill', 'none');
-            _exportShirt.setAttribute('fill-opacity', '0');
+          _exportShirt.setAttribute('fill', 'none');
+          _exportShirt.setAttribute('fill-opacity', '0');
         }
-// Help exported SVG self-load fonts even when rendered via Blob URL
+
         injectFontImport(svgClone);
-        
-        // 2. CRITICAL FIX: Embed background image as base64
+
+        // Embed design background image as base64
         if (checkoutBtn) checkoutBtn.textContent = 'Loading design elements...';
         const bgImage = svgClone.querySelector('#bgImage');
-        if (bgImage && bgImage.href.baseVal) {
-            const imageUrl = bgImage.href.baseVal;
-            console.log('Loading background image:', imageUrl);
-            
-            // Load image and convert to base64 (cached)
-            const base64 = await (async () => {
-                if (_assetCache.bgBase64.has(imageUrl)) return _assetCache.bgBase64.get(imageUrl);
+        if (bgImage && bgImage.href && bgImage.href.baseVal) {
+          const imageUrl = bgImage.href.baseVal;
 
-                const p = new Promise((resolve, reject) => {
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
-                
-                img.onload = function() {
-                    try {
-                        // Draw to canvas to get base64
-                        const canvas = document.createElement('canvas');
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0);
-                        const dataUrl = canvas.toDataURL('image/png');
-                        console.log('Background image converted to base64');
-                        resolve(dataUrl);
-                    } catch (err) {
-                        reject(err);
-                    }
-                };
-                
-                img.onerror = () => reject(new Error('Failed to load background image'));
-                img.src = imageUrl;
-                
-                setTimeout(() => reject(new Error('Background image load timeout')), 10000);
-                });
+          const base64 = await (async () => {
+            if (_assetCache.bgBase64.has(imageUrl)) return _assetCache.bgBase64.get(imageUrl);
 
-                _assetCache.bgBase64.set(imageUrl, p);
-                return p;
-            })();
-            // Replace external URL with base64
-            bgImage.setAttribute('href', base64);
-            console.log('Background image embedded in SVG');
+            const p = new Promise((resolve, reject) => {
+              const img = new Image();
+              img.crossOrigin = 'anonymous';
+
+              img.onload = function() {
+                try {
+                  const canvas = document.createElement('canvas');
+                  canvas.width = img.width;
+                  canvas.height = img.height;
+                  const ctx = canvas.getContext('2d');
+                  ctx.drawImage(img, 0, 0);
+                  const dataUrl = canvas.toDataURL('image/png');
+                  resolve(dataUrl);
+                } catch (err) { reject(err); }
+              };
+
+              img.onerror = () => reject(new Error('Failed to load background image'));
+              img.src = imageUrl;
+              setTimeout(() => reject(new Error('Background image load timeout')), 10000);
+            });
+
+            _assetCache.bgBase64.set(imageUrl, p);
+            return p;
+          })();
+
+          bgImage.setAttribute('href', base64);
         }
-        
-        // Ensure fonts are actually loaded before we serialize SVG for export
+
         await ensureFontsLoadedForExport();
-        
-        // 3. Convert SVG (with embedded image) to PNG
+
+        // Convert SVG -> PNG at 9000x7200
         if (checkoutBtn) checkoutBtn.textContent = 'Converting design...';
         const svgData = new XMLSerializer().serializeToString(svgClone);
         const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
         const url = URL.createObjectURL(svgBlob);
-        
-        // Create image from SVG
+
         const img = new Image();
-        
         const imageLoadPromise = new Promise((resolve, reject) => {
-            img.onload = () => {
-                console.log('SVG converted to image');
-                resolve();
-            };
-            img.onerror = () => reject(new Error('Failed to convert SVG'));
-            setTimeout(() => reject(new Error('SVG conversion timeout')), 10000);
+          img.onload = () => resolve();
+          img.onerror = () => reject(new Error('Failed to convert SVG'));
+          setTimeout(() => reject(new Error('SVG conversion timeout')), 10000);
         });
-        
         img.src = url;
         await imageLoadPromise;
-        
-        // 4. Draw to high-res canvas
+
         const canvas = document.createElement('canvas');
         canvas.width = 9000;
         canvas.height = 7200;
         const ctx = canvas.getContext('2d');
-        // Calculate centered scaling
+
         const svgWidth = 500;
         const svgHeight = 400;
         const scale = Math.min(9000 / svgWidth, 7200 / svgHeight);
@@ -3000,264 +2247,111 @@ async function generate9000pxPNG() {
         const scaledHeight = svgHeight * scale;
         const offsetX = (9000 - scaledWidth) / 2;
         const offsetY = (7200 - scaledHeight) / 2;
-        
-        // Draw SVG
+
         ctx.drawImage(img, offsetX, offsetY, scaledWidth, scaledHeight);
-        
         URL.revokeObjectURL(url);
-        
-        console.log('Canvas created:', canvas.width, 'x', canvas.height);
-        
-        // 5. Convert to blob
+
         if (checkoutBtn) checkoutBtn.textContent = 'Generating PNG...';
         const blob = await new Promise((resolve, reject) => {
-            canvas.toBlob((b) => {
-                if (b) resolve(b);
-                else reject(new Error('Failed to create PNG'));
-            }, 'image/png', 1.0);
+          canvas.toBlob((b) => b ? resolve(b) : reject(new Error('Failed to create PNG')), 'image/png', 1.0);
         });
-        
-        const sizeMB = (blob.size / 1024 / 1024).toFixed(2);
-        console.log('PNG created, size:', sizeMB + 'MB');
-        
+
         if (blob.size < 10000) {
-            throw new Error('PNG file too small (' + sizeMB + 'MB) - design may not have rendered correctly');
+          throw new Error('PNG file too small — design may not have rendered correctly');
         }
-        
-        // 6. Upload to Cloudinary
+
+        // Upload to Cloudinary
         if (checkoutBtn) checkoutBtn.textContent = 'Uploading design...';
         const formData = new FormData();
         formData.append('file', blob);
         formData.append('upload_preset', 'america250');
         formData.append('folder', 'usa250-orders');
-        
-        const cloudinaryResponse = await fetch(
-            'https://api.cloudinary.com/v1_1/dqab444bd/image/upload',
-            {
-                method: 'POST',
-                body: formData
-            }
-        );
-        
+
+        const cloudinaryResponse = await fetch('https://api.cloudinary.com/v1_1/dqab444bd/image/upload', {
+          method: 'POST',
+          body: formData
+        });
+
         if (!cloudinaryResponse.ok) {
-            const errorText = await cloudinaryResponse.text();
-            throw new Error(`Upload failed: ${errorText}`);
+          const errorText = await cloudinaryResponse.text();
+          throw new Error(`Upload failed: ${errorText}`);
         }
-        
+
         const cloudinaryData = await cloudinaryResponse.json();
         const designUrl = cloudinaryData.secure_url;
         const publicId = cloudinaryData.public_id;
-        
-        console.log('✓ Design uploaded:', designUrl);
-        console.log('✓ Public ID:', cloudinaryData.public_id);
-        
-        // 7. Map variant
+
+        // Variant mapping
         const variantKey = `${selectedProduct}-${selectedColor}-${selectedSize}`.toLowerCase();
         const variant = VARIANT_MAP[variantKey];
-        // Resolve human-friendly style label for cart display
         const styleObj = STYLES[selectedStyle] || null;
         const styleName = styleObj ? styleObj.name : (selectedStyle || '');
-        
-        if (!variant) {
-            console.error('Variant Map:', VARIANT_MAP);
-            console.error('Looking for key:', variantKey);
-            throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize}`);
-        }
-        
-        console.log('✓ Variant found:', variantKey);
-        
-        
-        // 8. Add item to Shopify cart via Cart Bridge (cumulative)
-        // NOTE: Do NOT add Color/Size as line-item properties (Shopify already shows them from the variant).
+
+        if (!variant) throw new Error(`No variant found for: ${selectedProduct} / ${selectedColor} / ${selectedSize}`);
+
         if (checkoutBtn) checkoutBtn.textContent = 'Adding to cart...';
 
         const designId = (window.crypto && crypto.randomUUID)
-            ? crypto.randomUUID()
-            : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
+          ? crypto.randomUUID()
+          : (`dsgn_${Date.now()}_${Math.random().toString(16).slice(2)}`);
 
         const qty = Math.max(1, Math.min(99, parseInt(selectedQuantity || 1, 10) || 1));
         const cityVal = (document.getElementById('cityInput')?.value || '').trim();
         const groupVal = (document.getElementById('groupInput')?.value || '').trim();
 
         const resp = await CartBridgeClient.addItems([{
-            id: variant.shopifyVariantId,
-            quantity: qty,
-            properties: {
-                _design_id: designId,
-                // Visible Style label for Shopify cart
-                style: styleName,
-                _style: selectedStyle,
-                city: cityVal,
-                group: groupVal,
-                _design_url: designUrl,
-                _cloudinary_public_id: publicId || '',
-                _builder_version: 'v1.27.2',
-                _variant_key: variantKey
-            }
+          id: variant.shopifyVariantId,
+          quantity: qty,
+          properties: {
+            _design_id: designId,
+            style: styleName,
+            _style: selectedStyle,
+            city: cityVal,
+            group: groupVal,
+            _design_url: designUrl,
+            _cloudinary_public_id: publicId || '',
+            _builder_version: BUILDER_VERSION,
+            _variant_key: variantKey
+          }
         }]);
 
         onAddToCartSuccess(resp && typeof resp.cartItemCount === 'number' ? resp.cartItemCount : null);
-        return;
-
-
-
-
-
-    } catch (error) {
-        console.error('✗ Checkout error:', error);
-        console.error('Stack:', error.stack);
-        alert('Checkout failed: ' + error.message + '\n\nPlease try again or contact support.');
+      } catch (error) {
+        console.error('Checkout error:', error);
+        alert('Checkout failed: ' + (error.message || String(error)) + '\n\nPlease try again or contact support.');
         if (checkoutBtn) {
-            checkoutBtn.textContent = originalText;
-            checkoutBtn.disabled = false;
-            checkoutBtn.dataset.loading = 'false';
+          checkoutBtn.textContent = originalText;
+          checkoutBtn.disabled = false;
+          checkoutBtn.dataset.loading = 'false';
         }
+      }
     }
-}
 
-
-    
+    // Init
     function init() {
-        updateProgress();
-        updateStepIndicator();
-        console.log("Initializing mockups..."); initializeMockups();
-        
-        // Always use the grid (all styles visible at once)
-        const mobileCarousel = document.querySelector('.style-cards');
-        const swipeNav = document.querySelector('.swipe-nav');
-        const grid = document.querySelector('.style-cards-desktop');
-        if (mobileCarousel) mobileCarousel.classList.add('hidden');
-        if (swipeNav) swipeNav.classList.add('hidden');
-        if (grid) grid.classList.remove('hidden');
+      const vb = document.getElementById("versionBadge");
+      if (vb) vb.textContent = BUILDER_VERSION;
 
-        // Advanced tweak sliders only on desktop
-        if (window.innerWidth >= 768) {
-            const adv = document.querySelector('.advanced-controls');
-            if (adv) adv.classList.remove('hidden');
-        }
+      updateProgress();
+      updateStepIndicator();
+
+      initializeMockups();
+
+      // Advanced tweak sliders only on desktop
+      if (window.innerWidth >= 1025) {
+        const adv = document.querySelector('.advanced-controls');
+        if (adv) adv.classList.remove('hidden');
+      }
+
+      // Initial CTA state
+      updateCTA();
+      setCartCount(0);
+
+      // Ensure Step 1 is visible on load
+      showStep(1);
     }
-    
+
     window.addEventListener('load', init);
-
-
-// Color/Size/Zoom Functions - v1.16
-
-const STYLE_COLORS = {
-    // Style 1 (A): Black + Navy only
-    'A': ['Black', 'Navy'],
-    // Style 2 (B): Black + Navy only
-    'B': ['Black', 'Navy'],
-    // Style 3 (C): all four colours
-    'C': ['Black', 'Navy', 'White', 'Gray'],
-    // Style 4 (D): White + Gray only (default Gray)
-    'D': ['Gray', 'White']
-};
-
-function updateColorOptions() {
-    const colorOptions = document.getElementById('colorOptions');
-    if (!colorOptions || !selectedStyle) return;
-    
-    const availableColors = STYLE_COLORS[selectedStyle] || ['Black', 'White', 'Navy', 'Gray'];
-    colorOptions.innerHTML = '';
-    
-    availableColors.forEach(color => {
-        const btn = document.createElement('button');
-        btn.className = 'color-btn';
-        btn.setAttribute('data-color', color);
-        btn.onclick = () => selectColor(color);
-        
-        const label = document.createElement('span');
-        label.className = 'color-name';
-        label.textContent = color;
-        btn.appendChild(label);
-        
-        colorOptions.appendChild(btn);
-    });
-    
-    if (!selectedColor || !availableColors.includes(selectedColor)) {
-        selectColor(availableColors[0]);
-    } else {
-        // Re-apply color to update background
-        selectColor(selectedColor);
-    }
-}
-
-function selectColor(color) {
-    selectedColor = color;
-    document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-color') === color);
-    });
-
-    // Update shirt underlay inside the SVG (so transparent mockup areas reflect the selected shirt colour)
-    const colorMap = {
-        'Black': '#1a1a1a',
-        'White': '#f5f5f5',
-        'Navy': '#001f3f',
-        'Gray': '#808080'
-    };
-
-    const shirtFill = document.getElementById('shirtFill');
-    if (shirtFill) {
-        shirtFill.setAttribute('fill', colorMap[color] || '#1a1a1a');
-    }
-
-}
-
-function selectSize(size) {
-    selectedSize = size;
-    document.querySelectorAll('.size-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.getAttribute('data-size') === size);
-    });
-}
-
-function changeQuantity(delta){
-    const next = Math.max(1, Math.min(99, (parseInt(selectedQuantity || 1, 10) || 1) + delta));
-    selectedQuantity = next;
-    const inp = document.getElementById('quantityInput');
-    if (inp) inp.value = String(next);
-}
-
-function setQuantityFromInput(val){
-    const n = Math.max(1, Math.min(99, parseInt(val || '1', 10) || 1));
-    selectedQuantity = n;
-    const inp = document.getElementById('quantityInput');
-    if (inp && inp.value !== String(n)) inp.value = String(n);
-}
-
-let isZoomed = false;
-function toggleZoom() {
-    const canvas = document.getElementById('previewCanvas') || document.querySelector('.preview-canvas');
-    const toggleBtn = document.getElementById('zoomToggle');
-
-    if (!canvas || !toggleBtn) return;
-
-    isZoomed = !isZoomed;
-
-    if (isZoomed) {
-        canvas.classList.add('zoomed');
-        toggleBtn.classList.add('active');
-        toggleBtn.querySelector('svg').innerHTML = `
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M21 21l-4.35-4.35"/>
-            <line x1="8" y1="11" x2="14" y2="11"/>
-        `;
-    } else {
-        canvas.classList.remove('zoomed');
-        toggleBtn.classList.remove('active');
-        toggleBtn.querySelector('svg').innerHTML = `
-            <circle cx="11" cy="11" r="8"/>
-            <path d="M21 21l-4.35-4.35"/>
-            <line x1="11" y1="8" x2="11" y2="14"/>
-            <line x1="8" y1="11" x2="14" y2="11"/>
-        `;
-    }
-}
-
-
-</script>
-
-
-
-
+  </script>
 </body>
 </html>
