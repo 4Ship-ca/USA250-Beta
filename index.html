@@ -1660,11 +1660,62 @@
     let baselineArch = { cityArch: 64, groupArch: 64, cityTrack: 0, groupTrack: 2 };
     let templateDefaults = {};
 
-    // Cart Bridge Client - stub for external library
-    const CartBridgeClient = window.CartBridgeClient || {
-        preopenBridge: async () => console.log('[CartBridge] preopenBridge called'),
-        addItems: async (items) => ({ success: true, cartItemCount: 1 })
-    };
+    // Real CartBridgeClient implementation with postMessage
+    const CartBridgeClient = window.CartBridgeClient || (() => {
+        const BRIDGE_URL = 'https://4ship.shop/cart-bridge'; // Bridge page URL
+        const BRIDGE_TOKEN = 'mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc'; // Must match bridge config
+        let bridgeWindow = null;
+
+        return {
+            preopenBridge: function() {
+                if (!bridgeWindow || bridgeWindow.closed) {
+                    bridgeWindow = window.open(
+                        `${BRIDGE_URL}?t=${encodeURIComponent(BRIDGE_TOKEN)}`,
+                        'CartBridge',
+                        'width=600,height=400'
+                    );
+                }
+                return bridgeWindow;
+            },
+
+            addItems: async function(items) {
+                return new Promise((resolve, reject) => {
+                    const bridge = this.preopenBridge();
+                    if (!bridge) {
+                        reject(new Error('Failed to open bridge'));
+                        return;
+                    }
+
+                    const timeout = setTimeout(() => {
+                        reject(new Error('Bridge timeout (no response within 30s)'));
+                    }, 30000);
+
+                    const listener = (event) => {
+                        // Only accept messages from bridge origin
+                        if (!event.origin.includes('4ship.shop')) return;
+
+                        const msg = event.data || {};
+                        if (msg.type === 'ADD_OK') {
+                            clearTimeout(timeout);
+                            window.removeEventListener('message', listener);
+                            resolve({ success: true, cartItemCount: msg.cartItemCount });
+                        } else if (msg.type === 'ADD_ERR') {
+                            clearTimeout(timeout);
+                            window.removeEventListener('message', listener);
+                            reject(new Error(msg.message || 'Bridge error'));
+                        }
+                    };
+
+                    window.addEventListener('message', listener);
+
+                    // Wait for bridge to be ready, then send items
+                    setTimeout(() => {
+                        bridge.postMessage({ type: 'ADD_ITEMS', items }, '*');
+                    }, 500);
+                });
+            }
+        };
+    })();
 
     // Cart count management
     let cartCount = 0;
