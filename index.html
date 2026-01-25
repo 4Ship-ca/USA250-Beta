@@ -1663,54 +1663,107 @@
     // Real CartBridgeClient implementation with postMessage
     const CartBridgeClient = window.CartBridgeClient || (() => {
         const BRIDGE_URL = 'https://shop.4ship.ca/cart-bridge'; // Bridge page URL
+        const BRIDGE_ORIGIN = 'https://shop.4ship.ca'; // Specific origin for postMessage
         const BRIDGE_TOKEN = 'mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc'; // Must match bridge config
         let bridgeWindow = null;
+        let requestCounter = 0;
+        const pendingRequests = new Map(); // Track pending requests by ID
 
         return {
             preopenBridge: function() {
                 if (!bridgeWindow || bridgeWindow.closed) {
+                    console.log('[CartBridge] Opening bridge window');
                     bridgeWindow = window.open(
                         `${BRIDGE_URL}?t=${encodeURIComponent(BRIDGE_TOKEN)}`,
                         'CartBridge',
                         'width=600,height=400'
                     );
+                    if (!bridgeWindow) {
+                        console.error('[CartBridge] Failed to open bridge window (popup may be blocked)');
+                    } else {
+                        console.log('[CartBridge] Bridge window opened successfully');
+                    }
                 }
                 return bridgeWindow;
             },
 
             addItems: async function(items) {
                 return new Promise((resolve, reject) => {
+                    const requestId = ++requestCounter;
+                    console.log(`[CartBridge] addItems request #${requestId} initiated with ${items.length} item(s)`);
+
                     const bridge = this.preopenBridge();
                     if (!bridge) {
+                        console.error(`[CartBridge] Request #${requestId}: Bridge window is not available`);
                         reject(new Error('Failed to open bridge'));
                         return;
                     }
 
-                    const timeout = setTimeout(() => {
-                        reject(new Error('Bridge timeout (no response within 30s)'));
-                    }, 30000);
+                    let timeoutHandle = null;
+                    let hasResponded = false;
 
                     const listener = (event) => {
                         // Only accept messages from bridge origin
-                        if (!event.origin.includes('shop.4ship.ca')) return;
+                        if (event.origin !== BRIDGE_ORIGIN) {
+                            console.debug(`[CartBridge] Ignoring message from unauthorized origin: ${event.origin}`);
+                            return;
+                        }
 
                         const msg = event.data || {};
+
+                        // Only process responses for this specific request
+                        if (msg.requestId !== requestId) {
+                            console.debug(`[CartBridge] Ignoring response for different request ID: ${msg.requestId}`);
+                            return;
+                        }
+
+                        if (hasResponded) {
+                            console.warn(`[CartBridge] Request #${requestId}: Already responded, ignoring duplicate message`);
+                            return;
+                        }
+
+                        hasResponded = true;
+                        console.log(`[CartBridge] Request #${requestId}: Received response (type: ${msg.type})`);
+
+                        if (timeoutHandle) {
+                            clearTimeout(timeoutHandle);
+                        }
+                        window.removeEventListener('message', listener);
+
                         if (msg.type === 'ADD_OK') {
-                            clearTimeout(timeout);
-                            window.removeEventListener('message', listener);
+                            console.log(`[CartBridge] Request #${requestId}: Success - cart count: ${msg.cartItemCount}`);
                             resolve({ success: true, cartItemCount: msg.cartItemCount });
                         } else if (msg.type === 'ADD_ERR') {
-                            clearTimeout(timeout);
-                            window.removeEventListener('message', listener);
+                            console.error(`[CartBridge] Request #${requestId}: Error - ${msg.message}`);
                             reject(new Error(msg.message || 'Bridge error'));
+                        } else {
+                            console.warn(`[CartBridge] Request #${requestId}: Unknown response type: ${msg.type}`);
                         }
                     };
+
+                    // Store the listener so we can clean it up
+                    pendingRequests.set(requestId, { listener, resolve, reject });
+
+                    // Set up timeout with cleanup
+                    timeoutHandle = setTimeout(() => {
+                        if (!hasResponded) {
+                            hasResponded = true;
+                            console.error(`[CartBridge] Request #${requestId}: Timeout (no response within 30s)`);
+                            window.removeEventListener('message', listener);
+                            pendingRequests.delete(requestId);
+                            reject(new Error('Bridge timeout (no response within 30s)'));
+                        }
+                    }, 30000);
 
                     window.addEventListener('message', listener);
 
                     // Wait for bridge to be ready, then send items
                     setTimeout(() => {
-                        bridge.postMessage({ type: 'ADD_ITEMS', items }, '*');
+                        console.log(`[CartBridge] Request #${requestId}: Sending addItems message to bridge`);
+                        bridge.postMessage(
+                            { type: 'ADD_ITEMS', requestId, items },
+                            BRIDGE_ORIGIN // Use specific origin instead of wildcard
+                        );
                     }, 500);
                 });
             }
