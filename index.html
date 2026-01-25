@@ -1698,17 +1698,29 @@
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#39;');
     }
+    
+    // Load mockup image with fallback
+    function loadMockup(img, style, product) {
+        const mockupUrl = getMockupUrl(style, product);
+        img.src = mockupUrl;
+        img.onerror = () => {
+            // Fallback to placeholder
+            img.style.background = '#1a1a1a';
+            img.style.display = 'flex';
+            img.style.alignItems = 'center';
+            img.style.justifyContent = 'center';
+            img.textContent = `${style} - ${product}`;
+            img.style.color = '#666';
+            img.style.fontSize = '12px';
+        };
+    }
 
-    async function fetchJsonCached(url) {
-        if (!url) return null;
-        if (_assetCache.json.has(url)) return _assetCache.json.get(url);
+    // Mockups load on-demand with automatic fallback - no pre-checking needed
 
-        const p = fetch(url, { cache: 'force-cache' })
-            .then(r => (r && r.ok) ? r.json() : null)
-            .catch(() => null);
-
-        _assetCache.json.set(url, p);
-        return p;
+    // Skip detection - just load mockups and handle errors gracefully
+    async function detectAvailableMockups() {
+        console.log('Mockups will load on-demand with fallback to placeholder');
+        // No detection needed - just try to load and fallback if missing
     }
 
     function injectFontImport(svgEl) {
@@ -1764,295 +1776,14 @@
             ]);
         } catch (e) {}
     }
-
-    const SHOPIFY_CONFIG = {
-        backendUrl: 'https://usa250-backend.vercel.app/api/create-draft-order',
-        productId: '8581802721430'
-    };
-
-    // -------- Cart bridge client --------
-    const CART_BRIDGE = {
-        token: "mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc",
-        bridgeOrigin: "https://shop.4ship.ca",
-        bridgeUrl: "https://shop.4ship.ca/pages/cart-bridge?t=mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc",
-        popupName: "shopify_cart",
-        popupFeatures: "width=460,height=720,menubar=0,toolbar=0,location=0,status=0,scrollbars=1,resizable=1"
-    };
-
-    const CartBridgeClient = (() => {
-        const BRIDGE_URL = CART_BRIDGE.bridgeUrl;
-        const BRIDGE_TOKEN = (() => {
-            try { return new URL(BRIDGE_URL).searchParams.get("t") || ""; } catch (e) { return ""; }
-        })();
-
-        const BRIDGE_ORIGIN = (() => {
-            try { return new URL(BRIDGE_URL).origin; } catch (e) { return CART_BRIDGE.bridgeOrigin; }
-        })();
-
-        const BRIDGE_ALLOWED_ORIGINS = new Set([
-            BRIDGE_ORIGIN,
-            "https://your4ship.myshopify.com"
-        ]);
-
-        let bridgeWin = null;
-        let ready = false;
-        let readyPromise = null;
-        let bridgeTargetOrigin = BRIDGE_ORIGIN;
-
-        const pending = new Map();
-
-        function uid() {
-            return "r_" + Date.now().toString(36) + "_" + Math.random().toString(16).slice(2);
-        }
-
-        function preopenBridge() {
-            if (bridgeWin && !bridgeWin.closed) return bridgeWin;
-            bridgeWin = window.open(BRIDGE_URL, "cart_bridge", "width=520,height=720");
-            if (!bridgeWin) throw new Error("Popup blocked. Allow popups for this site, then try again.");
-            return bridgeWin;
-        }
-
-        function openBridge() {
-            if (!bridgeWin || bridgeWin.closed) {
-                throw new Error("Cart Bridge not ready. Click 'View Cart' once to initialize, then try again.");
-            }
-            try { bridgeWin.focus(); } catch (e) {}
-            return bridgeWin;
-        }
-
-        function postToBridge(payload) {
-            if (!bridgeWin || bridgeWin.closed) openBridge();
-            const type = payload && payload.type;
-
-            if (type === "PING") {
-                try { bridgeWin.postMessage(payload, BRIDGE_ORIGIN); } catch (e) {}
-                try { bridgeWin.postMessage(payload, "*"); } catch (e) {}
-                return;
-            }
-
-            const target = bridgeTargetOrigin || BRIDGE_ORIGIN;
-            try { bridgeWin.postMessage(payload, target); } catch (e) {}
-        }
-
-        function request(type, payload = {}, timeoutMs = 15000) {
-            const requestId = payload.requestId || uid();
-
-            return new Promise((resolve, reject) => {
-                const timeout = setTimeout(() => {
-                    pending.delete(requestId);
-                    reject(new Error(`Cart Bridge timeout for ${type}.`));
-                }, timeoutMs);
-
-                pending.set(requestId, { resolve, reject, timeout, type });
-                postToBridge({ type, token: BRIDGE_TOKEN, requestId, ...payload });
-            });
-        }
-
-        async function ensureReady(timeoutMs = 9000) {
-            if (ready && bridgeWin && !bridgeWin.closed) return true;
-
-            openBridge();
-
-            if (readyPromise) return readyPromise;
-
-            readyPromise = new Promise((resolve, reject) => {
-                const started = Date.now();
-
-                const tick = () => {
-                    if (ready) {
-                        cleanup();
-                        resolve(true);
-                        return;
-                    }
-                    if (Date.now() - started > timeoutMs) {
-                        cleanup();
-                        reject(new Error("Cart Bridge not ready. Confirm the Shopify bridge page is published and the token matches."));
-                        return;
-                    }
-                    try { postToBridge({ type: "PING", token: BRIDGE_TOKEN }); } catch (e) {}
-                };
-
-                const interval = setInterval(tick, 350);
-
-                const cleanup = () => {
-                    clearInterval(interval);
-                    readyPromise = null;
-                };
-
-                tick();
-            });
-
-            return readyPromise;
-        }
-
-        window.addEventListener("message", (ev) => {
-            const msg = ev && ev.data ? ev.data : null;
-            if (!msg || typeof msg !== "object") return;
-
-            if (bridgeWin && ev.source !== bridgeWin) {
-                // ignore messages from other windows
-            }
-
-            if (BRIDGE_TOKEN && msg.token && msg.token !== BRIDGE_TOKEN) return;
-
-            if (ev.origin && !BRIDGE_ALLOWED_ORIGINS.has(ev.origin)) return;
-
-            if (msg.type === "READY") {
-                ready = true;
-                bridgeTargetOrigin = ev.origin || BRIDGE_ORIGIN;
-                return;
-            }
-
-            if (!msg.requestId && pending.size === 1) {
-                const [rid, p] = pending.entries().next().value;
-                clearTimeout(p.timeout);
-                pending.delete(rid);
-
-                if (msg.type === "ADD_ERR") p.reject(new Error(msg.message || "Cart add failed."));
-                else p.resolve(msg);
-                return;
-            }
-
-            if (!msg.requestId) return;
-
-            const p = pending.get(msg.requestId);
-            if (!p) return;
-
-            clearTimeout(p.timeout);
-            pending.delete(msg.requestId);
-
-            if (msg.type === "ADD_ERR") p.reject(new Error(msg.message || "Cart add failed."));
-            else p.resolve(msg);
-        });
-
-        async function addItems(items) {
-            await ensureReady();
-            const resp = await request("ADD_ITEMS", { items });
-            if (resp && resp.type === "ADD_ERR") throw new Error(resp.message || "Cart add failed.");
-            return resp;
-        }
-
-        function openCart() {
-            preopenBridge();
-            ensureReady().catch(() => {});
-            try { postToBridge({ type: "OPEN_CART", token: BRIDGE_TOKEN }); } catch (e) {}
-        }
-
-        return { addItems, openCart, preopenBridge, openBridge, ensureReady };
-    })();
-
-    // Single source of truth: variant → Shopify IDs
-    const VARIANT_MAP = {
-        'tee-navy-s':  { shopifyVariantId: '46056445575318', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-navy-m':  { shopifyVariantId: '46056445444246', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-navy-l':  { shopifyVariantId: '46056445477014', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-navy-xl': { shopifyVariantId: '46056445509782', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-navy-2xl':{ shopifyVariantId: '46056445542550', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_navy_gpr_4-0_gildan_64000' },
-        'tee-navy-3xl':{ shopifyVariantId: '46056446099606', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_navy_gpr_4-0_gildan_64000' },
-
-        'tee-black-s':  { shopifyVariantId: '46056445739158', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_black_gpr_4-0_gildan_64000' },
-        'tee-black-m':  { shopifyVariantId: '46056445608086', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_black_gpr_4-0_gildan_64000' },
-        'tee-black-l':  { shopifyVariantId: '46056445640854', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_black_gpr_4-0_gildan_64000' },
-        'tee-black-xl': { shopifyVariantId: '46056445673622', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_black_gpr_4-0_gildan_64000' },
-        'tee-black-2xl':{ shopifyVariantId: '46056445706390', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_black_gpr_4-0_gildan_64000' },
-        'tee-black-3xl':{ shopifyVariantId: '46056446132374', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_black_gpr_4-0_gildan_64000' },
-
-        'tee-gray-s':  { shopifyVariantId: '46056445902998', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-gray-m':  { shopifyVariantId: '46056445771926', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-gray-l':  { shopifyVariantId: '46056445804694', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-gray-xl': { shopifyVariantId: '46056445837462', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-gray-2xl':{ shopifyVariantId: '46056445870230', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_gray_gpr_4-0_gildan_64000' },
-        'tee-gray-3xl':{ shopifyVariantId: '46056446165142', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_gray_gpr_4-0_gildan_64000' },
-
-        'tee-white-s':  { shopifyVariantId: '46056446066838', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_s_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-m':  { shopifyVariantId: '46056445935766', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_m_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-l':  { shopifyVariantId: '46056445968534', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_l_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-xl': { shopifyVariantId: '46056446001302', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_xl_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-2xl':{ shopifyVariantId: '46056446034070', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_2xl_gco_white_gpr_4-0_gildan_64000' },
-        'tee-white-3xl':{ shopifyVariantId: '46056446197910', gelatoUid: 'apparel_product_gca_t-shirt_gsc_crewneck_gcu_unisex_gqa_classic_gsi_3xl_gco_white_gpr_4-0_gildan_64000' }
-    };
-
-    function setCartCount(n){
-        cartItemCount = Math.max(0, Number(n) || 0);
-        const btn = document.getElementById("viewCartBtn");
-        const badge = document.getElementById("cartBadge");
-
-        const isEmpty = cartItemCount <= 0;
-
-        if (btn){
-            btn.disabled = isEmpty;
-            btn.setAttribute("aria-disabled", isEmpty ? "true" : "false");
-        }
-        if (badge){
-            if (!isEmpty){
-                badge.style.display = "flex";
-                badge.textContent = String(cartItemCount);
-            } else {
-                badge.style.display = "none";
-                badge.textContent = "0";
-            }
-        }
+    
+    // Populate product selector with available products
+    function populateProductSelector() {
+        // Product selector is already populated in HTML with static options
+        // This function is a placeholder for future dynamic population
     }
-
-    async function handleViewCart(){
-        // Navigate to Shopify USA250 cart in the same tab.
-        let current = window.location.href;
-        let lastUrl = current;
-        try{
-            if (window.localStorage){
-                const key = "usa250_last_builder_url";
-                localStorage.setItem(key, current);
-                const stored = localStorage.getItem(key);
-                if (stored && /^https?:\/\//i.test(stored)){
-                    lastUrl = stored;
-                }
-            }
-        }catch(e){}
-
-        const baseCart = "https://shop.4ship.ca/cart";
-        const params = new URLSearchParams();
-        params.set("view", "usa250");
-        params.set("return_to", lastUrl);
-        const target = baseCart + "?" + params.toString();
-
-        try{
-            window.location.href = target;
-        }catch(e){
-            window.location.href = baseCart;
-        }
-    }
-
-    function hardReset() {
-        if (confirm("Are you sure you want to clear your design and start over?")) {
-            try {
-                if (window.sessionStorage) {
-                    sessionStorage.removeItem('usa250_session');
-                }
-            } catch (e) {}
-            window.location.reload();
-        }
-    }
-
-    function getMockupUrl(style, product) {
-        const shape = PRODUCTS[product].shape;
-        return `mockups/Style_${style}_${shape}_${product}.png`;
-    }
-
-    function loadMockup(imgElement, style, product) {
-        const primaryUrl = getMockupUrl(style, product);
-        imgElement.src = primaryUrl;
-        imgElement.alt = `${STYLES[style].name} - ${PRODUCTS[product].name}`;
-
-        imgElement.onerror = () => {
-            imgElement.src = 'mockups/placeholder.png';
-            imgElement.onerror = () => {
-                const colors = { A: '#1a3a5c', B: '#0a0a0a', C: '#5c1a1a', D: '#1a3a1a' };
-                imgElement.style.background = colors[style] || '#333';
-                imgElement.alt = `${STYLES[style].name} Style Preview`;
-            };
-        };
-    }
-
+    
+    // Initialize mockups for all style cards
     function initializeMockups() {
         const styles = ['A', 'B', 'C', 'D'];
         styles.forEach(style => {
@@ -2652,11 +2383,14 @@
         if (cacheable) _assetCache.images.set(src, p);
         return p;
     }
-
-    async function handleCheckout() {
-        if (!selectedStyle || !selectedProduct || !selectedColor || !selectedSize) {
-            alert('Please select your style, color, size, and quantity before adding to cart.');
-            return;
+    
+    async function handleCTA() {
+        if (currentStep < 4) {
+            currentStep++;
+            showStep(currentStep);
+        } else {
+            // At step 4, proceed to Shopify checkout
+            await handleCheckout();
         }
 
         const checkoutBtn = document.getElementById('ctaButtonRight');
