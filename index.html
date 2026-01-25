@@ -1662,7 +1662,7 @@
 
     // Real CartBridgeClient implementation with postMessage
     const CartBridgeClient = window.CartBridgeClient || (() => {
-        const BRIDGE_URL = 'https://4ship.shop/cart-bridge'; // Bridge page URL
+        const BRIDGE_URL = 'https://shop.4ship.ca/cart-bridge'; // Bridge page URL
         const BRIDGE_TOKEN = 'mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc'; // Must match bridge config
         let bridgeWindow = null;
 
@@ -1692,7 +1692,7 @@
 
                     const listener = (event) => {
                         // Only accept messages from bridge origin
-                        if (!event.origin.includes('4ship.shop')) return;
+                        if (!event.origin.includes('shop.4ship.ca')) return;
 
                         const msg = event.data || {};
                         if (msg.type === 'ADD_OK') {
