@@ -992,8 +992,24 @@
         return `mockups/Style_${style}_${shape}_${product}.png`;
     }
     
+    // Load mockup image with fallback
+    function loadMockup(img, style, product) {
+        const mockupUrl = getMockupUrl(style, product);
+        img.src = mockupUrl;
+        img.onerror = () => {
+            // Fallback to placeholder
+            img.style.background = '#1a1a1a';
+            img.style.display = 'flex';
+            img.style.alignItems = 'center';
+            img.style.justifyContent = 'center';
+            img.textContent = `${style} - ${product}`;
+            img.style.color = '#666';
+            img.style.fontSize = '12px';
+        };
+    }
+
     // Mockups load on-demand with automatic fallback - no pre-checking needed
-    
+
     // Skip detection - just load mockups and handle errors gracefully
     async function detectAvailableMockups() {
         console.log('Mockups will load on-demand with fallback to placeholder');
@@ -1024,17 +1040,9 @@
     
     // Populate product selector with available products
     function populateProductSelector() {
-        // Group products by category
-        const categories = {};
-        
-        Object.entries(PRODUCTS).forEach(([key, product]) => {
-            if (!categories[product.category]) {
-                categories[product.category] = [];
-            }
-            categories[product.category].push({ key, ...product });
-        });
-        
-     
+        // Product selector is already populated in HTML with static options
+        // This function is a placeholder for future dynamic population
+    }
     
     // Initialize mockups for all style cards
     function initializeMockups() {
@@ -1536,27 +1544,8 @@
             currentStep++;
             showStep(currentStep);
         } else {
-            // Generate 9000px PNG
-            const pngBlob = await generate9000pxPNG();
-            
-            if (pngBlob) {
-                // TODO: Upload to server/Gelato
-                // For now, trigger download for testing
-                const url = URL.createObjectURL(pngBlob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `America250_${selectedStyle}_${cityText.replace(/[^a-zA-Z0-9]/g, '_')}_9000px.png`;
-                a.click();
-                URL.revokeObjectURL(url);
-                
-                // Reset button
-                const ctaBtn = document.getElementById('ctaButton');
-                ctaBtn.textContent = 'Design Downloaded! Order Now →';
-                
-                setTimeout(() => {
-                    alert('Next: Upload to Gelato/Shopify and proceed to checkout');
-                }, 1000);
-            }
+            // At step 4, proceed to Shopify checkout
+            await handleCheckout();
         }
     }
     
