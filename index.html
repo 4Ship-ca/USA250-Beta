@@ -1671,18 +1671,16 @@
 
         return {
             preopenBridge: function() {
-                if (!bridgeWindow || bridgeWindow.closed) {
-                    console.log('[CartBridge] Opening bridge window');
-                    bridgeWindow = window.open(
-                        `${BRIDGE_URL}?t=${encodeURIComponent(BRIDGE_TOKEN)}`,
-                        'CartBridge',
-                        'width=600,height=400'
-                    );
-                    if (!bridgeWindow) {
-                        console.error('[CartBridge] Failed to open bridge window (popup may be blocked)');
-                    } else {
-                        console.log('[CartBridge] Bridge window opened successfully');
-                    }
+                // BOLT-ON: Use hidden iframe instead of popup window
+                // To revert: replace with original window.open() code above
+                const iframe = document.getElementById('cartBridgeFrame');
+                if (!iframe) {
+                    console.error('[CartBridge] cartBridgeFrame iframe not found');
+                    return null;
+                }
+                bridgeWindow = iframe.contentWindow;
+                if (bridgeWindow) {
+                    console.log('[CartBridge] Using hidden iframe for bridge communication');
                 }
                 return bridgeWindow;
             },
@@ -3154,6 +3152,20 @@
 
     window.addEventListener('load', init);
 </script>
+
+<!-- ============================================================
+     CART BRIDGE IFRAME BOLT-ON
+     Hidden iframe to CartBridge for silent checkout communication.
+     Can be removed by deleting this entire block and reverting
+     CartBridgeClient preopenBridge() to original window.open() code.
+     ============================================================ -->
+<iframe
+    id="cartBridgeFrame"
+    src="https://shop.4ship.ca/pages/cart-bridge?t=mHL5WpZ1FUenTk-NAG2_RS2jjNhuJWFJR0EH31nekSc"
+    style="display:none;position:absolute;left:-9999px;width:1px;height:1px;"
+    title="Cart Bridge"
+></iframe>
+<!-- END CART BRIDGE IFRAME BOLT-ON -->
 
 </body>
 </html>
