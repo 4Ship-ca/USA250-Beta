@@ -1669,34 +1669,16 @@
         let requestCounter = 0;
         const pendingRequests = new Map(); // Track pending requests by ID
 
-        // Device detection (mobile vs desktop)
-        function isMobileDevice() {
-            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-
         return {
             preopenBridge: function() {
-                // TWO-PATH APPROACH:
-                // - Desktop: Hidden popup (1x1px, off-screen)
-                // - Mobile: Visible popup (works from direct user click)
+                // ALWAYS HIDDEN: 1x1px popup (invisible to all users/devices)
+                // This avoids popup visibility issues on mobile while maintaining postMessage functionality
                 if (!bridgeWindow || bridgeWindow.closed) {
-                    const isMobile = isMobileDevice();
-                    let windowSpec;
-
-                    if (isMobile) {
-                        // MOBILE: Visible popup (user will see it briefly, but it works reliably)
-                        windowSpec = 'width=400,height=600,left=0,top=0';
-                        console.log('[CartBridge] Opening visible bridge window (mobile detected)');
-                    } else {
-                        // DESKTOP: Hidden popup (1x1px, invisible, off-screen)
-                        windowSpec = 'width=1,height=1,left=-9999,top=-9999';
-                        console.log('[CartBridge] Opening hidden bridge window (desktop detected)');
-                    }
-
+                    console.log('[CartBridge] Opening hidden bridge window (1x1px at -9999,-9999)');
                     bridgeWindow = window.open(
                         `${BRIDGE_URL}?t=${encodeURIComponent(BRIDGE_TOKEN)}`,
                         'CartBridge',
-                        windowSpec
+                        'width=1,height=1,left=-9999,top=-9999'  // Always hidden, all platforms
                     );
                     if (!bridgeWindow) {
                         console.error('[CartBridge] Failed to open bridge window (popup may be blocked)');
@@ -1795,6 +1777,26 @@
     function setCartCount(count) {
         cartCount = count;
         console.log('[USA250] Cart count updated:', count);
+    }
+
+    function updateCartBadge(count) {
+        // Add cart count badge to VIEW CART button
+        const viewCartBtn = document.querySelector('[href="https://shop.4ship.ca/cart"]');
+        if (!viewCartBtn) return;
+
+        // Remove existing badge if present
+        const existingBadge = viewCartBtn.querySelector('.cart-badge');
+        if (existingBadge) existingBadge.remove();
+
+        // Add new badge with count
+        if (count > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'cart-badge';
+            badge.textContent = count;
+            badge.style.cssText = 'position:absolute;top:-8px;right:-8px;background:#FFD700;color:#000;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold;';
+            viewCartBtn.style.position = 'relative';
+            viewCartBtn.appendChild(badge);
+        }
     }
 
     function _templateKey(style = selectedStyle) {
@@ -2790,7 +2792,8 @@
         }
         if (typeof cartCount === 'number') {
             setCartCount(cartCount);
-            showCartToast(cartCount);
+            // REMOVED: showCartToast(cartCount); - Use cart count badge instead
+            updateCartBadge(cartCount);
         }
     }
 
