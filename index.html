@@ -1669,22 +1669,39 @@
         let requestCounter = 0;
         const pendingRequests = new Map(); // Track pending requests by ID
 
+        // Device detection (mobile vs desktop)
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
         return {
             preopenBridge: function() {
-                // BOLT-ON: Hidden popup window (1x1px, off-screen)
-                // CSP frame-ancestors only affects iframes, not windows
-                // Users cannot see or interact with this window
+                // TWO-PATH APPROACH:
+                // - Desktop: Hidden popup (1x1px, off-screen)
+                // - Mobile: Visible popup (works from direct user click)
                 if (!bridgeWindow || bridgeWindow.closed) {
-                    console.log('[CartBridge] Opening hidden bridge window');
+                    const isMobile = isMobileDevice();
+                    let windowSpec;
+
+                    if (isMobile) {
+                        // MOBILE: Visible popup (user will see it briefly, but it works reliably)
+                        windowSpec = 'width=400,height=600,left=0,top=0';
+                        console.log('[CartBridge] Opening visible bridge window (mobile detected)');
+                    } else {
+                        // DESKTOP: Hidden popup (1x1px, invisible, off-screen)
+                        windowSpec = 'width=1,height=1,left=-9999,top=-9999';
+                        console.log('[CartBridge] Opening hidden bridge window (desktop detected)');
+                    }
+
                     bridgeWindow = window.open(
                         `${BRIDGE_URL}?t=${encodeURIComponent(BRIDGE_TOKEN)}`,
                         'CartBridge',
-                        'width=1,height=1,left=-9999,top=-9999'  // Hidden: 1x1px at -9999,-9999
+                        windowSpec
                     );
                     if (!bridgeWindow) {
                         console.error('[CartBridge] Failed to open bridge window (popup may be blocked)');
                     } else {
-                        console.log('[CartBridge] Hidden bridge window opened successfully');
+                        console.log('[CartBridge] Bridge window opened successfully');
                     }
                 }
                 return bridgeWindow;
