@@ -1731,12 +1731,22 @@
                             clearTimeout(timeoutHandle);
                         }
                         window.removeEventListener('message', listener);
+                        pendingRequests.delete(requestId);
 
                         if (msg.type === 'ADD_OK') {
                             console.log(`[CartBridge] Request #${requestId}: Success - cart count: ${msg.cartItemCount}`);
+                            // Close bridge window after successful add
+                            if (bridgeWindow && !bridgeWindow.closed) {
+                                bridgeWindow.close();
+                                console.log(`[CartBridge] Request #${requestId}: Closed bridge window`);
+                            }
                             resolve({ success: true, cartItemCount: msg.cartItemCount });
                         } else if (msg.type === 'ADD_ERR') {
                             console.error(`[CartBridge] Request #${requestId}: Error - ${msg.message}`);
+                            // Close bridge window on error
+                            if (bridgeWindow && !bridgeWindow.closed) {
+                                bridgeWindow.close();
+                            }
                             reject(new Error(msg.message || 'Bridge error'));
                         } else {
                             console.warn(`[CartBridge] Request #${requestId}: Unknown response type: ${msg.type}`);
@@ -1753,6 +1763,10 @@
                             console.error(`[CartBridge] Request #${requestId}: Timeout (no response within 30s)`);
                             window.removeEventListener('message', listener);
                             pendingRequests.delete(requestId);
+                            // Close bridge window on timeout
+                            if (bridgeWindow && !bridgeWindow.closed) {
+                                bridgeWindow.close();
+                            }
                             reject(new Error('Bridge timeout (no response within 30s)'));
                         }
                     }, 30000);
