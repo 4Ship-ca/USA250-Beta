@@ -1671,14 +1671,15 @@
 
         return {
             preopenBridge: function() {
-                // ALWAYS HIDDEN: 1x1px popup (invisible to all users/devices)
-                // This avoids popup visibility issues on mobile while maintaining postMessage functionality
+                // HIDDEN: Positioned far off-screen to the right + bottom (kiosk mode)
+                // Browsers enforce minimum window size (~100x100px), so we position it
+                // way outside viewport (left=9999, top=9999) to keep it invisible
                 if (!bridgeWindow || bridgeWindow.closed) {
-                    console.log('[CartBridge] Opening hidden bridge window (1x1px at -9999,-9999)');
+                    console.log('[CartBridge] Opening hidden bridge window (off-screen right-bottom, kiosk mode)');
                     bridgeWindow = window.open(
                         `${BRIDGE_URL}?t=${encodeURIComponent(BRIDGE_TOKEN)}`,
                         'CartBridge',
-                        'width=1,height=1,left=-9999,top=-9999'  // Always hidden, all platforms
+                        'width=300,height=400,left=9999,top=9999,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no'
                     );
                     if (!bridgeWindow) {
                         console.error('[CartBridge] Failed to open bridge window (popup may be blocked)');
