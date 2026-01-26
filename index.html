@@ -1671,15 +1671,15 @@
 
         return {
             preopenBridge: function() {
-                // HIDDEN: Positioned far off-screen bottom-right
+                // HIDDEN: Positioned far off-screen to the right + bottom (kiosk mode)
                 // Browsers enforce minimum window size (~100x100px), so we position it
                 // way outside viewport (left=9999, top=9999) to keep it invisible
                 if (!bridgeWindow || bridgeWindow.closed) {
-                    console.log('[CartBridge] Opening hidden bridge window (off-screen bottom-right)');
+                    console.log('[CartBridge] Opening hidden bridge window (off-screen right-bottom, kiosk mode)');
                     bridgeWindow = window.open(
                         `${BRIDGE_URL}?t=${encodeURIComponent(BRIDGE_TOKEN)}`,
                         'CartBridge',
-                        'width=300,height=400,left=9999,top=9999'  // Off-screen: browser minimum size at 9999,9999
+                        'width=300,height=400,left=9999,top=9999,menubar=no,toolbar=no,location=no,status=no,scrollbars=no,resizable=no'
                     );
                     if (!bridgeWindow) {
                         console.error('[CartBridge] Failed to open bridge window (popup may be blocked)');
