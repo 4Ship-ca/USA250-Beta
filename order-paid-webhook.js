@@ -105,12 +105,14 @@ async function createGelatoOrder(data) {
         customerReferenceId: data.orderNumber,
         items: [{
             itemReferenceId: data.lineItemId.toString(),
-            productUid: data.gelatoUid,
+            templateUid: 'f29cdb27-152d-4d38-b6d4-97d915632a6f',  // USA250 template ID
             quantity: data.quantity,
-            files: [{
-                type: 'default',
-                url: data.designUrl  // Customer's Cloudinary image - NOT the template placeholder
-            }]
+            placeholders: [
+                {
+                    name: 'customer_image',  // Must match placeholder name in Gelato template
+                    fileUrl: data.designUrl  // Customer's Cloudinary image URL
+                }
+            ]
         }],
         shipmentMethodUid: 'standard',
         shippingAddress: {
