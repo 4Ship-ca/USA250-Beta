@@ -1,12 +1,7 @@
-// api/webhooks/order-paid.js
 import crypto from 'crypto';
 
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
 const GELATO_API_KEY = process.env.GELATO_API_KEY;
-
-// HARDCODED TEST IMAGE - Use this to verify customer payloads vs template placeholders
-// Replace with actual customer design URL from Cloudinary in production
-const TEST_DESIGN_URL = 'https://res.cloudinary.com/dqab444bd/image/upload/v1738352400/usa250-orders/test_customer_design.png';
 
 export const config = {
     api: {
