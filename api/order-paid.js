@@ -65,8 +65,18 @@ export default async function handler(req, res) {
             console.log('[WEBHOOK] Item properties:', JSON.stringify(item.properties, null, 2));
 
             // Get custom attributes
-            const designUrl = item.properties?.find(p => p.name === '_design_url')?.value;
-            const gelatoUid = item.properties?.find(p => p.name === 'gelato_product')?.value;
+            // Handle both array format (from webhooks) and object format
+            let designUrl, gelatoUid;
+
+            if (Array.isArray(item.properties)) {
+                // Webhook format: array of {name, value}
+                designUrl = item.properties?.find(p => p.name === '_design_url')?.value;
+                gelatoUid = item.properties?.find(p => p.name === 'gelato_product')?.value;
+            } else if (item.properties && typeof item.properties === 'object') {
+                // Object format: direct properties
+                designUrl = item.properties._design_url;
+                gelatoUid = item.properties.gelato_product;
+            }
 
             console.log('[WEBHOOK] Extracted values:', {
                 designUrl: designUrl ? '✅ Found' : '❌ Missing',
@@ -124,7 +134,7 @@ async function createGelatoOrder(data) {
             quantity: data.quantity,
             placeholders: [
                 {
-                    name: 'customer_image.png',  // Matches the layer name in the Gelato template screenshot
+                    name: 'customer_image.png',  // Matches the layer name in the Gelato template
                     fileUrl: data.designUrl  // Customer's Cloudinary image URL
                 }
             ]
