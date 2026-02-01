@@ -2,12 +2,86 @@ import crypto from 'crypto';
 
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
 const GELATO_API_KEY = process.env.GELATO_API_KEY;
+const TEMPLATE_UID = '96027505-9403-4ee9-b30c-5e6644f5ac91';
+
+// Cache template details to avoid repeated API calls
+let templateCache = null;
+let templateCacheTime = 0;
+const CACHE_TTL = 3600000; // 1 hour
 
 export const config = {
     api: {
         bodyParser: false
     }
 };
+
+// Fetch and cache template details from Gelato
+async function getTemplateDetails() {
+    const now = Date.now();
+
+    // Return cached data if still valid
+    if (templateCache && (now - templateCacheTime) < CACHE_TTL) {
+        console.log('[TEMPLATE] Using cached template data');
+        return templateCache;
+    }
+
+    console.log('[TEMPLATE] Fetching template details from Gelato...');
+    const response = await fetch(
+        `https://ecommerce.gelatoapis.com/v1/templates/${TEMPLATE_UID}`,
+        {
+            method: 'GET',
+            headers: {
+                'X-API-KEY': GELATO_API_KEY,
+                'Content-Type': 'application/json'
+            }
+        }
+    );
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        console.error('[TEMPLATE] ❌ Failed to fetch template:', errorData);
+        throw new Error(`Failed to fetch template: ${response.status}`);
+    }
+
+    const templateData = await response.json();
+    console.log('[TEMPLATE] ✅ Template fetched successfully');
+    console.log('[TEMPLATE] Found', templateData.variants?.length || 0, 'variants');
+
+    // Cache the data
+    templateCache = templateData;
+    templateCacheTime = now;
+
+    return templateData;
+}
+
+// Find the templateVariantId that matches the ordered product
+function findMatchingVariant(template, gelatoUid) {
+    if (!template.variants) {
+        console.warn('[TEMPLATE] ⚠️ No variants in template data');
+        return null;
+    }
+
+    // Try to find exact match by product UID
+    const matchedVariant = template.variants.find(v => v.uid === gelatoUid);
+
+    if (matchedVariant) {
+        console.log('[TEMPLATE] Found matching variant:', {
+            uid: matchedVariant.uid,
+            label: matchedVariant.label,
+            templateVariantId: matchedVariant.templateVariantId || matchedVariant.id
+        });
+        return matchedVariant.templateVariantId || matchedVariant.id;
+    }
+
+    console.warn('[TEMPLATE] ⚠️ No variant found matching UID:', gelatoUid);
+    console.log('[TEMPLATE] Available variants:', template.variants.map(v => ({
+        uid: v.uid,
+        label: v.label,
+        id: v.id || v.templateVariantId
+    })));
+
+    return null;
+}
 
 // Verify webhook signature
 async function verifyWebhook(req) {
@@ -95,11 +169,20 @@ export default async function handler(req, res) {
 
             // Create Gelato order
             try {
+                // Fetch template details to get variant ID
+                const template = await getTemplateDetails();
+                const templateVariantId = findMatchingVariant(template, gelatoUid);
+
+                if (!templateVariantId) {
+                    throw new Error(`Could not find template variant for Gelato UID: ${gelatoUid}`);
+                }
+
                 const gelatoOrder = await createGelatoOrder({
                     orderNumber: order.order_number,
                     lineItemId: item.id,
                     quantity: item.quantity,
                     gelatoUid: gelatoUid,
+                    templateVariantId: templateVariantId,
                     designUrl: designUrl,
                     shippingAddress: order.shipping_address
                 });
@@ -130,7 +213,8 @@ async function createGelatoOrder(data) {
         customerReferenceId: data.orderNumber,
         items: [{
             itemReferenceId: data.lineItemId.toString(),
-            templateUid: '96027505-9403-4ee9-b30c-5e6644f5ac91',  // Updated USA250 template ID
+            templateUid: TEMPLATE_UID,
+            variantUid: data.templateVariantId,  // Specify the exact variant
             quantity: data.quantity,
             placeholders: [
                 {
@@ -155,6 +239,8 @@ async function createGelatoOrder(data) {
     };
 
     console.log('[GELATO] 📤 Sending order to Gelato...');
+    console.log('[GELATO] Template UID:', TEMPLATE_UID);
+    console.log('[GELATO] Variant UID:', data.templateVariantId);
     console.log('[GELATO] Payload:', JSON.stringify(orderPayload, null, 2));
     console.log('[GELATO] Placeholder being used:', orderPayload.items[0].placeholders[0].name);
     console.log('[GELATO] Image URL being sent:', orderPayload.items[0].placeholders[0].fileUrl);
