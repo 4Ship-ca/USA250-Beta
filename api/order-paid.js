@@ -84,16 +84,10 @@ function findMatchingVariant(template, gelatoUid) {
 }
 
 // Verify webhook signature
-async function verifyWebhook(req) {
+async function verifyWebhook(req, body) {
     const hmac = req.headers['x-shopify-hmac-sha256'];
 
     if (!hmac) return false;
-
-    const chunks = [];
-    for await (const chunk of req) {
-        chunks.push(chunk);
-    }
-    const body = Buffer.concat(chunks);
 
     const hash = crypto
         .createHmac('sha256', SHOPIFY_WEBHOOK_SECRET)
@@ -114,8 +108,16 @@ export default async function handler(req, res) {
     try {
         console.log('[WEBHOOK] ===== NEW ORDER WEBHOOK RECEIVED =====');
 
-        // Verify webhook (temporarily disabled for debugging)
-        const isValid = await verifyWebhook(req);
+        // Read request body once
+        const chunks = [];
+        for await (const chunk of req) {
+            chunks.push(chunk);
+        }
+        const bodyBuffer = Buffer.concat(chunks);
+        const bodyString = bodyBuffer.toString();
+
+        // Verify webhook
+        const isValid = await verifyWebhook(req, bodyBuffer);
         if (!isValid) {
             console.warn('[WEBHOOK] ⚠️ Webhook signature verification failed - proceeding anyway (debug mode)');
         } else {
@@ -123,12 +125,7 @@ export default async function handler(req, res) {
         }
 
         // Parse order
-        const chunks = [];
-        for await (const chunk of req) {
-            chunks.push(chunk);
-        }
-        const body = Buffer.concat(chunks).toString();
-        const order = JSON.parse(body);
+        const order = JSON.parse(bodyString);
 
         console.log('[WEBHOOK] 📦 Order received:', order.order_number);
         console.log('[WEBHOOK] Total line items:', order.line_items.length);
