@@ -134,7 +134,7 @@ async function createGelatoOrder(data) {
             quantity: data.quantity,
             placeholders: [
                 {
-                    name: 'customer_image',  // Matches the layer name in the Gelato template
+                    name: 'customer_image.png',  // Matches the layer name in the Gelato template
                     fileUrl: data.designUrl  // Customer's Cloudinary image URL
                 }
             ]
