@@ -38,12 +38,15 @@ export default async function handler(req, res) {
     }
 
     try {
+        console.log('[WEBHOOK] ===== NEW ORDER WEBHOOK RECEIVED =====');
+
         // Verify webhook
         const isValid = await verifyWebhook(req);
         if (!isValid) {
-            console.error('Invalid webhook signature');
+            console.error('[WEBHOOK] ❌ Invalid webhook signature');
             return res.status(401).json({ error: 'Unauthorized' });
         }
+        console.log('[WEBHOOK] ✅ Webhook signature verified');
 
         // Parse order
         const chunks = [];
@@ -53,42 +56,59 @@ export default async function handler(req, res) {
         const body = Buffer.concat(chunks).toString();
         const order = JSON.parse(body);
 
-        console.log('Received order:', order.order_number);
+        console.log('[WEBHOOK] 📦 Order received:', order.order_number);
+        console.log('[WEBHOOK] Total line items:', order.line_items.length);
 
         // Extract line items
         for (const item of order.line_items) {
+            console.log(`[WEBHOOK] Processing line item ${item.id}...`);
+            console.log('[WEBHOOK] Item properties:', JSON.stringify(item.properties, null, 2));
+
             // Get custom attributes
             const designUrl = item.properties?.find(p => p.name === '_design_url')?.value;
             const gelatoUid = item.properties?.find(p => p.name === 'gelato_product')?.value;
 
+            console.log('[WEBHOOK] Extracted values:', {
+                designUrl: designUrl ? '✅ Found' : '❌ Missing',
+                gelatoUid: gelatoUid ? '✅ Found' : '❌ Missing'
+            });
+
             if (!designUrl || !gelatoUid) {
-                console.error('Missing design URL or Gelato UID for item:', item.id);
+                console.error('[WEBHOOK] ❌ Missing required properties for item:', item.id);
+                console.error('[WEBHOOK] designUrl:', designUrl);
+                console.error('[WEBHOOK] gelatoUid:', gelatoUid);
                 continue;
             }
 
-            console.log('Processing item:', {
-                lineItemId: item.id,
-                gelatoUid: gelatoUid,
-                designUrl: designUrl
-            });
+            console.log('[WEBHOOK] 🎨 Design URL:', designUrl.substring(0, 80) + '...');
+            console.log('[WEBHOOK] 🏭 Gelato UID:', gelatoUid);
 
             // Create Gelato order
-            const gelatoOrder = await createGelatoOrder({
-                orderNumber: order.order_number,
-                lineItemId: item.id,
-                quantity: item.quantity,
-                gelatoUid: gelatoUid,
-                designUrl: designUrl,  // Uses actual customer design from Cloudinary
-                shippingAddress: order.shipping_address
-            });
+            try {
+                const gelatoOrder = await createGelatoOrder({
+                    orderNumber: order.order_number,
+                    lineItemId: item.id,
+                    quantity: item.quantity,
+                    gelatoUid: gelatoUid,
+                    designUrl: designUrl,
+                    shippingAddress: order.shipping_address
+                });
 
-            console.log('Gelato order created:', gelatoOrder.id);
+                console.log('[WEBHOOK] ✅ Gelato order created successfully!');
+                console.log('[WEBHOOK] Gelato Order ID:', gelatoOrder.id);
+                console.log('[WEBHOOK] Gelato Order Status:', gelatoOrder.fulfillmentStatus);
+            } catch (gelatoError) {
+                console.error('[WEBHOOK] ❌ Failed to create Gelato order:', gelatoError.message);
+                throw gelatoError;
+            }
         }
 
+        console.log('[WEBHOOK] ===== ORDER PROCESSING COMPLETE =====');
         return res.status(200).json({ success: true });
 
     } catch (error) {
-        console.error('Webhook error:', error);
+        console.error('[WEBHOOK] ❌ CRITICAL ERROR:', error.message);
+        console.error('[WEBHOOK] Stack trace:', error.stack);
         return res.status(500).json({ error: error.message });
     }
 }
@@ -124,7 +144,8 @@ async function createGelatoOrder(data) {
         }
     };
 
-    console.log('Creating Gelato order:', JSON.stringify(orderPayload, null, 2));
+    console.log('[GELATO] 📤 Sending order to Gelato...');
+    console.log('[GELATO] Payload:', JSON.stringify(orderPayload, null, 2));
 
     const response = await fetch('https://order.gelatoapis.com/v4/orders', {
         method: 'POST',
@@ -135,10 +156,20 @@ async function createGelatoOrder(data) {
         body: JSON.stringify(orderPayload)
     });
 
+    const responseData = await response.json();
+
+    console.log('[GELATO] HTTP Status:', response.status);
+    console.log('[GELATO] Response:', JSON.stringify(responseData, null, 2));
+
     if (!response.ok) {
-        const error = await response.text();
-        throw new Error(`Gelato API error: ${response.status} - ${error}`);
+        console.error('[GELATO] ❌ API Error:', {
+            status: response.status,
+            message: responseData.message,
+            details: responseData.details
+        });
+        throw new Error(`Gelato API error: ${response.status} - ${JSON.stringify(responseData)}`);
     }
 
-    return await response.json();
+    console.log('[GELATO] ✅ Successfully sent to Gelato');
+    return responseData;
 }
