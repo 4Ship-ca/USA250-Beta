@@ -47,6 +47,11 @@ async function getTemplateDetails() {
     console.log('[TEMPLATE] ✅ Template fetched successfully');
     console.log('[TEMPLATE] Found', templateData.variants?.length || 0, 'variants');
 
+    // Log available image placeholders
+    if (templateData.imagePlaceholders) {
+        console.log('[TEMPLATE] 📋 Available image placeholders:', JSON.stringify(templateData.imagePlaceholders, null, 2));
+    }
+
     // Cache the data
     templateCache = templateData;
     templateCacheTime = now;
@@ -187,7 +192,8 @@ export default async function handler(req, res) {
                     templateVariantId: templateVariantId,
                     designUrl: designUrl,
                     currency: order.currency || 'CAD',
-                    shippingAddress: order.shipping_address
+                    shippingAddress: order.shipping_address,
+                    template: template
                 });
 
                 console.log('[WEBHOOK] ✅ Gelato order created successfully!');
@@ -210,6 +216,17 @@ export default async function handler(req, res) {
 }
 
 async function createGelatoOrder(data) {
+    // Get the correct placeholder name from the template
+    let placeholderName = 'customer_image.png';  // Fallback
+
+    if (data.template?.imagePlaceholders && data.template.imagePlaceholders.length > 0) {
+        const firstPlaceholder = data.template.imagePlaceholders[0];
+        placeholderName = firstPlaceholder.name;
+        console.log('[GELATO] Using placeholder from template:', placeholderName);
+    } else {
+        console.warn('[GELATO] ⚠️ No imagePlaceholders found in template, using fallback:', placeholderName);
+    }
+
     const orderPayload = {
         orderReferenceId: `${data.orderNumber}-${data.lineItemId}`,
         orderType: 'order',
@@ -222,7 +239,7 @@ async function createGelatoOrder(data) {
             quantity: data.quantity,
             placeholders: [
                 {
-                    name: 'customer_image.png',  // Matches the layer name in the Gelato template
+                    name: placeholderName,  // Use actual placeholder name from template
                     fileUrl: data.designUrl  // Customer's Cloudinary image URL
                 }
             ]
