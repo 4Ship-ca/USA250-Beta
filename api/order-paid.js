@@ -57,11 +57,19 @@ async function getTemplateDetails() {
     // Log template structure to debug
     console.log('[TEMPLATE] 🔍 Full template keys:', Object.keys(templateData));
 
+    // Check for printAreas
+    if (templateData.printAreas) {
+        console.log('[TEMPLATE] 📍 Found printAreas:', JSON.stringify(templateData.printAreas, null, 2));
+    }
+
     // Check for placeholders in variant level
     if (templateData.variants && templateData.variants[0]) {
         console.log('[TEMPLATE] 🔍 First variant keys:', Object.keys(templateData.variants[0]));
         if (templateData.variants[0].imagePlaceholders) {
             console.log('[TEMPLATE] 📋 Found placeholders in variant:', JSON.stringify(templateData.variants[0].imagePlaceholders, null, 2));
+        }
+        if (templateData.variants[0].printAreas) {
+            console.log('[TEMPLATE] 📍 Found printAreas in variant:', JSON.stringify(templateData.variants[0].printAreas, null, 2));
         }
     }
 
@@ -230,7 +238,8 @@ export default async function handler(req, res) {
 
 async function createGelatoOrder(data) {
     // Get the correct placeholder name from the template
-    let placeholderName = 'customer_image.png';  // Fallback
+    // Common Gelato placeholder naming patterns: ImageFront, Front, customer_image, etc.
+    let placeholderName = 'ImageFront';  // Try standard Gelato naming first
 
     // Try to find placeholder from template's imagePlaceholders
     if (data.template?.imagePlaceholders && data.template.imagePlaceholders.length > 0) {
@@ -244,10 +253,15 @@ async function createGelatoOrder(data) {
         placeholderName = firstPlaceholder.name;
         console.log('[GELATO] Using placeholder from variant:', placeholderName);
     }
+    // If template has printAreas or layers info
+    else if (data.template?.printAreas && data.template.printAreas.length > 0) {
+        placeholderName = data.template.printAreas[0].name || 'ImageFront';
+        console.log('[GELATO] Using placeholder from printAreas:', placeholderName);
+    }
     // Check if there's a structure we haven't accounted for
     else {
-        console.warn('[GELATO] ⚠️ No imagePlaceholders found in template or variants');
-        console.log('[GELATO] Using fallback placeholder:', placeholderName);
+        console.warn('[GELATO] ⚠️ No imagePlaceholders/printAreas found in template or variants');
+        console.log('[GELATO] Using standard placeholder:', placeholderName);
     }
 
     const orderPayload = {
@@ -285,9 +299,9 @@ async function createGelatoOrder(data) {
     console.log('[GELATO] 📤 Sending order to Gelato...');
     console.log('[GELATO] Template UID:', TEMPLATE_UID);
     console.log('[GELATO] Variant UID:', data.templateVariantId);
-    console.log('[GELATO] Payload:', JSON.stringify(orderPayload, null, 2));
-    console.log('[GELATO] Placeholder being used:', orderPayload.items[0].placeholders[0].name);
+    console.log('[GELATO] 🎯 Placeholder name being used:', placeholderName);
     console.log('[GELATO] Image URL being sent:', orderPayload.items[0].placeholders[0].fileUrl);
+    console.log('[GELATO] Full payload:', JSON.stringify(orderPayload, null, 2));
 
     const response = await fetch('https://order.gelatoapis.com/v4/orders', {
         method: 'POST',
