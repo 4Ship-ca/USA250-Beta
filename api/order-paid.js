@@ -58,7 +58,9 @@ async function getTemplateDetails() {
 function findMatchingVariant(template, gelatoUid) {
     if (!template.variants) {
         console.warn('[TEMPLATE] ⚠️ No variants in template data');
-        return null;
+        // Fallback: use gelatoUid directly as variantUid
+        console.log('[TEMPLATE] Falling back to gelatoUid as variantUid');
+        return gelatoUid;
     }
 
     // Try to find exact match by product UID
@@ -80,7 +82,10 @@ function findMatchingVariant(template, gelatoUid) {
         id: v.id || v.templateVariantId
     })));
 
-    return null;
+    // Fallback: use gelatoUid directly as variantUid
+    // The gelatoUid is a valid Gelato product identifier that Gelato API accepts
+    console.log('[TEMPLATE] ℹ️ Falling back to gelatoUid as variantUid:', gelatoUid);
+    return gelatoUid;
 }
 
 // Verify webhook signature
