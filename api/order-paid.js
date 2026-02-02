@@ -186,6 +186,7 @@ export default async function handler(req, res) {
                     gelatoUid: gelatoUid,
                     templateVariantId: templateVariantId,
                     designUrl: designUrl,
+                    currency: order.currency || 'CAD',
                     shippingAddress: order.shipping_address
                 });
 
@@ -213,6 +214,7 @@ async function createGelatoOrder(data) {
         orderReferenceId: `${data.orderNumber}-${data.lineItemId}`,
         orderType: 'order',
         customerReferenceId: data.orderNumber,
+        currency: data.currency,  // Required by Gelato API
         items: [{
             itemReferenceId: data.lineItemId.toString(),
             templateUid: TEMPLATE_UID,
