@@ -50,6 +50,19 @@ async function getTemplateDetails() {
     // Log available image placeholders
     if (templateData.imagePlaceholders) {
         console.log('[TEMPLATE] 📋 Available image placeholders:', JSON.stringify(templateData.imagePlaceholders, null, 2));
+    } else {
+        console.warn('[TEMPLATE] ⚠️ No imagePlaceholders field in template response');
+    }
+
+    // Log template structure to debug
+    console.log('[TEMPLATE] 🔍 Full template keys:', Object.keys(templateData));
+
+    // Check for placeholders in variant level
+    if (templateData.variants && templateData.variants[0]) {
+        console.log('[TEMPLATE] 🔍 First variant keys:', Object.keys(templateData.variants[0]));
+        if (templateData.variants[0].imagePlaceholders) {
+            console.log('[TEMPLATE] 📋 Found placeholders in variant:', JSON.stringify(templateData.variants[0].imagePlaceholders, null, 2));
+        }
     }
 
     // Cache the data
@@ -219,12 +232,22 @@ async function createGelatoOrder(data) {
     // Get the correct placeholder name from the template
     let placeholderName = 'customer_image.png';  // Fallback
 
+    // Try to find placeholder from template's imagePlaceholders
     if (data.template?.imagePlaceholders && data.template.imagePlaceholders.length > 0) {
         const firstPlaceholder = data.template.imagePlaceholders[0];
         placeholderName = firstPlaceholder.name;
         console.log('[GELATO] Using placeholder from template:', placeholderName);
-    } else {
-        console.warn('[GELATO] ⚠️ No imagePlaceholders found in template, using fallback:', placeholderName);
+    }
+    // Try to find placeholder from first variant's imagePlaceholders
+    else if (data.template?.variants?.[0]?.imagePlaceholders && data.template.variants[0].imagePlaceholders.length > 0) {
+        const firstPlaceholder = data.template.variants[0].imagePlaceholders[0];
+        placeholderName = firstPlaceholder.name;
+        console.log('[GELATO] Using placeholder from variant:', placeholderName);
+    }
+    // Check if there's a structure we haven't accounted for
+    else {
+        console.warn('[GELATO] ⚠️ No imagePlaceholders found in template or variants');
+        console.log('[GELATO] Using fallback placeholder:', placeholderName);
     }
 
     const orderPayload = {
