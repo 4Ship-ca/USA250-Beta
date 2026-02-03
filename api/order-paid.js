@@ -130,16 +130,17 @@ function findMatchingVariant(template, gelatoUid, variantKey) {
                     console.log('[TEMPLATE] ✅ Found matching variant by key:', {
                         variantKey,
                         matchedId: variant.id,
-                        title: variant.title,
                         productUid: variant.productUid,
+                        title: variant.title,
                         variantOptions: variant.variantOptions
                     });
 
                     // Log ALL fields in the matched variant for debugging
                     console.log('[TEMPLATE] 🔍 Full matched variant structure:', JSON.stringify(variant, null, 2));
 
-                    // Return the ID - this is what Gelato API expects for variantUid
-                    return variant.id;
+                    // Return productUid - Gelato API expects semantic product identifier for variantUid, not the internal ID
+                    console.log('[TEMPLATE] ℹ️ Using productUid for Gelato order:', variant.productUid);
+                    return variant.productUid;
                 }
             }
 
@@ -361,8 +362,7 @@ async function createGelatoOrder(data) {
     console.log('[GELATO] 📤 Sending order to Gelato...');
     console.log('[GELATO] Template UID:', TEMPLATE_UID);
     console.log('[GELATO] Variant Key (from order):', data.variantKey || '⚠️ Not provided');
-    console.log('[GELATO] ⚠️ CRITICAL: Variant UID being sent to Gelato API:', data.templateVariantId);
-    console.log('[GELATO] (If Gelato rejects this as "Deleted product variant", the ID format is wrong)');
+    console.log('[GELATO] ℹ️ Using productUid as Variant UID for Gelato API:', data.templateVariantId);
     console.log('[GELATO] 🎯 Placeholder name being used:', placeholderName);
     console.log('[GELATO] Image URL being sent:', orderPayload.items[0].placeholders[0].fileUrl);
 
@@ -400,8 +400,9 @@ async function createGelatoOrder(data) {
         // Check if this is a "deleted variant" issue
         if (item.refusalReason || item.fulfillmentStatus === 'not_connected') {
             console.warn('[GELATO] ❌ ISSUE DETECTED: Variant may be invalid or disconnected');
-            console.warn('[GELATO] Sent variantUid:', data.templateVariantId);
+            console.warn('[GELATO] Sent productUid as variantUid:', data.templateVariantId);
             console.warn('[GELATO] Gelato Response shows product may be deleted/disconnected');
+            console.log('[GELATO] Note: Testing productUid field instead of variant.id - if still failing, variant ID source is wrong');
         }
     }
 
