@@ -131,8 +131,14 @@ function findMatchingVariant(template, gelatoUid, variantKey) {
                         variantKey,
                         matchedId: variant.id,
                         title: variant.title,
+                        productUid: variant.productUid,
                         variantOptions: variant.variantOptions
                     });
+
+                    // Log ALL fields in the matched variant for debugging
+                    console.log('[TEMPLATE] 🔍 Full matched variant structure:', JSON.stringify(variant, null, 2));
+
+                    // Return the ID - this is what Gelato API expects for variantUid
                     return variant.id;
                 }
             }
@@ -328,7 +334,7 @@ async function createGelatoOrder(data) {
         items: [{
             itemReferenceId: data.lineItemId.toString(),
             templateUid: TEMPLATE_UID,
-            variantUid: data.templateVariantId,  // Specify the exact variant
+            variantUid: data.templateVariantId,  // This should be the variant ID from template
             quantity: data.quantity,
             placeholders: [
                 {
@@ -354,8 +360,9 @@ async function createGelatoOrder(data) {
 
     console.log('[GELATO] 📤 Sending order to Gelato...');
     console.log('[GELATO] Template UID:', TEMPLATE_UID);
-    console.log('[GELATO] Variant Key:', data.variantKey || '⚠️ Not provided');
-    console.log('[GELATO] Variant UID (sent to Gelato):', data.templateVariantId);
+    console.log('[GELATO] Variant Key (from order):', data.variantKey || '⚠️ Not provided');
+    console.log('[GELATO] ⚠️ CRITICAL: Variant UID being sent to Gelato API:', data.templateVariantId);
+    console.log('[GELATO] (If Gelato rejects this as "Deleted product variant", the ID format is wrong)');
     console.log('[GELATO] 🎯 Placeholder name being used:', placeholderName);
     console.log('[GELATO] Image URL being sent:', orderPayload.items[0].placeholders[0].fileUrl);
 
@@ -380,13 +387,22 @@ async function createGelatoOrder(data) {
     // Log detailed response about image processing
     if (responseData.items && responseData.items[0]) {
         const item = responseData.items[0];
-        console.log('[GELATO] Item processing status:', {
+        console.log('[GELATO] ⚠️ Item processing status:', {
             fulfillmentStatus: item.fulfillmentStatus,
             processedFileUrl: item.processedFileUrl,
-            files: item.files,
+            files: item.files?.length || 0,
             refusalReason: item.refusalReason,
-            refusalReasonCode: item.refusalReasonCode
+            refusalReasonCode: item.refusalReasonCode,
+            storeProductVariantId: item.storeProductVariantId,
+            productVariant: item.productVariant?.length || 0
         });
+
+        // Check if this is a "deleted variant" issue
+        if (item.refusalReason || item.fulfillmentStatus === 'not_connected') {
+            console.warn('[GELATO] ❌ ISSUE DETECTED: Variant may be invalid or disconnected');
+            console.warn('[GELATO] Sent variantUid:', data.templateVariantId);
+            console.warn('[GELATO] Gelato Response shows product may be deleted/disconnected');
+        }
     }
 
     // Log full response for debugging
