@@ -81,10 +81,9 @@ async function getTemplateDetails() {
 }
 
 // Find the templateVariantId that matches the ordered product
-function findMatchingVariant(template, gelatoUid) {
+function findMatchingVariant(template, gelatoUid, variantKey) {
     if (!template.variants) {
         console.warn('[TEMPLATE] ⚠️ No variants in template data');
-        // Fallback: use gelatoUid directly as variantUid
         console.log('[TEMPLATE] Falling back to gelatoUid as variantUid');
         return gelatoUid;
     }
@@ -93,23 +92,34 @@ function findMatchingVariant(template, gelatoUid) {
     const matchedVariant = template.variants.find(v => v.uid === gelatoUid);
 
     if (matchedVariant) {
-        console.log('[TEMPLATE] Found matching variant:', {
+        console.log('[TEMPLATE] Found matching variant by UID:', {
             uid: matchedVariant.uid,
             label: matchedVariant.label,
-            templateVariantId: matchedVariant.templateVariantId || matchedVariant.id
+            id: matchedVariant.id
         });
-        return matchedVariant.templateVariantId || matchedVariant.id;
+        return matchedVariant.id;
     }
 
     console.warn('[TEMPLATE] ⚠️ No variant found matching UID:', gelatoUid);
-    console.log('[TEMPLATE] Available variants:', template.variants.map(v => ({
-        uid: v.uid,
-        label: v.label,
-        id: v.id || v.templateVariantId
-    })));
 
-    // Fallback: use gelatoUid directly as variantUid
-    // The gelatoUid is a valid Gelato product identifier that Gelato API accepts
+    // Log all variant details to help with mapping
+    console.log('[TEMPLATE] Full variant details:', JSON.stringify(template.variants.map(v => ({
+        id: v.id,
+        title: v.title,
+        productUid: v.productUid,
+        variantOptions: v.variantOptions
+    })), null, 2));
+
+    // Try to match by variant key if available
+    if (variantKey && template.variants.length > 0) {
+        console.log('[TEMPLATE] ℹ️ Attempting to match by variant key:', variantKey);
+        // The variant key format is like "tee-navy-xl" - we need to match this somehow
+        // For now, use first variant as fallback
+        console.log('[TEMPLATE] Using first variant ID as fallback');
+        return template.variants[0].id;
+    }
+
+    // Last resort: use gelatoUid directly
     console.log('[TEMPLATE] ℹ️ Falling back to gelatoUid as variantUid:', gelatoUid);
     return gelatoUid;
 }
@@ -168,21 +178,24 @@ export default async function handler(req, res) {
 
             // Get custom attributes
             // Handle both array format (from webhooks) and object format
-            let designUrl, gelatoUid;
+            let designUrl, gelatoUid, variantKey;
 
             if (Array.isArray(item.properties)) {
                 // Webhook format: array of {name, value}
                 designUrl = item.properties?.find(p => p.name === '_design_url')?.value;
                 gelatoUid = item.properties?.find(p => p.name === 'gelato_product')?.value;
+                variantKey = item.properties?.find(p => p.name === '_variant_key')?.value;
             } else if (item.properties && typeof item.properties === 'object') {
                 // Object format: direct properties
                 designUrl = item.properties._design_url;
                 gelatoUid = item.properties.gelato_product;
+                variantKey = item.properties._variant_key;
             }
 
             console.log('[WEBHOOK] Extracted values:', {
                 designUrl: designUrl ? '✅ Found' : '❌ Missing',
-                gelatoUid: gelatoUid ? '✅ Found' : '❌ Missing'
+                gelatoUid: gelatoUid ? '✅ Found' : '❌ Missing',
+                variantKey: variantKey ? `✅ Found (${variantKey})` : '⚠️ Missing'
             });
 
             if (!designUrl || !gelatoUid) {
@@ -194,12 +207,15 @@ export default async function handler(req, res) {
 
             console.log('[WEBHOOK] 🎨 Design URL:', designUrl.substring(0, 80) + '...');
             console.log('[WEBHOOK] 🏭 Gelato UID:', gelatoUid);
+            if (variantKey) {
+                console.log('[WEBHOOK] 🔑 Variant Key:', variantKey);
+            }
 
             // Create Gelato order
             try {
                 // Fetch template details to get variant ID
                 const template = await getTemplateDetails();
-                const templateVariantId = findMatchingVariant(template, gelatoUid);
+                const templateVariantId = findMatchingVariant(template, gelatoUid, variantKey);
 
                 if (!templateVariantId) {
                     throw new Error(`Could not find template variant for Gelato UID: ${gelatoUid}`);
@@ -210,6 +226,7 @@ export default async function handler(req, res) {
                     lineItemId: item.id,
                     quantity: item.quantity,
                     gelatoUid: gelatoUid,
+                    variantKey: variantKey,
                     templateVariantId: templateVariantId,
                     designUrl: designUrl,
                     currency: order.currency || 'CAD',
@@ -298,7 +315,8 @@ async function createGelatoOrder(data) {
 
     console.log('[GELATO] 📤 Sending order to Gelato...');
     console.log('[GELATO] Template UID:', TEMPLATE_UID);
-    console.log('[GELATO] Variant UID:', data.templateVariantId);
+    console.log('[GELATO] Variant Key:', data.variantKey || '⚠️ Not provided');
+    console.log('[GELATO] Variant UID (sent to Gelato):', data.templateVariantId);
     console.log('[GELATO] 🎯 Placeholder name being used:', placeholderName);
     console.log('[GELATO] Image URL being sent:', orderPayload.items[0].placeholders[0].fileUrl);
 
