@@ -102,24 +102,63 @@ function findMatchingVariant(template, gelatoUid, variantKey) {
 
     console.warn('[TEMPLATE] ⚠️ No variant found matching UID:', gelatoUid);
 
-    // Log all variant details to help with mapping
-    console.log('[TEMPLATE] Full variant details:', JSON.stringify(template.variants.map(v => ({
-        id: v.id,
-        title: v.title,
-        productUid: v.productUid,
-        variantOptions: v.variantOptions
-    })), null, 2));
-
     // Try to match by variant key if available
     if (variantKey && template.variants.length > 0) {
         console.log('[TEMPLATE] ℹ️ Attempting to match by variant key:', variantKey);
-        // The variant key format is like "tee-navy-xl" - we need to match this somehow
-        // For now, use first variant as fallback
-        console.log('[TEMPLATE] Using first variant ID as fallback');
+
+        // Parse variant key: format is "tee-{color}-{size}" e.g., "tee-navy-xl"
+        const keyParts = variantKey.split('-');
+        if (keyParts.length >= 3) {
+            const productType = keyParts[0];  // "tee"
+            const color = keyParts[1];         // "navy"
+            const size = keyParts.slice(2).join('-'); // "xl" or "2xl"
+
+            console.log('[TEMPLATE] Parsed variant key:', { productType, color, size });
+
+            // Find variant with matching color and size in variantOptions
+            for (const variant of template.variants) {
+                if (!variant.variantOptions || variant.variantOptions.length === 0) {
+                    continue;
+                }
+
+                // Check if this variant's options match our color and size
+                const optionValues = variant.variantOptions.map(opt => opt.value?.toLowerCase?.() || '');
+                const colorMatch = optionValues.some(val => val.includes(color.toLowerCase()));
+                const sizeMatch = optionValues.some(val => val.includes(size.toLowerCase()));
+
+                if (colorMatch && sizeMatch) {
+                    console.log('[TEMPLATE] ✅ Found matching variant by key:', {
+                        variantKey,
+                        matchedId: variant.id,
+                        title: variant.title,
+                        variantOptions: variant.variantOptions
+                    });
+                    return variant.id;
+                }
+            }
+
+            console.warn('[TEMPLATE] ⚠️ Could not find variant matching key:', { color, size });
+            console.log('[TEMPLATE] Available variants with options:', JSON.stringify(
+                template.variants.map(v => ({
+                    id: v.id,
+                    title: v.title,
+                    variantOptions: v.variantOptions
+                })),
+                null,
+                2
+            ));
+        } else {
+            console.warn('[TEMPLATE] ⚠️ Invalid variant key format:', variantKey);
+        }
+    }
+
+    // Last resort: use first variant as fallback
+    if (template.variants.length > 0) {
+        console.log('[TEMPLATE] ℹ️ Using first variant ID as fallback');
         return template.variants[0].id;
     }
 
-    // Last resort: use gelatoUid directly
+    // Fallback: use gelatoUid directly
     console.log('[TEMPLATE] ℹ️ Falling back to gelatoUid as variantUid:', gelatoUid);
     return gelatoUid;
 }
