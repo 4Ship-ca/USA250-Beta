@@ -81,10 +81,9 @@ async function getTemplateDetails() {
 }
 
 // Find the templateVariantId that matches the ordered product
-function findMatchingVariant(template, gelatoUid) {
+function findMatchingVariant(template, gelatoUid, variantKey) {
     if (!template.variants) {
         console.warn('[TEMPLATE] ⚠️ No variants in template data');
-        // Fallback: use gelatoUid directly as variantUid
         console.log('[TEMPLATE] Falling back to gelatoUid as variantUid');
         return gelatoUid;
     }
@@ -93,23 +92,80 @@ function findMatchingVariant(template, gelatoUid) {
     const matchedVariant = template.variants.find(v => v.uid === gelatoUid);
 
     if (matchedVariant) {
-        console.log('[TEMPLATE] Found matching variant:', {
+        console.log('[TEMPLATE] Found matching variant by UID:', {
             uid: matchedVariant.uid,
             label: matchedVariant.label,
-            templateVariantId: matchedVariant.templateVariantId || matchedVariant.id
+            id: matchedVariant.id
         });
-        return matchedVariant.templateVariantId || matchedVariant.id;
+        return matchedVariant.id;
     }
 
     console.warn('[TEMPLATE] ⚠️ No variant found matching UID:', gelatoUid);
-    console.log('[TEMPLATE] Available variants:', template.variants.map(v => ({
-        uid: v.uid,
-        label: v.label,
-        id: v.id || v.templateVariantId
-    })));
 
-    // Fallback: use gelatoUid directly as variantUid
-    // The gelatoUid is a valid Gelato product identifier that Gelato API accepts
+    // Try to match by variant key if available
+    if (variantKey && template.variants.length > 0) {
+        console.log('[TEMPLATE] ℹ️ Attempting to match by variant key:', variantKey);
+
+        // Parse variant key: format is "tee-{color}-{size}" e.g., "tee-navy-xl"
+        const keyParts = variantKey.split('-');
+        if (keyParts.length >= 3) {
+            const productType = keyParts[0];  // "tee"
+            const color = keyParts[1];         // "navy"
+            const size = keyParts.slice(2).join('-'); // "xl" or "2xl"
+
+            console.log('[TEMPLATE] Parsed variant key:', { productType, color, size });
+
+            // Find variant with matching color and size in variantOptions
+            for (const variant of template.variants) {
+                if (!variant.variantOptions || variant.variantOptions.length === 0) {
+                    continue;
+                }
+
+                // Check if this variant's options match our color and size
+                const optionValues = variant.variantOptions.map(opt => opt.value?.toLowerCase?.() || '');
+                const colorMatch = optionValues.some(val => val.includes(color.toLowerCase()));
+                const sizeMatch = optionValues.some(val => val.includes(size.toLowerCase()));
+
+                if (colorMatch && sizeMatch) {
+                    console.log('[TEMPLATE] ✅ Found matching variant by key:', {
+                        variantKey,
+                        matchedId: variant.id,
+                        productUid: variant.productUid,
+                        title: variant.title,
+                        variantOptions: variant.variantOptions
+                    });
+
+                    // Log ALL fields in the matched variant for debugging
+                    console.log('[TEMPLATE] 🔍 Full matched variant structure:', JSON.stringify(variant, null, 2));
+
+                    // Return productUid - Gelato API expects semantic product identifier for variantUid, not the internal ID
+                    console.log('[TEMPLATE] ℹ️ Using productUid for Gelato order:', variant.productUid);
+                    return variant.productUid;
+                }
+            }
+
+            console.warn('[TEMPLATE] ⚠️ Could not find variant matching key:', { color, size });
+            console.log('[TEMPLATE] Available variants with options:', JSON.stringify(
+                template.variants.map(v => ({
+                    id: v.id,
+                    title: v.title,
+                    variantOptions: v.variantOptions
+                })),
+                null,
+                2
+            ));
+        } else {
+            console.warn('[TEMPLATE] ⚠️ Invalid variant key format:', variantKey);
+        }
+    }
+
+    // Last resort: use first variant as fallback
+    if (template.variants.length > 0) {
+        console.log('[TEMPLATE] ℹ️ Using first variant ID as fallback');
+        return template.variants[0].id;
+    }
+
+    // Fallback: use gelatoUid directly
     console.log('[TEMPLATE] ℹ️ Falling back to gelatoUid as variantUid:', gelatoUid);
     return gelatoUid;
 }
@@ -168,21 +224,24 @@ export default async function handler(req, res) {
 
             // Get custom attributes
             // Handle both array format (from webhooks) and object format
-            let designUrl, gelatoUid;
+            let designUrl, gelatoUid, variantKey;
 
             if (Array.isArray(item.properties)) {
                 // Webhook format: array of {name, value}
                 designUrl = item.properties?.find(p => p.name === '_design_url')?.value;
                 gelatoUid = item.properties?.find(p => p.name === 'gelato_product')?.value;
+                variantKey = item.properties?.find(p => p.name === '_variant_key')?.value;
             } else if (item.properties && typeof item.properties === 'object') {
                 // Object format: direct properties
                 designUrl = item.properties._design_url;
                 gelatoUid = item.properties.gelato_product;
+                variantKey = item.properties._variant_key;
             }
 
             console.log('[WEBHOOK] Extracted values:', {
                 designUrl: designUrl ? '✅ Found' : '❌ Missing',
-                gelatoUid: gelatoUid ? '✅ Found' : '❌ Missing'
+                gelatoUid: gelatoUid ? '✅ Found' : '❌ Missing',
+                variantKey: variantKey ? `✅ Found (${variantKey})` : '⚠️ Missing'
             });
 
             if (!designUrl || !gelatoUid) {
@@ -194,12 +253,15 @@ export default async function handler(req, res) {
 
             console.log('[WEBHOOK] 🎨 Design URL:', designUrl.substring(0, 80) + '...');
             console.log('[WEBHOOK] 🏭 Gelato UID:', gelatoUid);
+            if (variantKey) {
+                console.log('[WEBHOOK] 🔑 Variant Key:', variantKey);
+            }
 
             // Create Gelato order
             try {
                 // Fetch template details to get variant ID
                 const template = await getTemplateDetails();
-                const templateVariantId = findMatchingVariant(template, gelatoUid);
+                const templateVariantId = findMatchingVariant(template, gelatoUid, variantKey);
 
                 if (!templateVariantId) {
                     throw new Error(`Could not find template variant for Gelato UID: ${gelatoUid}`);
@@ -210,6 +272,7 @@ export default async function handler(req, res) {
                     lineItemId: item.id,
                     quantity: item.quantity,
                     gelatoUid: gelatoUid,
+                    variantKey: variantKey,
                     templateVariantId: templateVariantId,
                     designUrl: designUrl,
                     currency: order.currency || 'CAD',
@@ -272,7 +335,7 @@ async function createGelatoOrder(data) {
         items: [{
             itemReferenceId: data.lineItemId.toString(),
             templateUid: TEMPLATE_UID,
-            variantUid: data.templateVariantId,  // Specify the exact variant
+            variantUid: data.templateVariantId,  // This should be the variant ID from template
             quantity: data.quantity,
             placeholders: [
                 {
@@ -298,9 +361,14 @@ async function createGelatoOrder(data) {
 
     console.log('[GELATO] 📤 Sending order to Gelato...');
     console.log('[GELATO] Template UID:', TEMPLATE_UID);
-    console.log('[GELATO] Variant UID:', data.templateVariantId);
+    console.log('[GELATO] Variant Key (from order):', data.variantKey || '⚠️ Not provided');
+    console.log('[GELATO] ℹ️ Using productUid as Variant UID for Gelato API:', data.templateVariantId);
     console.log('[GELATO] 🎯 Placeholder name being used:', placeholderName);
     console.log('[GELATO] Image URL being sent:', orderPayload.items[0].placeholders[0].fileUrl);
+
+    // Log placeholder structure for debugging
+    console.log('[GELATO] Placeholder structure:', JSON.stringify(orderPayload.items[0].placeholders[0], null, 2));
+
     console.log('[GELATO] Full payload:', JSON.stringify(orderPayload, null, 2));
 
     const response = await fetch('https://order.gelatoapis.com/v4/orders', {
@@ -315,7 +383,31 @@ async function createGelatoOrder(data) {
     const responseData = await response.json();
 
     console.log('[GELATO] HTTP Status:', response.status);
-    console.log('[GELATO] Response:', JSON.stringify(responseData, null, 2));
+
+    // Log detailed response about image processing
+    if (responseData.items && responseData.items[0]) {
+        const item = responseData.items[0];
+        console.log('[GELATO] ⚠️ Item processing status:', {
+            fulfillmentStatus: item.fulfillmentStatus,
+            processedFileUrl: item.processedFileUrl,
+            files: item.files?.length || 0,
+            refusalReason: item.refusalReason,
+            refusalReasonCode: item.refusalReasonCode,
+            storeProductVariantId: item.storeProductVariantId,
+            productVariant: item.productVariant?.length || 0
+        });
+
+        // Check if this is a "deleted variant" issue
+        if (item.refusalReason || item.fulfillmentStatus === 'not_connected') {
+            console.warn('[GELATO] ❌ ISSUE DETECTED: Variant may be invalid or disconnected');
+            console.warn('[GELATO] Sent productUid as variantUid:', data.templateVariantId);
+            console.warn('[GELATO] Gelato Response shows product may be deleted/disconnected');
+            console.log('[GELATO] Note: Testing productUid field instead of variant.id - if still failing, variant ID source is wrong');
+        }
+    }
+
+    // Log full response for debugging
+    console.log('[GELATO] Full response:', JSON.stringify(responseData, null, 2));
 
     if (!response.ok) {
         console.error('[GELATO] ❌ API Error:', {
