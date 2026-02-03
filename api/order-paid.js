@@ -301,6 +301,10 @@ async function createGelatoOrder(data) {
     console.log('[GELATO] Variant UID:', data.templateVariantId);
     console.log('[GELATO] 🎯 Placeholder name being used:', placeholderName);
     console.log('[GELATO] Image URL being sent:', orderPayload.items[0].placeholders[0].fileUrl);
+
+    // Log placeholder structure for debugging
+    console.log('[GELATO] Placeholder structure:', JSON.stringify(orderPayload.items[0].placeholders[0], null, 2));
+
     console.log('[GELATO] Full payload:', JSON.stringify(orderPayload, null, 2));
 
     const response = await fetch('https://order.gelatoapis.com/v4/orders', {
@@ -315,7 +319,21 @@ async function createGelatoOrder(data) {
     const responseData = await response.json();
 
     console.log('[GELATO] HTTP Status:', response.status);
-    console.log('[GELATO] Response:', JSON.stringify(responseData, null, 2));
+
+    // Log detailed response about image processing
+    if (responseData.items && responseData.items[0]) {
+        const item = responseData.items[0];
+        console.log('[GELATO] Item processing status:', {
+            fulfillmentStatus: item.fulfillmentStatus,
+            processedFileUrl: item.processedFileUrl,
+            files: item.files,
+            refusalReason: item.refusalReason,
+            refusalReasonCode: item.refusalReasonCode
+        });
+    }
+
+    // Log full response for debugging
+    console.log('[GELATO] Full response:', JSON.stringify(responseData, null, 2));
 
     if (!response.ok) {
         console.error('[GELATO] ❌ API Error:', {
