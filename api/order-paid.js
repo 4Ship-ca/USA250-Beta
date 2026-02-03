@@ -95,9 +95,10 @@ function findMatchingVariant(template, gelatoUid, variantKey) {
         console.log('[TEMPLATE] Found matching variant by UID:', {
             uid: matchedVariant.uid,
             label: matchedVariant.label,
-            id: matchedVariant.id
+            id: matchedVariant.id,
+            productUid: matchedVariant.productUid
         });
-        return matchedVariant.id;
+        return matchedVariant.productUid;
     }
 
     console.warn('[TEMPLATE] ⚠️ No variant found matching UID:', gelatoUid);
@@ -161,8 +162,8 @@ function findMatchingVariant(template, gelatoUid, variantKey) {
 
     // Last resort: use first variant as fallback
     if (template.variants.length > 0) {
-        console.log('[TEMPLATE] ℹ️ Using first variant ID as fallback');
-        return template.variants[0].id;
+        console.log('[TEMPLATE] ℹ️ Using first variant productUid as fallback');
+        return template.variants[0].productUid;
     }
 
     // Fallback: use gelatoUid directly
@@ -259,13 +260,20 @@ export default async function handler(req, res) {
 
             // Create Gelato order
             try {
-                // Orders v4 API uses productUid directly from line item
-                // No need to fetch template for Orders v4 - pass productUid as-is
+                // The gelato_product from line item is a template reference, not a valid productUid
+                // We need to match it to the actual variant's productUid
+                const template = await getTemplateDetails();
+                const matchedVariant = findMatchingVariant(template, gelatoUid, variantKey);
+
+                if (!matchedVariant) {
+                    throw new Error(`Could not find template variant for Gelato UID: ${gelatoUid}`);
+                }
+
                 const gelatoOrder = await createGelatoOrder({
                     orderNumber: order.order_number,
                     lineItemId: item.id,
                     quantity: item.quantity,
-                    gelatoUid: gelatoUid,  // productUid from line item
+                    productUid: matchedVariant,  // Use the matched variant's productUid
                     designUrl: designUrl,
                     currency: order.currency || 'CAD',
                     shippingAddress: order.shipping_address
@@ -292,7 +300,7 @@ export default async function handler(req, res) {
 
 async function createGelatoOrder(data) {
     // Orders v4 API requires productUid + files (not templateUid/variantUid/placeholders)
-    // Use productUid directly from the line item (gelatoUid)
+    // productUid comes from template variant matching, not from line item directly
 
     const orderPayload = {
         orderReferenceId: `${data.orderNumber}-${data.lineItemId}`,
@@ -301,7 +309,7 @@ async function createGelatoOrder(data) {
         currency: data.currency,  // Required by Gelato API
         items: [{
             itemReferenceId: data.lineItemId.toString(),
-            productUid: data.gelatoUid,  // REQUIRED: Use productUid directly from line item
+            productUid: data.productUid,  // REQUIRED: Matched variant's productUid from template
             quantity: data.quantity,
             files: [
                 {
@@ -326,7 +334,7 @@ async function createGelatoOrder(data) {
     };
 
     console.log('[GELATO] 📤 Sending order to Gelato (Orders v4 API)...');
-    console.log('[GELATO] Product UID:', data.gelatoUid);
+    console.log('[GELATO] Product UID:', data.productUid);
     console.log('[GELATO] Design URL:', data.designUrl);
     console.log('[GELATO] File type: default (primary print area)');
 
