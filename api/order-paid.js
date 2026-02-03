@@ -89,7 +89,7 @@ function findMatchingVariant(template, gelatoUid, variantKey) {
     }
 
     // Try to find exact match by product UID
-    const matchedVariant = template.variants.find(v => v.uid === gelatoUid);
+    const matchedVariant = template.variants.find(v => v.productUid === gelatoUid);
 
     if (matchedVariant) {
         console.log('[TEMPLATE] Found matching variant by UID:', {
@@ -259,25 +259,16 @@ export default async function handler(req, res) {
 
             // Create Gelato order
             try {
-                // Fetch template details to get variant ID
-                const template = await getTemplateDetails();
-                const templateVariantId = findMatchingVariant(template, gelatoUid, variantKey);
-
-                if (!templateVariantId) {
-                    throw new Error(`Could not find template variant for Gelato UID: ${gelatoUid}`);
-                }
-
+                // Orders v4 API uses productUid directly from line item
+                // No need to fetch template for Orders v4 - pass productUid as-is
                 const gelatoOrder = await createGelatoOrder({
                     orderNumber: order.order_number,
                     lineItemId: item.id,
                     quantity: item.quantity,
-                    gelatoUid: gelatoUid,
-                    variantKey: variantKey,
-                    templateVariantId: templateVariantId,
+                    gelatoUid: gelatoUid,  // productUid from line item
                     designUrl: designUrl,
                     currency: order.currency || 'CAD',
-                    shippingAddress: order.shipping_address,
-                    template: template
+                    shippingAddress: order.shipping_address
                 });
 
                 console.log('[WEBHOOK] ✅ Gelato order created successfully!');
@@ -300,32 +291,8 @@ export default async function handler(req, res) {
 }
 
 async function createGelatoOrder(data) {
-    // Get the correct placeholder name from the template
-    // Common Gelato placeholder naming patterns: ImageFront, Front, customer_image, etc.
-    let placeholderName = 'ImageFront';  // Try standard Gelato naming first
-
-    // Try to find placeholder from template's imagePlaceholders
-    if (data.template?.imagePlaceholders && data.template.imagePlaceholders.length > 0) {
-        const firstPlaceholder = data.template.imagePlaceholders[0];
-        placeholderName = firstPlaceholder.name;
-        console.log('[GELATO] Using placeholder from template:', placeholderName);
-    }
-    // Try to find placeholder from first variant's imagePlaceholders
-    else if (data.template?.variants?.[0]?.imagePlaceholders && data.template.variants[0].imagePlaceholders.length > 0) {
-        const firstPlaceholder = data.template.variants[0].imagePlaceholders[0];
-        placeholderName = firstPlaceholder.name;
-        console.log('[GELATO] Using placeholder from variant:', placeholderName);
-    }
-    // If template has printAreas or layers info
-    else if (data.template?.printAreas && data.template.printAreas.length > 0) {
-        placeholderName = data.template.printAreas[0].name || 'ImageFront';
-        console.log('[GELATO] Using placeholder from printAreas:', placeholderName);
-    }
-    // Check if there's a structure we haven't accounted for
-    else {
-        console.warn('[GELATO] ⚠️ No imagePlaceholders/printAreas found in template or variants');
-        console.log('[GELATO] Using standard placeholder:', placeholderName);
-    }
+    // Orders v4 API requires productUid + files (not templateUid/variantUid/placeholders)
+    // Use productUid directly from the line item (gelatoUid)
 
     const orderPayload = {
         orderReferenceId: `${data.orderNumber}-${data.lineItemId}`,
@@ -334,13 +301,12 @@ async function createGelatoOrder(data) {
         currency: data.currency,  // Required by Gelato API
         items: [{
             itemReferenceId: data.lineItemId.toString(),
-            templateUid: TEMPLATE_UID,
-            variantUid: data.templateVariantId,  // This should be the variant ID from template
+            productUid: data.gelatoUid,  // REQUIRED: Use productUid directly from line item
             quantity: data.quantity,
-            placeholders: [
+            files: [
                 {
-                    name: placeholderName,  // Use actual placeholder name from template
-                    fileUrl: data.designUrl  // Customer's Cloudinary image URL
+                    type: 'default',  // 'default' = primary print area (front for apparel)
+                    url: data.designUrl
                 }
             ]
         }],
@@ -359,15 +325,10 @@ async function createGelatoOrder(data) {
         }
     };
 
-    console.log('[GELATO] 📤 Sending order to Gelato...');
-    console.log('[GELATO] Template UID:', TEMPLATE_UID);
-    console.log('[GELATO] Variant Key (from order):', data.variantKey || '⚠️ Not provided');
-    console.log('[GELATO] ℹ️ Using productUid as Variant UID for Gelato API:', data.templateVariantId);
-    console.log('[GELATO] 🎯 Placeholder name being used:', placeholderName);
-    console.log('[GELATO] Image URL being sent:', orderPayload.items[0].placeholders[0].fileUrl);
-
-    // Log placeholder structure for debugging
-    console.log('[GELATO] Placeholder structure:', JSON.stringify(orderPayload.items[0].placeholders[0], null, 2));
+    console.log('[GELATO] 📤 Sending order to Gelato (Orders v4 API)...');
+    console.log('[GELATO] Product UID:', data.gelatoUid);
+    console.log('[GELATO] Design URL:', data.designUrl);
+    console.log('[GELATO] File type: default (primary print area)');
 
     console.log('[GELATO] Full payload:', JSON.stringify(orderPayload, null, 2));
 
@@ -384,25 +345,21 @@ async function createGelatoOrder(data) {
 
     console.log('[GELATO] HTTP Status:', response.status);
 
-    // Log detailed response about image processing
+    // Log response details
     if (responseData.items && responseData.items[0]) {
         const item = responseData.items[0];
-        console.log('[GELATO] ⚠️ Item processing status:', {
+        console.log('[GELATO] Order Item Response:', {
+            id: item.id,
             fulfillmentStatus: item.fulfillmentStatus,
+            productUid: item.productUid,
             processedFileUrl: item.processedFileUrl,
             files: item.files?.length || 0,
-            refusalReason: item.refusalReason,
-            refusalReasonCode: item.refusalReasonCode,
-            storeProductVariantId: item.storeProductVariantId,
-            productVariant: item.productVariant?.length || 0
+            refusalReason: item.refusalReason
         });
 
-        // Check if this is a "deleted variant" issue
-        if (item.refusalReason || item.fulfillmentStatus === 'not_connected') {
-            console.warn('[GELATO] ❌ ISSUE DETECTED: Variant may be invalid or disconnected');
-            console.warn('[GELATO] Sent productUid as variantUid:', data.templateVariantId);
-            console.warn('[GELATO] Gelato Response shows product may be deleted/disconnected');
-            console.log('[GELATO] Note: Testing productUid field instead of variant.id - if still failing, variant ID source is wrong');
+        if (item.fulfillmentStatus === 'not_connected') {
+            console.warn('[GELATO] ⚠️ WARNING: Item marked as not_connected');
+            console.warn('[GELATO] Verify that productUid exists and is properly connected in Gelato');
         }
     }
 
@@ -418,6 +375,6 @@ async function createGelatoOrder(data) {
         throw new Error(`Gelato API error: ${response.status} - ${JSON.stringify(responseData)}`);
     }
 
-    console.log('[GELATO] ✅ Successfully sent to Gelato');
+    console.log('[GELATO] ✅ Order successfully sent to Gelato');
     return responseData;
 }
