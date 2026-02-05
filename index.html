@@ -2342,6 +2342,7 @@
             cityContainer.setAttribute('font-weight', style.weight);
             cityContainer.style.fontFamily = `"${style.font}", sans-serif`;
             cityContainer.style.letterSpacing = baselineArch.cityTrack + "px";
+            cityContainer.setAttribute('letter-spacing', baselineArch.cityTrack + "px");
             cityContainer.setAttribute('font-size', citySize);
 
             const cityTextPath = cityContainer.querySelector('textPath');
@@ -2356,6 +2357,7 @@
             groupContainer.setAttribute('font-weight', style.weight);
             groupContainer.style.fontFamily = `"${style.font}", sans-serif`;
             groupContainer.style.letterSpacing = baselineArch.groupTrack + "px";
+            groupContainer.setAttribute('letter-spacing', baselineArch.groupTrack + "px");
             groupContainer.setAttribute('font-size', groupSize);
 
             const groupTextPath = groupContainer.querySelector('textPath');
