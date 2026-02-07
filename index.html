@@ -2338,7 +2338,7 @@
 
         if (cityContainer && style) {
             cityContainer.setAttribute('fill', style.color);
-            cityContainer.setAttribute('font-family', `"${style.font}"`);
+            cityContainer.setAttribute('font-family', style.font);
             cityContainer.setAttribute('font-weight', style.weight);
             cityContainer.style.fontFamily = `"${style.font}", sans-serif`;
             cityContainer.style.letterSpacing = baselineArch.cityTrack + "px";
@@ -2353,7 +2353,7 @@
 
         if (groupContainer && style) {
             groupContainer.setAttribute('fill', style.color);
-            groupContainer.setAttribute('font-family', `"${style.font}"`);
+            groupContainer.setAttribute('font-family', style.font);
             groupContainer.setAttribute('font-weight', style.weight);
             groupContainer.style.fontFamily = `"${style.font}", sans-serif`;
             groupContainer.style.letterSpacing = baselineArch.groupTrack + "px";
